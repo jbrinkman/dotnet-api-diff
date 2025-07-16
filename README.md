@@ -1,0 +1,78 @@
+# DotNet API Diff Tool
+
+A command-line tool for comparing public APIs between different versions of .NET assemblies to detect breaking changes and API evolution.
+
+## Features
+
+- Compare public APIs between two .NET assembly versions
+- Detect breaking changes, additions, removals, and modifications
+- Generate reports in multiple formats (Console, JSON, XML, HTML, Markdown)
+- Comprehensive analysis of types, methods, properties, fields, and events
+- Severity classification for different types of changes
+
+## Requirements
+
+- .NET 8.0 SDK or later
+- Compatible with .NET Framework, .NET Core, and .NET 5+ assemblies
+
+## Building
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd DotNetApiDiff
+
+# Build the solution
+dotnet build
+
+# Run tests
+dotnet test
+```
+
+## Usage
+
+```bash
+# Basic comparison
+dotnet run -- --old path/to/old/assembly.dll --new path/to/new/assembly.dll
+
+# Generate JSON report
+dotnet run -- --old old.dll --new new.dll --format json --output report.json
+
+# Show only breaking changes
+dotnet run -- --old old.dll --new new.dll --breaking-only
+```
+
+## Command Line Options
+
+- `--old, -o`: Path to the original assembly
+- `--new, -n`: Path to the new assembly to compare against
+- `--format, -f`: Output format (console, json, xml, html, markdown)
+- `--output, -out`: Output file path (optional, defaults to console)
+- `--breaking-only, -b`: Show only breaking changes
+- `--help, -h`: Show help information
+
+## Project Structure
+
+```
+src/
+├── DotNetApiDiff/
+│   ├── Interfaces/          # Core service interfaces
+│   ├── Models/              # Data models and enums
+│   ├── Services/            # Implementation classes (to be added)
+│   └── Program.cs           # Main entry point
+tests/
+└── DotNetApiDiff.Tests/     # Unit tests
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
