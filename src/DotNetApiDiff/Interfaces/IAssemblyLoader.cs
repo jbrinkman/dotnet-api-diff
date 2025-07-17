@@ -14,7 +14,7 @@ public interface IAssemblyLoader
     /// <returns>Loaded assembly</returns>
     /// <exception cref="FileNotFoundException">Thrown when assembly file is not found</exception>
     /// <exception cref="BadImageFormatException">Thrown when assembly file is invalid</exception>
-    Assembly LoadAssembly(string assemblyPath);
+    System.Reflection.Assembly LoadAssembly(string assemblyPath);
     
     /// <summary>
     /// Validates that the specified path contains a valid .NET assembly
