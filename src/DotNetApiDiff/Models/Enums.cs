@@ -8,11 +8,12 @@ public enum ChangeType
     Added,
     Removed,
     Modified,
-    Moved
+    Moved,
+    Excluded
 }
 
 /// <summary>
-/// Types of API elements
+/// Types of API elements/members
 /// </summary>
 public enum ApiElementType
 {
@@ -24,6 +25,36 @@ public enum ApiElementType
     Field,
     Event,
     Constructor
+}
+
+/// <summary>
+/// Types of API members for detailed analysis
+/// </summary>
+public enum MemberType
+{
+    Class,
+    Interface,
+    Struct,
+    Enum,
+    Delegate,
+    Method,
+    Property,
+    Field,
+    Event,
+    Constructor
+}
+
+/// <summary>
+/// Accessibility levels for API members
+/// </summary>
+public enum AccessibilityLevel
+{
+    Private,
+    Protected,
+    Internal,
+    ProtectedInternal,
+    ProtectedPrivate,
+    Public
 }
 
 /// <summary>
