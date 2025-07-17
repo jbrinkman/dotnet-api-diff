@@ -1,0 +1,51 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Run weekly on Mondays at midnight
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  dependency-updates:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Install .NET Outdated
+      run: dotnet tool install --global dotnet-outdated-tool
+    
+    - name: Check for outdated packages
+      id: outdated
+      run: |
+        OUTDATED=$(dotnet outdated -u -vl Major -o json)
+        echo "OUTDATED_PACKAGES=$OUTDATED" >> $GITHUB_ENV
+        if [[ $(echo $OUTDATED | jq length) -gt 0 ]]; then
+          echo "HAS_UPDATES=true" >> $GITHUB_ENV
+        else
+          echo "HAS_UPDATES=false" >> $GITHUB_ENV
+        fi
+    
+    - name: Create Pull Request
+      if: env.HAS_UPDATES == 'true'
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update dependencies"
+        title: "chore: update dependencies"
+        body: |
+          This PR updates the following dependencies:
+          
+          ```
+          ${{ env.OUTDATED_PACKAGES }}
+          ```
+          
+          This PR was created automatically by the dependency update workflow.
+        branch: dependency-updates
+        base: main
+        labels: dependencies

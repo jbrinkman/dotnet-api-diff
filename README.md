@@ -1,5 +1,8 @@
 # DotNet API Diff Tool
 
+[![Main Branch Build](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/main-build.yml/badge.svg)](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/main-build.yml)
+[![PR Build and Test](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/pr-build.yml/badge.svg)](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/pr-build.yml)
+
 A command-line tool for comparing public APIs between different versions of .NET assemblies to detect breaking changes and API evolution.
 
 ## Features
