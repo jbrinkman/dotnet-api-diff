@@ -17,11 +17,11 @@ public class IsolatedAssemblyLoadContextTests : IDisposable
     {
         // Use the current test assembly as a valid assembly for testing
         _validAssemblyPath = typeof(IsolatedAssemblyLoadContextTests).Assembly.Location;
-        
+
         // Create a path to an invalid assembly (use a text file)
         _invalidAssemblyPath = Path.GetTempFileName();
         File.WriteAllText(_invalidAssemblyPath, "This is not a valid assembly");
-        
+
         _loggerMock = new Mock<ILogger>();
     }
 

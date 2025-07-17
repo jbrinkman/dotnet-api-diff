@@ -54,11 +54,11 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Removals.Add(new ApiChange 
-        { 
-            Type = ChangeType.Removed, 
+        comparison.Removals.Add(new ApiChange
+        {
+            Type = ChangeType.Removed,
             Description = "Removed method",
-            IsBreakingChange = true 
+            IsBreakingChange = true
         });
 
         // Act & Assert
@@ -70,11 +70,11 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Additions.Add(new ApiChange 
-        { 
-            Type = ChangeType.Added, 
+        comparison.Additions.Add(new ApiChange
+        {
+            Type = ChangeType.Added,
             Description = "Added method",
-            IsBreakingChange = false 
+            IsBreakingChange = false
         });
 
         // Act & Assert
@@ -103,23 +103,23 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Additions.Add(new ApiChange 
-        { 
-            Type = ChangeType.Added, 
+        comparison.Additions.Add(new ApiChange
+        {
+            Type = ChangeType.Added,
             Description = "Added",
-            IsBreakingChange = false 
+            IsBreakingChange = false
         });
-        comparison.Removals.Add(new ApiChange 
-        { 
-            Type = ChangeType.Removed, 
+        comparison.Removals.Add(new ApiChange
+        {
+            Type = ChangeType.Removed,
             Description = "Removed",
-            IsBreakingChange = true 
+            IsBreakingChange = true
         });
-        comparison.Modifications.Add(new ApiChange 
-        { 
-            Type = ChangeType.Modified, 
+        comparison.Modifications.Add(new ApiChange
+        {
+            Type = ChangeType.Modified,
             Description = "Modified",
-            IsBreakingChange = true 
+            IsBreakingChange = true
         });
 
         // Act
@@ -134,15 +134,15 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Additions.Add(new ApiChange 
-        { 
-            Type = ChangeType.Added, 
+        comparison.Additions.Add(new ApiChange
+        {
+            Type = ChangeType.Added,
             Description = "Added method",
             TargetMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
         });
-        comparison.Removals.Add(new ApiChange 
-        { 
-            Type = ChangeType.Removed, 
+        comparison.Removals.Add(new ApiChange
+        {
+            Type = ChangeType.Removed,
             Description = "Removed method",
             SourceMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
         });
@@ -156,9 +156,9 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Additions.Add(new ApiChange 
-        { 
-            Type = ChangeType.Added, 
+        comparison.Additions.Add(new ApiChange
+        {
+            Type = ChangeType.Added,
             Description = "", // Invalid - empty description
             TargetMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
         });
@@ -172,8 +172,8 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Additions.Add(new ApiChange 
-        { 
+        comparison.Additions.Add(new ApiChange
+        {
             Type = ChangeType.Removed, // Wrong type for Additions collection
             Description = "Should be added",
             TargetMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
@@ -188,8 +188,8 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Removals.Add(new ApiChange 
-        { 
+        comparison.Removals.Add(new ApiChange
+        {
             Type = ChangeType.Added, // Wrong type for Removals collection
             Description = "Should be removed",
             SourceMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
@@ -204,8 +204,8 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Modifications.Add(new ApiChange 
-        { 
+        comparison.Modifications.Add(new ApiChange
+        {
             Type = ChangeType.Added, // Wrong type for Modifications collection
             Description = "Should be modified",
             SourceMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" },
@@ -221,8 +221,8 @@ public class ApiComparisonTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        comparison.Excluded.Add(new ApiChange 
-        { 
+        comparison.Excluded.Add(new ApiChange
+        {
             Type = ChangeType.Added, // Wrong type for Excluded collection
             Description = "Should be excluded"
         });

@@ -39,16 +39,16 @@ public class MappingConfiguration
     public bool IsValid()
     {
         // Check for empty keys or values in namespace mappings
-        if (NamespaceMappings.Any(kvp => string.IsNullOrWhiteSpace(kvp.Key) || 
-                                         kvp.Value == null || 
-                                         kvp.Value.Count == 0 || 
+        if (NamespaceMappings.Any(kvp => string.IsNullOrWhiteSpace(kvp.Key) ||
+                                         kvp.Value == null ||
+                                         kvp.Value.Count == 0 ||
                                          kvp.Value.Any(string.IsNullOrWhiteSpace)))
         {
             return false;
         }
 
         // Check for empty keys or values in type mappings
-        if (TypeMappings.Any(kvp => string.IsNullOrWhiteSpace(kvp.Key) || 
+        if (TypeMappings.Any(kvp => string.IsNullOrWhiteSpace(kvp.Key) ||
                                     string.IsNullOrWhiteSpace(kvp.Value)))
         {
             return false;

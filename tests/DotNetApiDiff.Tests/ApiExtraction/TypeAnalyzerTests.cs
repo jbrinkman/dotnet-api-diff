@@ -67,7 +67,7 @@ public class TypeAnalyzerTests
         // Arrange
         var type = typeof(TestClass);
         var publicMethod = type.GetMethod("PublicMethod");
-        
+
         _mockSignatureBuilder.Setup(x => x.BuildMethodSignature(It.IsAny<MethodInfo>()))
             .Returns<MethodInfo>(m => $"public {m.ReturnType.Name} {m.Name}()");
 
@@ -77,7 +77,7 @@ public class TypeAnalyzerTests
         // Assert
         Assert.Contains(result, m => m.Name == "PublicMethod");
         Assert.DoesNotContain(result, m => m.Name == "PrivateMethod");
-        
+
         var publicMethodMember = result.First(m => m.Name == "PublicMethod");
         Assert.Equal($"{type.FullName}.PublicMethod", publicMethodMember.FullName);
         Assert.Equal(type.Namespace, publicMethodMember.Namespace);
@@ -93,7 +93,7 @@ public class TypeAnalyzerTests
         // Arrange
         var type = typeof(TestClass);
         var publicProperty = type.GetProperty("PublicProperty");
-        
+
         _mockSignatureBuilder.Setup(x => x.BuildPropertySignature(It.IsAny<PropertyInfo>()))
             .Returns<PropertyInfo>(p => $"public {p.PropertyType.Name} {p.Name} {{ get; set; }}");
 
@@ -103,7 +103,7 @@ public class TypeAnalyzerTests
         // Assert
         Assert.Contains(result, m => m.Name == "PublicProperty");
         Assert.DoesNotContain(result, m => m.Name == "PrivateProperty");
-        
+
         var publicPropertyMember = result.First(m => m.Name == "PublicProperty");
         Assert.Equal($"{type.FullName}.PublicProperty", publicPropertyMember.FullName);
         Assert.Equal(type.Namespace, publicPropertyMember.Namespace);
@@ -119,7 +119,7 @@ public class TypeAnalyzerTests
         // Arrange
         var type = typeof(TestClass);
         var publicField = type.GetField("PublicField");
-        
+
         _mockSignatureBuilder.Setup(x => x.BuildFieldSignature(It.IsAny<FieldInfo>()))
             .Returns<FieldInfo>(f => $"public {f.FieldType.Name} {f.Name}");
 
@@ -129,7 +129,7 @@ public class TypeAnalyzerTests
         // Assert
         Assert.Contains(result, m => m.Name == "PublicField");
         Assert.DoesNotContain(result, m => m.Name == "privateField");
-        
+
         var publicFieldMember = result.First(m => m.Name == "PublicField");
         Assert.Equal($"{type.FullName}.PublicField", publicFieldMember.FullName);
         Assert.Equal(type.Namespace, publicFieldMember.Namespace);
@@ -145,7 +145,7 @@ public class TypeAnalyzerTests
         // Arrange
         var type = typeof(TestClass);
         var publicEvent = type.GetEvent("PublicEvent");
-        
+
         _mockSignatureBuilder.Setup(x => x.BuildEventSignature(It.IsAny<EventInfo>()))
             .Returns<EventInfo>(e => $"public event EventHandler {e.Name}");
 
@@ -154,7 +154,7 @@ public class TypeAnalyzerTests
 
         // Assert
         Assert.Contains(result, m => m.Name == "PublicEvent");
-        
+
         var publicEventMember = result.First(m => m.Name == "PublicEvent");
         Assert.Equal($"{type.FullName}.PublicEvent", publicEventMember.FullName);
         Assert.Equal(type.Namespace, publicEventMember.Namespace);
@@ -170,7 +170,7 @@ public class TypeAnalyzerTests
         // Arrange
         var type = typeof(TestClass);
         var publicConstructor = type.GetConstructor(Type.EmptyTypes);
-        
+
         _mockSignatureBuilder.Setup(x => x.BuildConstructorSignature(It.IsAny<ConstructorInfo>()))
             .Returns<ConstructorInfo>(c => $"public {c.DeclaringType.Name}()");
 
@@ -179,7 +179,7 @@ public class TypeAnalyzerTests
 
         // Assert
         Assert.Contains(result, m => m.Name == ".ctor");
-        
+
         var publicConstructorMember = result.First(m => m.Name == ".ctor");
         Assert.Equal($"{type.FullName}..ctor", publicConstructorMember.FullName);
         Assert.Equal(type.Namespace, publicConstructorMember.Namespace);

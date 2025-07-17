@@ -73,10 +73,10 @@ public class TypeAnalyzer : ITypeAnalyzer
         try
         {
             var methods = new List<ApiMember>();
-            
+
             // Get all methods, excluding property accessors, event accessors, and constructors
-            var methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | 
-                                             BindingFlags.Instance | BindingFlags.Static | 
+            var methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                                             BindingFlags.Instance | BindingFlags.Static |
                                              BindingFlags.DeclaredOnly)
                                   .Where(m => !m.IsSpecialName);
 
@@ -127,9 +127,9 @@ public class TypeAnalyzer : ITypeAnalyzer
         try
         {
             var properties = new List<ApiMember>();
-            
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | 
-                                                 BindingFlags.Instance | BindingFlags.Static | 
+
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic |
+                                                 BindingFlags.Instance | BindingFlags.Static |
                                                  BindingFlags.DeclaredOnly);
 
             foreach (var property in propertyInfos)
@@ -179,9 +179,9 @@ public class TypeAnalyzer : ITypeAnalyzer
         try
         {
             var fields = new List<ApiMember>();
-            
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | 
-                                          BindingFlags.Instance | BindingFlags.Static | 
+
+            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic |
+                                          BindingFlags.Instance | BindingFlags.Static |
                                           BindingFlags.DeclaredOnly);
 
             foreach (var field in fieldInfos)
@@ -231,9 +231,9 @@ public class TypeAnalyzer : ITypeAnalyzer
         try
         {
             var events = new List<ApiMember>();
-            
-            var eventInfos = type.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | 
-                                          BindingFlags.Instance | BindingFlags.Static | 
+
+            var eventInfos = type.GetEvents(BindingFlags.Public | BindingFlags.NonPublic |
+                                          BindingFlags.Instance | BindingFlags.Static |
                                           BindingFlags.DeclaredOnly);
 
             foreach (var eventInfo in eventInfos)
@@ -283,9 +283,9 @@ public class TypeAnalyzer : ITypeAnalyzer
         try
         {
             var constructors = new List<ApiMember>();
-            
-            var constructorInfos = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | 
-                                                      BindingFlags.Instance | BindingFlags.Static | 
+
+            var constructorInfos = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic |
+                                                      BindingFlags.Instance | BindingFlags.Static |
                                                       BindingFlags.DeclaredOnly);
 
             foreach (var constructor in constructorInfos)
@@ -424,7 +424,7 @@ public class TypeAnalyzer : ITypeAnalyzer
     {
         var getMethod = property.GetMethod;
         var setMethod = property.SetMethod;
-        
+
         // Use the most accessible between get and set
         if (getMethod != null && setMethod != null)
         {
@@ -440,7 +440,7 @@ public class TypeAnalyzer : ITypeAnalyzer
         {
             return GetMethodAccessibility(setMethod);
         }
-        
+
         return AccessibilityLevel.Private;
     }
 
@@ -485,12 +485,12 @@ public class TypeAnalyzer : ITypeAnalyzer
     private AccessibilityLevel GetEventAccessibility(EventInfo eventInfo)
     {
         var addMethod = eventInfo.AddMethod;
-        
+
         if (addMethod != null)
         {
             return GetMethodAccessibility(addMethod);
         }
-        
+
         return AccessibilityLevel.Private;
     }
 
@@ -578,8 +578,8 @@ public class TypeAnalyzer : ITypeAnalyzer
     private bool IsCompilerGeneratedAttribute(object attribute)
     {
         var typeName = attribute.GetType().Name;
-        return typeName == "CompilerGeneratedAttribute" || 
-               typeName == "DebuggerHiddenAttribute" || 
+        return typeName == "CompilerGeneratedAttribute" ||
+               typeName == "DebuggerHiddenAttribute" ||
                typeName == "DebuggerNonUserCodeAttribute";
     }
 
@@ -626,7 +626,7 @@ public class TypeAnalyzer : ITypeAnalyzer
         }
 
         // Check if either accessor is overriding a public accessor
-        if ((getMethod != null && IsPublicOrOverride(getMethod)) || 
+        if ((getMethod != null && IsPublicOrOverride(getMethod)) ||
             (setMethod != null && IsPublicOrOverride(setMethod)))
         {
             return true;
@@ -652,7 +652,7 @@ public class TypeAnalyzer : ITypeAnalyzer
         }
 
         // Check if either accessor is overriding a public accessor
-        if ((addMethod != null && IsPublicOrOverride(addMethod)) || 
+        if ((addMethod != null && IsPublicOrOverride(addMethod)) ||
             (removeMethod != null && IsPublicOrOverride(removeMethod)))
         {
             return true;

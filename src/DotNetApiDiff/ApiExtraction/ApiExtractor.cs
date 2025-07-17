@@ -37,16 +37,16 @@ public class ApiExtractor : IApiExtractor
         }
 
         _logger.LogInformation("Extracting API members from assembly: {AssemblyName}", assembly.GetName().Name);
-        
+
         var apiMembers = new List<ApiMember>();
-        
+
         try
         {
             // Get all public types from the assembly
             var types = GetPublicTypes(assembly).ToList();
-            _logger.LogDebug("Found {TypeCount} public types in assembly {AssemblyName}", 
+            _logger.LogDebug("Found {TypeCount} public types in assembly {AssemblyName}",
                 types.Count, assembly.GetName().Name);
-            
+
             // Process each type
             foreach (var type in types)
             {
@@ -55,12 +55,12 @@ public class ApiExtractor : IApiExtractor
                     // Add the type itself
                     var typeMember = _typeAnalyzer.AnalyzeType(type);
                     apiMembers.Add(typeMember);
-                    
+
                     // Add all members of the type
                     var typeMembers = ExtractTypeMembers(type).ToList();
                     apiMembers.AddRange(typeMembers);
-                    
-                    _logger.LogDebug("Extracted {MemberCount} members from type {TypeName}", 
+
+                    _logger.LogDebug("Extracted {MemberCount} members from type {TypeName}",
                         typeMembers.Count, type.FullName);
                 }
                 catch (Exception ex)
@@ -68,16 +68,16 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogError(ex, "Error extracting members from type {TypeName}", type.FullName);
                 }
             }
-            
-            _logger.LogInformation("Extracted {MemberCount} total API members from assembly {AssemblyName}", 
+
+            _logger.LogInformation("Extracted {MemberCount} total API members from assembly {AssemblyName}",
                 apiMembers.Count, assembly.GetName().Name);
-            
+
             return apiMembers;
         }
         catch (ReflectionTypeLoadException ex)
         {
             _logger.LogError(ex, "Error loading types from assembly {AssemblyName}", assembly.GetName().Name);
-            
+
             // Log the loader exceptions for more detailed diagnostics
             if (ex.LoaderExceptions != null)
             {
@@ -89,13 +89,13 @@ public class ApiExtractor : IApiExtractor
                     }
                 }
             }
-            
+
             // Return any types that were successfully loaded
             return apiMembers;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting API members from assembly {AssemblyName}", 
+            _logger.LogError(ex, "Error extracting API members from assembly {AssemblyName}",
                 assembly.GetName().Name);
             return apiMembers;
         }
@@ -114,24 +114,24 @@ public class ApiExtractor : IApiExtractor
         }
 
         var members = new List<ApiMember>();
-        
+
         try
         {
             // Extract methods
             members.AddRange(_typeAnalyzer.AnalyzeMethods(type));
-            
+
             // Extract properties
             members.AddRange(_typeAnalyzer.AnalyzeProperties(type));
-            
+
             // Extract fields
             members.AddRange(_typeAnalyzer.AnalyzeFields(type));
-            
+
             // Extract events
             members.AddRange(_typeAnalyzer.AnalyzeEvents(type));
-            
+
             // Extract constructors
             members.AddRange(_typeAnalyzer.AnalyzeConstructors(type));
-            
+
             return members;
         }
         catch (Exception ex)
@@ -163,13 +163,13 @@ public class ApiExtractor : IApiExtractor
         catch (ReflectionTypeLoadException ex)
         {
             _logger.LogError(ex, "Error loading types from assembly {AssemblyName}", assembly.GetName().Name);
-            
+
             // Return any types that were successfully loaded
             return ex.Types.Where(t => t != null).Cast<Type>();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting public types from assembly {AssemblyName}", 
+            _logger.LogError(ex, "Error getting public types from assembly {AssemblyName}",
                 assembly.GetName().Name);
             return Enumerable.Empty<Type>();
         }
@@ -193,7 +193,7 @@ public static class ReflectionExtensions
         {
             return true;
         }
-        
+
         // Check for CompilerGeneratedAttribute using IsDefined for better performance
         return type.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), true);
     }

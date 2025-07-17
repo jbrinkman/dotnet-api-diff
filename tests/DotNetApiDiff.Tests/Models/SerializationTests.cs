@@ -55,18 +55,18 @@ public class SerializationTests
             Type = ChangeType.Modified,
             IsBreakingChange = true,
             Description = "Method signature changed",
-            SourceMember = new ApiMember 
-            { 
-                Name = "TestMethod", 
-                FullName = "Test.TestMethod", 
+            SourceMember = new ApiMember
+            {
+                Name = "TestMethod",
+                FullName = "Test.TestMethod",
                 Signature = "void TestMethod(int param)",
                 Type = MemberType.Method,
                 Accessibility = AccessibilityLevel.Public
             },
-            TargetMember = new ApiMember 
-            { 
-                Name = "TestMethod", 
-                FullName = "Test.TestMethod", 
+            TargetMember = new ApiMember
+            {
+                Name = "TestMethod",
+                FullName = "Test.TestMethod",
                 Signature = "int TestMethod(string param)",
                 Type = MemberType.Method,
                 Accessibility = AccessibilityLevel.Public
@@ -97,30 +97,30 @@ public class SerializationTests
     {
         // Arrange
         var comparison = new ApiComparison();
-        
-        comparison.Additions.Add(new ApiChange 
-        { 
-            Type = ChangeType.Added, 
+
+        comparison.Additions.Add(new ApiChange
+        {
+            Type = ChangeType.Added,
             Description = "Added new method",
-            TargetMember = new ApiMember 
-            { 
-                Name = "NewMethod", 
-                FullName = "Test.NewMethod", 
+            TargetMember = new ApiMember
+            {
+                Name = "NewMethod",
+                FullName = "Test.NewMethod",
                 Signature = "void NewMethod()",
                 Type = MemberType.Method,
                 Accessibility = AccessibilityLevel.Public
             }
         });
 
-        comparison.Removals.Add(new ApiChange 
-        { 
-            Type = ChangeType.Removed, 
+        comparison.Removals.Add(new ApiChange
+        {
+            Type = ChangeType.Removed,
             Description = "Removed old method",
             IsBreakingChange = true,
-            SourceMember = new ApiMember 
-            { 
-                Name = "OldMethod", 
-                FullName = "Test.OldMethod", 
+            SourceMember = new ApiMember
+            {
+                Name = "OldMethod",
+                FullName = "Test.OldMethod",
                 Signature = "void OldMethod()",
                 Type = MemberType.Method,
                 Accessibility = AccessibilityLevel.Public

@@ -14,7 +14,7 @@ public interface IReportGenerator
     /// <param name="format">The desired output format</param>
     /// <returns>Generated report as a string</returns>
     string GenerateReport(ComparisonResult result, ReportFormat format);
-    
+
     /// <summary>
     /// Saves a report to the specified file path
     /// </summary>
@@ -22,7 +22,7 @@ public interface IReportGenerator
     /// <param name="format">The desired output format</param>
     /// <param name="filePath">Path where the report should be saved</param>
     Task SaveReportAsync(ComparisonResult result, ReportFormat format, string filePath);
-    
+
     /// <summary>
     /// Gets the supported report formats
     /// </summary>

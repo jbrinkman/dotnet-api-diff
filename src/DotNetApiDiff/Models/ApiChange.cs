@@ -49,7 +49,7 @@ public class ApiChange
             return false;
 
         // Must have at least one member for most change types
-        if (Type != ChangeType.Added && Type != ChangeType.Removed && 
+        if (Type != ChangeType.Added && Type != ChangeType.Removed &&
             SourceMember == null && TargetMember == null)
             return false;
 

@@ -109,12 +109,12 @@ public class ExclusionConfigurationTests
         // Arrange
         var config = new ExclusionConfiguration
         {
-            ExcludedTypePatterns = new List<string> 
-            { 
-                "System.*", 
-                "Microsoft.?", 
-                "*.Internal.*", 
-                "Test?Namespace.Test*Class" 
+            ExcludedTypePatterns = new List<string>
+            {
+                "System.*",
+                "Microsoft.?",
+                "*.Internal.*",
+                "Test?Namespace.Test*Class"
             }
         };
 
@@ -148,7 +148,7 @@ public class ExclusionConfigurationTests
         Assert.Equal(config.ExcludedMemberPatterns.Count, deserialized.ExcludedMemberPatterns.Count);
         Assert.Equal(config.ExcludeCompilerGenerated, deserialized.ExcludeCompilerGenerated);
         Assert.Equal(config.ExcludeObsolete, deserialized.ExcludeObsolete);
-        
+
         Assert.All(config.ExcludedTypes, t => Assert.Contains(t, deserialized.ExcludedTypes));
         Assert.All(config.ExcludedMembers, m => Assert.Contains(m, deserialized.ExcludedMembers));
         Assert.All(config.ExcludedTypePatterns, p => Assert.Contains(p, deserialized.ExcludedTypePatterns));

@@ -28,24 +28,24 @@ public class ApiExtractorTests
         var assembly = typeof(List<>).Assembly;
         var listType = typeof(List<>);
         var dictionaryType = typeof(Dictionary<,>);
-        
+
         var types = new[] { listType, dictionaryType };
-        
+
         var listTypeMember = new ApiMember { Name = "List`1", FullName = "System.Collections.Generic.List`1" };
         var dictionaryTypeMember = new ApiMember { Name = "Dictionary`2", FullName = "System.Collections.Generic.Dictionary`2" };
-        
+
         var listMembers = new List<ApiMember>
         {
             new ApiMember { Name = "Add", FullName = "System.Collections.Generic.List`1.Add" },
             new ApiMember { Name = "Count", FullName = "System.Collections.Generic.List`1.Count" }
         };
-        
+
         var dictionaryMembers = new List<ApiMember>
         {
             new ApiMember { Name = "Add", FullName = "System.Collections.Generic.Dictionary`2.Add" },
             new ApiMember { Name = "ContainsKey", FullName = "System.Collections.Generic.Dictionary`2.ContainsKey" }
         };
-        
+
         // Setup mocks
         _mockTypeAnalyzer.Setup(x => x.AnalyzeType(listType)).Returns(listTypeMember);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeType(dictionaryType)).Returns(dictionaryTypeMember);
@@ -54,20 +54,20 @@ public class ApiExtractorTests
         _mockTypeAnalyzer.Setup(x => x.AnalyzeFields(listType)).Returns(Enumerable.Empty<ApiMember>());
         _mockTypeAnalyzer.Setup(x => x.AnalyzeEvents(listType)).Returns(Enumerable.Empty<ApiMember>());
         _mockTypeAnalyzer.Setup(x => x.AnalyzeConstructors(listType)).Returns(Enumerable.Empty<ApiMember>());
-        
+
         _mockTypeAnalyzer.Setup(x => x.AnalyzeMethods(dictionaryType)).Returns(dictionaryMembers);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeProperties(dictionaryType)).Returns(Enumerable.Empty<ApiMember>());
         _mockTypeAnalyzer.Setup(x => x.AnalyzeFields(dictionaryType)).Returns(Enumerable.Empty<ApiMember>());
         _mockTypeAnalyzer.Setup(x => x.AnalyzeEvents(dictionaryType)).Returns(Enumerable.Empty<ApiMember>());
         _mockTypeAnalyzer.Setup(x => x.AnalyzeConstructors(dictionaryType)).Returns(Enumerable.Empty<ApiMember>());
-        
+
         // Create a partial mock to override GetPublicTypes
         var partialMock = new Mock<ApiExtractor>(_mockTypeAnalyzer.Object, _mockLogger.Object) { CallBase = true };
         partialMock.Setup(x => x.GetPublicTypes(assembly)).Returns(types);
-        
+
         // Act
         var result = partialMock.Object.ExtractApiMembers(assembly).ToList();
-        
+
         // Assert
         Assert.Equal(6, result.Count); // 2 types + 4 members
         Assert.Contains(result, m => m.Name == "List`1");
@@ -83,42 +83,42 @@ public class ApiExtractorTests
     {
         // Arrange
         var type = typeof(List<>);
-        
+
         var methodMembers = new[]
         {
             new ApiMember { Name = "Add", FullName = "System.Collections.Generic.List`1.Add", Type = MemberType.Method }
         };
-        
+
         var propertyMembers = new[]
         {
             new ApiMember { Name = "Count", FullName = "System.Collections.Generic.List`1.Count", Type = MemberType.Property }
         };
-        
+
         var fieldMembers = new[]
         {
             new ApiMember { Name = "_items", FullName = "System.Collections.Generic.List`1._items", Type = MemberType.Field }
         };
-        
+
         var eventMembers = new[]
         {
             new ApiMember { Name = "Changed", FullName = "System.Collections.Generic.List`1.Changed", Type = MemberType.Event }
         };
-        
+
         var constructorMembers = new[]
         {
             new ApiMember { Name = ".ctor", FullName = "System.Collections.Generic.List`1..ctor", Type = MemberType.Constructor }
         };
-        
+
         // Setup mocks
         _mockTypeAnalyzer.Setup(x => x.AnalyzeMethods(type)).Returns(methodMembers);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeProperties(type)).Returns(propertyMembers);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeFields(type)).Returns(fieldMembers);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeEvents(type)).Returns(eventMembers);
         _mockTypeAnalyzer.Setup(x => x.AnalyzeConstructors(type)).Returns(constructorMembers);
-        
+
         // Act
         var result = _apiExtractor.ExtractTypeMembers(type).ToList();
-        
+
         // Assert
         Assert.Equal(5, result.Count);
         Assert.Contains(result, m => m.Name == "Add" && m.Type == MemberType.Method);
@@ -133,10 +133,10 @@ public class ApiExtractorTests
     {
         // Arrange
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        
+
         // Act
         var result = _apiExtractor.GetPublicTypes(assembly).ToList();
-        
+
         // Assert
         Assert.NotEmpty(result);
         Assert.All(result, type => Assert.True(type.IsPublic || type.IsNestedPublic));

@@ -54,7 +54,7 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-3.2-api-extractor`, commit, push, and create PR
     - _Requirements: 1.1, 1.2, 8.1_
 
-  - [ ] 3.3 Implement GitHub workflows for CI/CD
+  - [x] 3.3 Implement GitHub workflows for CI/CD
     - Create workflow for building and testing on pull requests
     - Create workflow for building and testing on main branch pushes
     - Configure workflows to treat warnings as errors

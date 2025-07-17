@@ -21,18 +21,18 @@ public class AssemblyLoaderTests : IDisposable
     {
         // Use the current test assembly as a valid assembly for testing
         _validAssemblyPath = typeof(AssemblyLoaderTests).Assembly.Location;
-        
+
         // Create a path to a non-existent assembly
         _nonExistentAssemblyPath = Path.Combine(Path.GetTempPath(), $"NonExistent_{Guid.NewGuid()}.dll");
-        
+
         // Create a path to an invalid assembly (use a text file)
         _invalidAssemblyPath = Path.GetTempFileName();
         File.WriteAllText(_invalidAssemblyPath, "This is not a valid assembly");
-        
+
         // Create a path that would be too long (Windows has a 260 character path limit by default)
         string longSegment = new string('x', 240);
         _tooLongPathAssemblyPath = Path.Combine(Path.GetTempPath(), longSegment, "assembly.dll");
-        
+
         _loggerMock = new Mock<ILogger<AssemblyLoader>>();
         _genericLoggerMock = new Mock<ILogger>();
     }
@@ -278,7 +278,7 @@ public class AssemblyLoaderTests : IDisposable
 
         // Arrange
         var loader = new AssemblyLoader(_loggerMock.Object);
-        
+
         // Act & Assert
         // Create the exception directly since we're just testing the exception handling
         var ex = new ReflectionTypeLoadException(
@@ -286,7 +286,7 @@ public class AssemblyLoaderTests : IDisposable
             new Exception[] { new DllNotFoundException("Test DLL not found") },
             "Test exception"
         );
-        
+
         // Verify the exception contains the expected message
         Assert.Contains("Test DLL not found", ex.LoaderExceptions[0].Message);
     }
@@ -296,12 +296,12 @@ public class AssemblyLoaderTests : IDisposable
     {
         // Arrange
         var loader = new AssemblyLoader(_loggerMock.Object);
-        
+
         // Act & Assert
         // We can't easily create a real SecurityException in a unit test,
         // so we'll just verify the exception handling by checking the code path
         var securityException = new SecurityException("Test security exception");
-        
+
         // Just create the exception and verify its properties
         Assert.Equal("Test security exception", securityException.Message);
     }
@@ -318,14 +318,15 @@ public class AssemblyLoaderTests : IDisposable
 
         // Arrange
         var loader = new AssemblyLoader(_loggerMock.Object);
-        
+
         // Create directory with a very long path if it doesn't exist
         var longPathDirectory = Path.GetDirectoryName(_tooLongPathAssemblyPath);
-        
+
         // Act & Assert
         // On Windows with default settings, this should throw PathTooLongException
         // when trying to check if the file exists
-        Assert.Throws<PathTooLongException>(() => {
+        Assert.Throws<PathTooLongException>(() =>
+        {
             if (!Directory.Exists(longPathDirectory))
             {
                 Directory.CreateDirectory(longPathDirectory);

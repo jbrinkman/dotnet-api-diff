@@ -124,28 +124,28 @@ public class ComparisonConfigurationTests
 
         // Assert
         Assert.NotNull(deserialized);
-        
+
         // Check mappings
         Assert.Single(deserialized!.Mappings.NamespaceMappings);
         Assert.True(deserialized.Mappings.NamespaceMappings.ContainsKey("OldNamespace"));
         Assert.Single(deserialized.Mappings.TypeMappings);
         Assert.True(deserialized.Mappings.TypeMappings.ContainsKey("OldType"));
         Assert.True(deserialized.Mappings.AutoMapSameNameTypes);
-        
+
         // Check exclusions
         Assert.Single(deserialized.Exclusions.ExcludedTypes);
         Assert.Contains("System.Diagnostics.Debug", deserialized.Exclusions.ExcludedTypes);
         Assert.True(deserialized.Exclusions.ExcludeObsolete);
-        
+
         // Check breaking change rules
         Assert.True(deserialized.BreakingChangeRules.TreatAddedInterfaceAsBreaking);
         Assert.True(deserialized.BreakingChangeRules.TreatParameterNameChangeAsBreaking);
-        
+
         // Check filters
         Assert.Single(deserialized.Filters.IncludeNamespaces);
         Assert.Contains("System", deserialized.Filters.IncludeNamespaces);
         Assert.True(deserialized.Filters.IncludeInternals);
-        
+
         // Check other properties
         Assert.Equal(ReportFormat.Json, deserialized.OutputFormat);
         Assert.Equal("output.json", deserialized.OutputPath);
@@ -165,13 +165,13 @@ public class ComparisonConfigurationTests
                 OutputPath = "output.json",
                 FailOnBreakingChanges = false
             };
-            
+
             var json = JsonSerializer.Serialize(config, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
-            
+
             File.WriteAllText(tempFile, json);
 
             // Act
@@ -239,7 +239,7 @@ public class ComparisonConfigurationTests
                     }
                 }
             }";
-            
+
             File.WriteAllText(tempFile, json);
 
             // Act & Assert
@@ -271,13 +271,13 @@ public class ComparisonConfigurationTests
 
             // Act
             config.SaveToJsonFile(tempFile);
-            
+
             // Assert
             var json = File.ReadAllText(tempFile);
             Assert.Contains("\"outputFormat\"", json);
             Assert.Contains("\"outputPath\"", json);
             Assert.Contains("\"failOnBreakingChanges\"", json);
-            
+
             // Verify we can deserialize it back
             var deserialized = JsonSerializer.Deserialize<ComparisonConfiguration>(json);
             Assert.NotNull(deserialized);
