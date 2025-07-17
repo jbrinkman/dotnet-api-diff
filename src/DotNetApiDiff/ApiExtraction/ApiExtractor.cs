@@ -146,7 +146,7 @@ public class ApiExtractor : IApiExtractor
     /// </summary>
     /// <param name="assembly">Assembly to get types from</param>
     /// <returns>Collection of public types</returns>
-    public IEnumerable<Type> GetPublicTypes(Assembly assembly)
+    public virtual IEnumerable<Type> GetPublicTypes(Assembly assembly)
     {
         if (assembly == null)
         {
