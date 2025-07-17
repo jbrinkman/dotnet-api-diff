@@ -162,8 +162,8 @@ public class SerializationTests
         var json = JsonSerializer.Serialize(member, _jsonOptions);
 
         // Assert
-        Assert.Contains("\"type\": 5", json); // Method is the 6th enum value (0-indexed = 5)
-        Assert.Contains("\"accessibility\": 5", json); // Public is the 6th enum value (0-indexed = 5)
+        Assert.Contains($"\"type\": {Convert.ToInt32(MemberType.Method)}", json); // Dynamically retrieve enum value
+        Assert.Contains($"\"accessibility\": {Convert.ToInt32(AccessibilityLevel.Public)}", json); // Dynamically retrieve enum value
     }
 
     [Fact]
