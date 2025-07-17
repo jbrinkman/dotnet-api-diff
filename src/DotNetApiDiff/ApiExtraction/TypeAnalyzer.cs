@@ -502,7 +502,30 @@ public class TypeAnalyzer : ITypeAnalyzer
     /// <returns>Most accessible level</returns>
     private AccessibilityLevel GetMostAccessible(AccessibilityLevel access1, AccessibilityLevel access2)
     {
-        return (AccessibilityLevel)Math.Max((int)access1, (int)access2);
+        return CompareAccessibilityLevels(access1, access2);
+    }
+
+    /// <summary>
+    /// Compares two accessibility levels and returns the more accessible one
+    /// </summary>
+    /// <param name="access1">First accessibility level</param>
+    /// <param name="access2">Second accessibility level</param>
+    /// <returns>Most accessible level</returns>
+    private AccessibilityLevel CompareAccessibilityLevels(AccessibilityLevel access1, AccessibilityLevel access2)
+    {
+        if (access1 == AccessibilityLevel.Public || access2 == AccessibilityLevel.Public)
+        {
+            return AccessibilityLevel.Public;
+        }
+        if (access1 == AccessibilityLevel.Protected || access2 == AccessibilityLevel.Protected)
+        {
+            return AccessibilityLevel.Protected;
+        }
+        if (access1 == AccessibilityLevel.Internal || access2 == AccessibilityLevel.Internal)
+        {
+            return AccessibilityLevel.Internal;
+        }
+        return AccessibilityLevel.Private;
     }
 
     /// <summary>
