@@ -46,7 +46,7 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-3.1-assembly-loader`, commit, push, and create PR
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 3.2 Implement ApiExtractor for reflection-based analysis
+  - [x] 3.2 Implement ApiExtractor for reflection-based analysis
     - Create ApiExtractor to extract public types, methods, properties, events, fields
     - Implement TypeAnalyzer for detailed type member analysis
     - Write MemberSignatureBuilder for normalized method signatures
