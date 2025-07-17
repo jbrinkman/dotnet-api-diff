@@ -1,0 +1,16 @@
+root = true
+
+[*.cs]
+# Disable specific rules
+dotnet_diagnostic.SA1633.severity = none  # File header
+dotnet_diagnostic.SA1200.severity = none  # Using directive placement
+dotnet_diagnostic.SA1101.severity = none  # Prefix local calls with this
+
+# Enable all other StyleCop rules
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.LayoutRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.MaintainabilityRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.NamingRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.OrderingRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.ReadabilityRules.severity = warning
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpacingRules.severity = warning
