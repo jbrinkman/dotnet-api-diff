@@ -14,7 +14,7 @@ public interface IApiComparer
     /// <param name="oldAssembly">The original assembly</param>
     /// <param name="newAssembly">The new assembly to compare against</param>
     /// <returns>Comparison result containing all detected differences</returns>
-    ComparisonResult CompareAssemblies(Assembly oldAssembly, Assembly newAssembly);
+    ComparisonResult CompareAssemblies(System.Reflection.Assembly oldAssembly, System.Reflection.Assembly newAssembly);
     
     /// <summary>
     /// Compares types between two assemblies
