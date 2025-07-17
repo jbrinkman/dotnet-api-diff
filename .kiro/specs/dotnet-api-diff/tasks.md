@@ -23,8 +23,8 @@ Each task should follow this git workflow:
   - **Git Workflow**: Create branch `feature/task-1-project-setup`, commit, push, and create PR
   - _Requirements: 1.1, 2.3_
 
-- [ ] 2. Implement data models and validation
-  - [ ] 2.1 Create core data model classes
+- [x] 2. Implement data models and validation
+  - [-] 2.1 Create core data model classes
     - Implement ApiMember, ApiComparison, ApiChange classes with proper validation
     - Create enums for MemberType, ChangeType, AccessibilityLevel
     - Write unit tests for data model validation and serialization
