@@ -68,8 +68,10 @@ public class ExclusionConfiguration
                 WildcardToRegex(pattern);
             }
         }
-        catch
+        catch (Exception ex)
         {
+            // Log the exception details for debugging purposes
+            Console.WriteLine($"Validation failed due to an exception: {ex.Message}");
             return false;
         }
 
