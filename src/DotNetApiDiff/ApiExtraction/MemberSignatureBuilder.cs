@@ -301,7 +301,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             // Add event keyword and event handler type
             signature.Append("event ");
-            signature.Append(GetTypeName(eventInfo.EventHandlerType));
+            signature.Append(GetTypeName(eventInfo.EventHandlerType ?? typeof(object)));
             signature.Append(' ');
 
             // Add event name
