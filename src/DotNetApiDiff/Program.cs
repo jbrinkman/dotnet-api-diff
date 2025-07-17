@@ -22,6 +22,9 @@ class Program
             // TODO: Parse command line arguments and execute comparison
             // This will be implemented in subsequent tasks
             
+            // Add a minimal await to satisfy the async method requirement
+            await Task.Delay(0);
+            
             logger.LogInformation("DotNet API Diff Tool completed successfully");
             return 0;
         }
