@@ -39,7 +39,7 @@ jobs:
           coverlet ./tests/DotNetApiDiff.Tests/bin/Debug/net8.0/DotNetApiDiff.Tests.dll --target "dotnet" --targetargs "test ./tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj --no-build" --format cobertura --output ./TestResults/coverage.cobertura.xml
 
       - name: Generate coverage report
-        run: reportgenerator -reports:./TestResults/coverage.cobertura.xml -targetdir:./CodeCoverage -reporttypes:HtmlInline_AzurePipelines;Cobertura
+        run: reportgenerator "-reports:./TestResults/coverage.cobertura.xml" "-targetdir:./CodeCoverage" "-reporttypes:HtmlInline_AzurePipelines;Cobertura"
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
