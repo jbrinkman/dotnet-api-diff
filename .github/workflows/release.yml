@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore /p:Version=${GITHUB_REF#refs/tags/v}
+    
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+    
+    - name: Publish
+      run: |
+        dotnet publish src/DotNetApiDiff/DotNetApiDiff.csproj --configuration Release --no-build --output ./publish/win-x64 --runtime win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true
+        dotnet publish src/DotNetApiDiff/DotNetApiDiff.csproj --configuration Release --no-build --output ./publish/linux-x64 --runtime linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true
+        dotnet publish src/DotNetApiDiff/DotNetApiDiff.csproj --configuration Release --no-build --output ./publish/osx-x64 --runtime osx-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true
+    
+    - name: Create ZIP archives
+      run: |
+        cd ./publish/win-x64 && zip -r ../../dotnet-api-diff-win-x64.zip . && cd ../..
+        cd ./publish/linux-x64 && tar -czf ../../dotnet-api-diff-linux-x64.tar.gz . && cd ../..
+        cd ./publish/osx-x64 && tar -czf ../../dotnet-api-diff-osx-x64.tar.gz . && cd ../..
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dotnet-api-diff-win-x64.zip
+        asset_name: dotnet-api-diff-win-x64.zip
+        asset_content_type: application/zip
+    
+    - name: Upload Linux Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dotnet-api-diff-linux-x64.tar.gz
+        asset_name: dotnet-api-diff-linux-x64.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload macOS Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dotnet-api-diff-osx-x64.tar.gz
+        asset_name: dotnet-api-diff-osx-x64.tar.gz
+        asset_content_type: application/gzip
