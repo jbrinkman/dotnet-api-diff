@@ -165,7 +165,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogError(ex, "Error loading types from assembly {AssemblyName}", assembly.GetName().Name);
             
             // Return any types that were successfully loaded
-            return ex.Types.Where(t => t != null);
+            return ex.Types.Where(t => t != null).Cast<Type>();
         }
         catch (Exception ex)
         {
