@@ -6,7 +6,7 @@ namespace DotNetApiDiff;
 
 class Program
 {
-    static int Main(string[] args)
+    static async Task<int> Main(string[] args)
     {
         // Set up dependency injection
         var services = new ServiceCollection();

@@ -194,8 +194,7 @@ public static class ReflectionExtensions
             return true;
         }
         
-        // Check for CompilerGeneratedAttribute
-        var attributes = type.GetCustomAttributes(true);
-        return attributes.Any(a => a.GetType().Name == "CompilerGeneratedAttribute");
+        // Check for CompilerGeneratedAttribute using IsDefined for better performance
+        return type.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), true);
     }
 }
