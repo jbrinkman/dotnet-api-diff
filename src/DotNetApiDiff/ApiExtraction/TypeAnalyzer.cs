@@ -574,24 +574,12 @@ public class TypeAnalyzer : ITypeAnalyzer
         }
 
         // If the method is an override, check if it's overriding a public method
-        if (method.IsVirtual && !method.IsAbstract && !method.IsFinal)
+        if (method.GetBaseDefinition() != method)
         {
-            // Try to find the base method that this is overriding
-            var baseType = method.DeclaringType?.BaseType;
-            while (baseType != null)
+            var baseMethod = method.GetBaseDefinition();
+            if (baseMethod != null && baseMethod.IsPublic)
             {
-                var baseMethod = baseType.GetMethod(method.Name, 
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                    null,
-                    method.GetParameters().Select(p => p.ParameterType).ToArray(),
-                    null);
-
-                if (baseMethod != null && baseMethod.IsPublic)
-                {
-                    return true;
-                }
-
-                baseType = baseType.BaseType;
+                return true;
             }
         }
 
