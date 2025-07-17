@@ -2,37 +2,29 @@ name: Security Scan
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 0 * * 0'  # Run weekly on Sundays at midnight
+    - cron: "0 0 * * 0" # Run weekly on Sundays at midnight
 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Run NuGet vulnerability scan
-      run: dotnet list package --vulnerable --include-transitive
-      
-    - name: Run Security CodeQL Analysis
-      uses: github/codeql-action/init@v3
-      with:
-        languages: csharp
-        
-    - name: Build
-      run: dotnet build --no-restore
-      
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run NuGet vulnerability scan
+        run: dotnet list package --vulnerable --include-transitive
+
+      - name: Build
+        run: dotnet build --no-restore

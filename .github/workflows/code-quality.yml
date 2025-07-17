@@ -2,41 +2,41 @@ name: Code Quality
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   code-quality:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Install .NET Format
-      run: dotnet tool install -g dotnet-format
-    
-    - name: Check code formatting
-      run: dotnet format --verify-no-changes --verbosity diagnostic
-      
-    - name: Install .NET Analyzers
-      run: |
-        dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package Microsoft.CodeAnalysis.NetAnalyzers
-        dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package StyleCop.Analyzers
-        dotnet add tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj package Microsoft.CodeAnalysis.NetAnalyzers
-      
-    - name: Run code analysis
-      run: dotnet build --no-restore /p:EnforceCodeStyleInBuild=true /p:EnableNETAnalyzers=true /p:AnalysisLevel=latest /p:TreatWarningsAsErrors=true
-      
-    - name: Run .NET Outdated
-      run: |
-        dotnet tool install --global dotnet-outdated-tool
-        dotnet outdated --version-lock Major
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Install .NET Format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Check code formatting
+        run: dotnet format --verify-no-changes
+
+      - name: Install .NET Analyzers
+        run: |
+          dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package Microsoft.CodeAnalysis.NetAnalyzers
+          dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package StyleCop.Analyzers
+          dotnet add tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj package Microsoft.CodeAnalysis.NetAnalyzers
+
+      - name: Run code analysis
+        run: dotnet build --no-restore /p:EnforceCodeStyleInBuild=true /p:EnableNETAnalyzers=true /p:AnalysisLevel=latest /p:TreatWarningsAsErrors=true
+
+      - name: Run .NET Outdated
+        run: |
+          dotnet tool install --global dotnet-outdated-tool
+          dotnet outdated --version-lock Major
