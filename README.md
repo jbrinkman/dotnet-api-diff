@@ -56,7 +56,7 @@ dotnet run -- --old old.dll --new new.dll --breaking-only
 
 ## Project Structure
 
-```
+```text
 src/
 ├── DotNetApiDiff/
 │   ├── Interfaces/          # Core service interfaces
