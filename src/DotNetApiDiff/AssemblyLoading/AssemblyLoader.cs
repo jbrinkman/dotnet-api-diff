@@ -14,7 +14,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
     private readonly ILogger<AssemblyLoader> _logger;
     private readonly Dictionary<string, Assembly> _loadedAssemblies = new();
     private readonly Dictionary<string, IsolatedAssemblyLoadContext> _loadContexts = new();
-    
+
     /// <summary>
     /// Creates a new assembly loader with the specified logger
     /// </summary>
@@ -45,16 +45,16 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
         // Normalize the path to ensure consistent dictionary keys
         assemblyPath = Path.GetFullPath(assemblyPath);
-        
+
         // Check if we've already loaded this assembly
         if (_loadedAssemblies.TryGetValue(assemblyPath, out var loadedAssembly))
         {
             _logger.LogDebug("Returning previously loaded assembly from {Path}", assemblyPath);
             return loadedAssembly;
         }
-        
+
         _logger.LogInformation("Loading assembly from {Path}", assemblyPath);
-        
+
         try
         {
             // Verify the file exists
@@ -63,27 +63,27 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 _logger.LogError("Assembly file not found: {Path}", assemblyPath);
                 throw new FileNotFoundException($"Assembly file not found: {assemblyPath}", assemblyPath);
             }
-            
+
             // Create a new isolated load context for this assembly
             var loadContext = new IsolatedAssemblyLoadContext(assemblyPath, _logger);
-            
+
             // Add the directory of the assembly as a search path
             var assemblyDirectory = Path.GetDirectoryName(assemblyPath);
             if (!string.IsNullOrEmpty(assemblyDirectory))
             {
                 loadContext.AddSearchPath(assemblyDirectory);
             }
-            
+
             // Load the assembly in the isolated context
             var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
-            
+
             // Store the assembly and load context for later use
             _loadedAssemblies[assemblyPath] = assembly;
             _loadContexts[assemblyPath] = loadContext;
-            
-            _logger.LogInformation("Successfully loaded assembly: {AssemblyName} from {Path}", 
+
+            _logger.LogInformation("Successfully loaded assembly: {AssemblyName} from {Path}",
                 assembly.GetName().Name, assemblyPath);
-            
+
             return assembly;
         }
         catch (FileNotFoundException ex)
@@ -109,7 +109,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
         catch (ReflectionTypeLoadException ex)
         {
             _logger.LogError(ex, "Failed to load types from assembly: {Path}", assemblyPath);
-            
+
             // Log the loader exceptions for more detailed diagnostics
             if (ex.LoaderExceptions != null)
             {
@@ -121,7 +121,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                     }
                 }
             }
-            
+
             throw;
         }
         catch (Exception ex)
@@ -158,7 +158,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
             try
             {
                 var assembly = tempContext.LoadFromAssemblyPath(assemblyPath);
-                
+
                 // If we got here, the assembly is valid
                 _logger.LogDebug("Successfully validated assembly: {Path}", assemblyPath);
                 return true;
@@ -182,7 +182,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
     public void UnloadAll()
     {
         _logger.LogInformation("Unloading all assemblies");
-        
+
         foreach (var context in _loadContexts.Values)
         {
             try
@@ -194,7 +194,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 _logger.LogWarning(ex, "Error unloading assembly context");
             }
         }
-        
+
         _loadContexts.Clear();
         _loadedAssemblies.Clear();
     }

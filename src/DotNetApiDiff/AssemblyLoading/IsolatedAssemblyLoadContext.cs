@@ -45,7 +45,7 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         try
         {
             _logger?.LogDebug("Attempting to resolve assembly: {AssemblyName}", assemblyName.FullName);
-            
+
             // First, try to resolve using the dependency resolver
             string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
             if (assemblyPath != null)
@@ -68,7 +68,7 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Error resolving assembly {AssemblyName} for {MainAssembly}", 
+            _logger?.LogWarning(ex, "Error resolving assembly {AssemblyName} for {MainAssembly}",
                 assemblyName.FullName, _mainAssemblyPath);
             throw;
         }
@@ -84,7 +84,7 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         try
         {
             _logger?.LogDebug("Attempting to resolve native library: {LibName}", libName);
-            
+
             // First, try to resolve using the dependency resolver
             string? libraryPath = _resolver.ResolveUnmanagedDllToPath(libName);
             if (libraryPath != null)
@@ -107,17 +107,17 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Error resolving native library {LibName} for {MainAssembly}", 
+            _logger?.LogWarning(ex, "Error resolving native library {LibName} for {MainAssembly}",
                 libName, _mainAssemblyPath);
             throw;
         }
     }
-    
+
     /// <summary>
     /// Additional search paths for assemblies
     /// </summary>
     public List<string> AdditionalSearchPaths { get; } = new List<string>();
-    
+
     /// <summary>
     /// Adds an additional search path for assemblies
     /// </summary>

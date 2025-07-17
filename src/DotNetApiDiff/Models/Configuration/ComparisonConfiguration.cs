@@ -57,8 +57,8 @@ public class ComparisonConfiguration
     /// <returns>True if valid, false otherwise</returns>
     public bool IsValid()
     {
-        return Mappings.IsValid() && 
-               Exclusions.IsValid() && 
+        return Mappings.IsValid() &&
+               Exclusions.IsValid() &&
                Filters.IsValid() &&
                Enum.IsDefined(typeof(ReportFormat), OutputFormat);
     }

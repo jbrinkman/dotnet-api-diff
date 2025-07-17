@@ -129,7 +129,7 @@ public class FilterConfigurationTests
         Assert.Equal(config.ExcludeTypes.Count, deserialized.ExcludeTypes.Count);
         Assert.Equal(config.IncludeInternals, deserialized.IncludeInternals);
         Assert.Equal(config.IncludeCompilerGenerated, deserialized.IncludeCompilerGenerated);
-        
+
         Assert.All(config.IncludeNamespaces, ns => Assert.Contains(ns, deserialized.IncludeNamespaces));
         Assert.All(config.ExcludeNamespaces, ns => Assert.Contains(ns, deserialized.ExcludeNamespaces));
         Assert.All(config.IncludeTypes, t => Assert.Contains(t, deserialized.IncludeTypes));

@@ -126,7 +126,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             // Get the most accessible accessor between getter and setter
             var getMethod = property.GetMethod;
             var setMethod = property.SetMethod;
-            
+
             // Add accessibility
             if (getMethod != null && setMethod != null)
             {
@@ -268,7 +268,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             // Get the add method to determine accessibility
             var addMethod = eventInfo.AddMethod;
-            
+
             // Add accessibility
             if (addMethod != null)
             {
@@ -367,7 +367,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error building signature for constructor in type {TypeName}", 
+            _logger.LogError(ex, "Error building signature for constructor in type {TypeName}",
                 constructor.DeclaringType?.Name ?? "Unknown");
             return $"Error: Constructor in {constructor.DeclaringType?.Name ?? "Unknown"}";
         }
@@ -468,7 +468,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             }
 
             // Add base type if not Object or ValueType
-            if (type.BaseType != null && type.BaseType != typeof(object) && type.BaseType != typeof(ValueType) && 
+            if (type.BaseType != null && type.BaseType != typeof(object) && type.BaseType != typeof(ValueType) &&
                 type.BaseType != typeof(Enum))
             {
                 signature.Append(" : ");
@@ -479,7 +479,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             var interfaces = type.GetInterfaces();
             if (interfaces.Length > 0 && !type.IsInterface)
             {
-                if (type.BaseType == null || type.BaseType == typeof(object) || type.BaseType == typeof(ValueType) || 
+                if (type.BaseType == null || type.BaseType == typeof(object) || type.BaseType == typeof(ValueType) ||
                     type.BaseType == typeof(Enum))
                 {
                     signature.Append(" : ");
@@ -653,7 +653,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             var genericTypeDef = type.GetGenericTypeDefinition();
             var genericArgs = type.GetGenericArguments();
             var typeName = genericTypeDef.Name;
-            
+
             // Remove the `n suffix from generic type names
             if (typeName.Contains('`'))
             {
@@ -665,12 +665,12 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             {
                 return $"{GetTypeName(genericArgs[0])}?";
             }
-            
+
             // For other generic types, use the standard format
             var sb = new StringBuilder();
             sb.Append(typeName);
             sb.Append('<');
-            
+
             for (int i = 0; i < genericArgs.Length; i++)
             {
                 if (i > 0)
@@ -679,7 +679,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                 }
                 sb.Append(GetTypeName(genericArgs[i]));
             }
-            
+
             sb.Append('>');
             return sb.ToString();
         }
@@ -701,7 +701,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         }
 
         var constraints = new List<string>();
-        
+
         // Add class/struct constraint
         if (type.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
         {

@@ -15,7 +15,7 @@ public interface IApiComparer
     /// <param name="newAssembly">The new assembly to compare against</param>
     /// <returns>Comparison result containing all detected differences</returns>
     ComparisonResult CompareAssemblies(System.Reflection.Assembly oldAssembly, System.Reflection.Assembly newAssembly);
-    
+
     /// <summary>
     /// Compares types between two assemblies
     /// </summary>
@@ -23,7 +23,7 @@ public interface IApiComparer
     /// <param name="newTypes">Types from the new assembly</param>
     /// <returns>List of type-level differences</returns>
     IEnumerable<ApiDifference> CompareTypes(IEnumerable<Type> oldTypes, IEnumerable<Type> newTypes);
-    
+
     /// <summary>
     /// Compares members (methods, properties, fields) of two types
     /// </summary>
