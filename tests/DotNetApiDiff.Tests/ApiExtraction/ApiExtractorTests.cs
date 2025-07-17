@@ -132,7 +132,7 @@ public class ApiExtractorTests
     public void GetPublicTypes_WithValidAssembly_ReturnsPublicTypes()
     {
         // Arrange
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
         
         // Act
         var result = _apiExtractor.GetPublicTypes(assembly).ToList();
