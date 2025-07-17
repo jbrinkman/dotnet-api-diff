@@ -24,14 +24,14 @@ Each task should follow this git workflow:
   - _Requirements: 1.1, 2.3_
 
 - [x] 2. Implement data models and validation
-  - [-] 2.1 Create core data model classes
+  - [x] 2.1 Create core data model classes
     - Implement ApiMember, ApiComparison, ApiChange classes with proper validation
     - Create enums for MemberType, ChangeType, AccessibilityLevel
     - Write unit tests for data model validation and serialization
     - **Git Workflow**: Create branch `feature/task-2.1-data-models`, commit, push, and create PR
     - _Requirements: 7.1, 8.1_
 
-  - [ ] 2.2 Implement configuration models
+  - [x] 2.2 Implement configuration models
     - Create ComparisonConfiguration, MappingConfiguration, ExclusionConfiguration classes
     - Implement JSON/YAML deserialization with validation
     - Write unit tests for configuration loading and validation
