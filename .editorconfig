@@ -30,5 +30,8 @@ dotnet_diagnostic.SA1101.severity = none
 # SA1413: Use trailing comma in multi-line initializers
 dotnet_diagnostic.SA1413.severity = none
 
+# SA0001: XML comment analysis is disabled
+dotnet_diagnostic.SA0001.severity = none
+
 # Enforce final newline
 insert_final_newline = true
