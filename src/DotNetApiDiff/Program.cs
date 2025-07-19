@@ -57,6 +57,3 @@ public class Program
         // services.AddScoped<IReportGenerator, ReportGenerator>();
     }
 }
-
-
-

@@ -46,6 +46,3 @@ public class ApiDifference
     /// </summary>
     public string? NewSignature { get; set; }
 }
-
-
-

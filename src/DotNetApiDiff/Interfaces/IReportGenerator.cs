@@ -30,6 +30,3 @@ public interface IReportGenerator
     /// <returns>Collection of supported report formats</returns>
     IEnumerable<ReportFormat> GetSupportedFormats();
 }
-
-
-

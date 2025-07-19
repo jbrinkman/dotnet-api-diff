@@ -30,6 +30,3 @@ public interface IApiExtractor
     /// <returns>Collection of public types</returns>
     IEnumerable<Type> GetPublicTypes(Assembly assembly);
 }
-
-
-
