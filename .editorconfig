@@ -56,3 +56,6 @@ dotnet_diagnostic.SA1122.severity = warning
 
 # SA1116: Split parameters should start on line after declaration
 dotnet_diagnostic.SA1116.severity = warning
+
+# Enforce final newline
+insert_final_newline = true
