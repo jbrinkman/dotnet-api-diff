@@ -5,6 +5,14 @@
     "dotnet-reportgenerator-globaltool": {
       "version": "5.2.0",
       "commands": ["reportgenerator"]
+    },
+    "dotnet-format": {
+      "version": "5.1.250801",
+      "commands": ["dotnet-format"]
+    },
+    "dotnet-outdated-tool": {
+      "version": "4.6.0",
+      "commands": ["dotnet-outdated"]
     }
   }
 }

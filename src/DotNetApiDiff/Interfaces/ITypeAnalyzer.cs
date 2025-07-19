@@ -51,3 +51,5 @@ public interface ITypeAnalyzer
     /// <returns>Collection of constructor API members</returns>
     IEnumerable<ApiMember> AnalyzeConstructors(Type type);
 }
+
+

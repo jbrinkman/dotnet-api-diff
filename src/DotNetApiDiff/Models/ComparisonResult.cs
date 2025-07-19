@@ -72,3 +72,5 @@ public class ComparisonSummary
     /// </summary>
     public int TotalChanges => AddedCount + RemovedCount + ModifiedCount;
 }
+
+

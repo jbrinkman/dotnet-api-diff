@@ -50,3 +50,5 @@ public interface IMemberSignatureBuilder
     /// <returns>Normalized type signature</returns>
     string BuildTypeSignature(Type type);
 }
+
+

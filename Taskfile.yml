@@ -82,6 +82,8 @@ tasks:
     cmds:
       - dotnet new tool-manifest --force || true
       - dotnet tool install dotnet-reportgenerator-globaltool --ignore-failed-sources --version 5.2.0
+      - dotnet tool install dotnet-format --ignore-failed-sources
+      - dotnet tool install dotnet-outdated-tool --ignore-failed-sources
 
   tools:restore:
     desc: Restore dotnet tools
@@ -103,12 +105,59 @@ tasks:
     cmds:
       - dotnet publish {{.PROJECT}} -c Release -o ./publish
 
+  code:format:
+    desc: Format code using dotnet-format
+    cmds:
+      - dotnet tool restore
+      - dotnet format
+
+  code:format:verify:
+    desc: Verify code formatting without making changes
+    cmds:
+      - dotnet tool restore
+      - dotnet format --verify-no-changes
+
+  code:analyze:
+    desc: Run code analysis with analyzers
+    cmds:
+      - dotnet build {{.SOLUTION}} --no-restore /p:EnforceCodeStyleInBuild=true /p:EnableNETAnalyzers=true /p:AnalysisLevel=latest /p:TreatWarningsAsErrors=true
+
+  code:outdated:
+    desc: Check for outdated NuGet packages
+    cmds:
+      - dotnet tool restore
+      - dotnet outdated --version-lock Major
+
+  code:analyzers:install:
+    desc: Install code analyzers to projects
+    cmds:
+      - dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package Microsoft.CodeAnalysis.NetAnalyzers
+      - dotnet add src/DotNetApiDiff/DotNetApiDiff.csproj package StyleCop.Analyzers
+      - dotnet add tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj package Microsoft.CodeAnalysis.NetAnalyzers
+
+  code:quality:
+    desc: Run all code quality checks
+    cmds:
+      - task: code:format:verify
+      - task: code:analyze
+      - task: code:outdated
+
+  code:fix:stylecop:
+    desc: Run StyleCop fix scripts
+    cmds:
+      - powershell -ExecutionPolicy Bypass -File ./scripts/Fix-SA1513.ps1
+      - powershell -ExecutionPolicy Bypass -File ./scripts/Fix-ConstructorInitializers.ps1
+      - powershell -ExecutionPolicy Bypass -File ./scripts/Fix-ParameterFormatting.ps1
+      - powershell -ExecutionPolicy Bypass -File ./scripts/Fix-TrailingCommas.ps1
+      - powershell -ExecutionPolicy Bypass -File ./scripts/Add-FinalNewlines.ps1
+
   ci:
     desc: Run CI build and test sequence
     cmds:
       - task: deps:install
       - task: clean
       - task: restore
+      - task: code:quality
       - task: build
       - task: test
       - task: coverage

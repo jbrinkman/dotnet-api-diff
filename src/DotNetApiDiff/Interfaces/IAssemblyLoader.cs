@@ -24,3 +24,5 @@ public interface IAssemblyLoader
     /// <returns>True if path contains a valid assembly, false otherwise</returns>
     bool IsValidAssembly(string assemblyPath);
 }
+
+

@@ -108,3 +108,5 @@ public class ApiComparison
         Summary.BreakingChangesCount = BreakingChangesCount;
     }
 }
+
+

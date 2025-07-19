@@ -19,7 +19,8 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     /// Creates a new isolated assembly load context
     /// </summary>
     /// <param name="assemblyPath">Path to the main assembly</param>
-    public IsolatedAssemblyLoadContext(string assemblyPath) : base(isCollectible: true)
+    public IsolatedAssemblyLoadContext(string assemblyPath)
+        : base(isCollectible: true)
     {
         _mainAssemblyPath = assemblyPath;
         _assemblyDirectory = Path.GetDirectoryName(assemblyPath) ?? string.Empty;
@@ -31,7 +32,8 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     /// </summary>
     /// <param name="assemblyPath">Path to the main assembly</param>
     /// <param name="logger">Logger for diagnostic information</param>
-    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger) : this(assemblyPath)
+    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger)
+        : this(assemblyPath)
     {
         _logger = logger;
     }
@@ -76,6 +78,11 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     }
 
     /// <summary>
+    /// Additional search paths for assemblies
+    /// </summary>
+    public List<string> AdditionalSearchPaths { get; } = new List<string>();
+
+    /// <summary>
     /// Loads a native library with the given name
     /// </summary>
     /// <param name="libName">The library name to load</param>
@@ -115,11 +122,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     }
 
     /// <summary>
-    /// Additional search paths for assemblies
-    /// </summary>
-    public List<string> AdditionalSearchPaths { get; } = new List<string>();
-
-    /// <summary>
     /// Adds an additional search path for assemblies
     /// </summary>
     /// <param name="path">Path to search for assemblies</param>
@@ -132,3 +134,5 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
     }
 }
+
+

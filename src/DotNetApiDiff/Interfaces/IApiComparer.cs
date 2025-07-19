@@ -33,3 +33,5 @@ public interface IApiComparer
     /// <returns>List of member-level differences</returns>
     IEnumerable<ApiDifference> CompareMembers(Type oldType, Type newType);
 }
+
+
