@@ -52,7 +52,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return member;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing type {TypeName}", type.Name);
@@ -107,7 +106,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return methods;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing methods for type {TypeName}", type.Name);
@@ -160,7 +158,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return properties;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing properties for type {TypeName}", type.Name);
@@ -213,7 +210,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return fields;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing fields for type {TypeName}", type.Name);
@@ -266,7 +262,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return events;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing events for type {TypeName}", type.Name);
@@ -319,7 +314,6 @@ public class TypeAnalyzer : ITypeAnalyzer
 
             return constructors;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing constructors for type {TypeName}", type.Name);
@@ -338,22 +332,18 @@ public class TypeAnalyzer : ITypeAnalyzer
         {
             return MemberType.Interface;
         }
-
         else if (type.IsEnum)
         {
             return MemberType.Enum;
         }
-
         else if (type.IsValueType)
         {
             return MemberType.Struct;
         }
-
         else if (type.IsSubclassOf(typeof(MulticastDelegate)))
         {
             return MemberType.Delegate;
         }
-
         else
         {
             return MemberType.Class;
@@ -371,27 +361,22 @@ public class TypeAnalyzer : ITypeAnalyzer
         {
             return AccessibilityLevel.Public;
         }
-
         else if (type.IsNestedFamily)
         {
             return AccessibilityLevel.Protected;
         }
-
         else if (type.IsNestedFamORAssem)
         {
             return AccessibilityLevel.ProtectedInternal;
         }
-
         else if (type.IsNestedFamANDAssem)
         {
             return AccessibilityLevel.ProtectedPrivate;
         }
-
         else if (type.IsNestedAssembly || type.IsNotPublic)
         {
             return AccessibilityLevel.Internal;
         }
-
         else
         {
             return AccessibilityLevel.Private;
@@ -409,27 +394,22 @@ public class TypeAnalyzer : ITypeAnalyzer
         {
             return AccessibilityLevel.Public;
         }
-
         else if (method.IsFamily)
         {
             return AccessibilityLevel.Protected;
         }
-
         else if (method.IsFamilyOrAssembly)
         {
             return AccessibilityLevel.ProtectedInternal;
         }
-
         else if (method.IsFamilyAndAssembly)
         {
             return AccessibilityLevel.ProtectedPrivate;
         }
-
         else if (method.IsAssembly)
         {
             return AccessibilityLevel.Internal;
         }
-
         else
         {
             return AccessibilityLevel.Private;
@@ -453,12 +433,10 @@ public class TypeAnalyzer : ITypeAnalyzer
             var setAccess = GetMethodAccessibility(setMethod);
             return GetMostAccessible(getAccess, setAccess);
         }
-
         else if (getMethod != null)
         {
             return GetMethodAccessibility(getMethod);
         }
-
         else if (setMethod != null)
         {
             return GetMethodAccessibility(setMethod);
@@ -478,27 +456,22 @@ public class TypeAnalyzer : ITypeAnalyzer
         {
             return AccessibilityLevel.Public;
         }
-
         else if (field.IsFamily)
         {
             return AccessibilityLevel.Protected;
         }
-
         else if (field.IsFamilyOrAssembly)
         {
             return AccessibilityLevel.ProtectedInternal;
         }
-
         else if (field.IsFamilyAndAssembly)
         {
             return AccessibilityLevel.ProtectedPrivate;
         }
-
         else if (field.IsAssembly)
         {
             return AccessibilityLevel.Internal;
         }
-
         else
         {
             return AccessibilityLevel.Private;
@@ -573,7 +546,6 @@ public class TypeAnalyzer : ITypeAnalyzer
                 .Select(a => a.GetType().Name)
                 .ToList();
         }
-
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Error getting attributes for type {TypeName}", type.Name);
@@ -595,7 +567,6 @@ public class TypeAnalyzer : ITypeAnalyzer
                 .Select(a => a.GetType().Name)
                 .ToList();
         }
-
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Error getting attributes for member {MemberName}", member.Name);

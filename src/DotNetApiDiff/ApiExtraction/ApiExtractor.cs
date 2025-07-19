@@ -64,7 +64,6 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug("Extracted {MemberCount} members from type {TypeName}",
                         typeMembers.Count, type.FullName);
                 }
-
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error extracting members from type {TypeName}", type.FullName);
@@ -76,7 +75,6 @@ public class ApiExtractor : IApiExtractor
 
             return apiMembers;
         }
-
         catch (ReflectionTypeLoadException ex)
         {
             _logger.LogError(ex, "Error loading types from assembly {AssemblyName}", assembly.GetName().Name);
@@ -96,7 +94,6 @@ public class ApiExtractor : IApiExtractor
             // Return any types that were successfully loaded
             return apiMembers;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error extracting API members from assembly {AssemblyName}",
@@ -138,7 +135,6 @@ public class ApiExtractor : IApiExtractor
 
             return members;
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error extracting members from type {TypeName}", type.FullName);
@@ -165,7 +161,6 @@ public class ApiExtractor : IApiExtractor
                 .Where(t => !t.IsCompilerGenerated() && !t.IsSpecialName)
                 .OrderBy(t => t.FullName);
         }
-
         catch (ReflectionTypeLoadException ex)
         {
             _logger.LogError(ex, "Error loading types from assembly {AssemblyName}", assembly.GetName().Name);
@@ -173,7 +168,6 @@ public class ApiExtractor : IApiExtractor
             // Return any types that were successfully loaded
             return ex.Types.Where(t => t != null).Cast<Type>();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting public types from assembly {AssemblyName}",
