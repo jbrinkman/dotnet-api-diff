@@ -46,6 +46,23 @@ public class FilterConfiguration
     public bool IncludeCompilerGenerated { get; set; } = false;
 
     /// <summary>
+    /// Creates a default filter configuration
+    /// </summary>
+    /// <returns>A default filter configuration</returns>
+    public static FilterConfiguration CreateDefault()
+    {
+        return new FilterConfiguration
+        {
+            IncludeNamespaces = new List<string>(),
+            ExcludeNamespaces = new List<string>(),
+            IncludeTypes = new List<string>(),
+            ExcludeTypes = new List<string>(),
+            IncludeInternals = false,
+            IncludeCompilerGenerated = false
+        };
+    }
+
+    /// <summary>
     /// Validates the filter configuration
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
@@ -61,22 +78,5 @@ public class FilterConfiguration
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Creates a default filter configuration
-    /// </summary>
-    /// <returns>A default filter configuration</returns>
-    public static FilterConfiguration CreateDefault()
-    {
-        return new FilterConfiguration
-        {
-            IncludeNamespaces = new List<string>(),
-            ExcludeNamespaces = new List<string>(),
-            IncludeTypes = new List<string>(),
-            ExcludeTypes = new List<string>(),
-            IncludeInternals = false,
-            IncludeCompilerGenerated = false
-        };
     }
 }

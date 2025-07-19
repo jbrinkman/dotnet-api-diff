@@ -52,17 +52,6 @@ public class ComparisonConfiguration
     [JsonPropertyName("failOnBreakingChanges")]
     public bool FailOnBreakingChanges { get; set; } = true;
 
-    /// <summary>
-    /// Validates the configuration
-    /// </summary>
-    /// <returns>True if valid, false otherwise</returns>
-    public bool IsValid()
-    {
-        return Mappings.IsValid() &&
-               Exclusions.IsValid() &&
-               Filters.IsValid() &&
-               Enum.IsDefined(typeof(ReportFormat), OutputFormat);
-    }
 
     /// <summary>
     /// Creates a default configuration
@@ -116,6 +105,18 @@ public class ComparisonConfiguration
         }
 
         return config;
+    }
+
+    /// <summary>
+    /// Validates the configuration
+    /// </summary>
+    /// <returns>True if valid, false otherwise</returns>
+    public bool IsValid()
+    {
+        return Mappings.IsValid() &&
+               Exclusions.IsValid() &&
+               Filters.IsValid() &&
+               Enum.IsDefined(typeof(ReportFormat), OutputFormat);
     }
 
     /// <summary>

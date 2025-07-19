@@ -46,6 +46,35 @@ public class ExclusionConfiguration
     public bool ExcludeObsolete { get; set; } = false;
 
     /// <summary>
+    /// Creates a default exclusion configuration
+    /// </summary>
+    /// <returns>A default exclusion configuration</returns>
+    public static ExclusionConfiguration CreateDefault()
+    {
+        return new ExclusionConfiguration
+        {
+            ExcludedTypes = new List<string>(),
+            ExcludedMembers = new List<string>(),
+            ExcludedTypePatterns = new List<string>(),
+            ExcludedMemberPatterns = new List<string>(),
+            ExcludeCompilerGenerated = true,
+            ExcludeObsolete = false
+        };
+    }
+
+    /// <summary>
+    /// Converts a wildcard pattern to a regular expression
+    /// </summary>
+    /// <param name="pattern">The wildcard pattern</param>
+    /// <returns>A regular expression pattern</returns>
+    private static string WildcardToRegex(string pattern)
+    {
+        return "^" + Regex.Escape(pattern)
+                          .Replace("\\*", ".*")
+                          .Replace("\\?", ".") + "$";
+    }
+
+    /// <summary>
     /// Validates the exclusion configuration
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
@@ -77,34 +106,5 @@ public class ExclusionConfiguration
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Creates a default exclusion configuration
-    /// </summary>
-    /// <returns>A default exclusion configuration</returns>
-    public static ExclusionConfiguration CreateDefault()
-    {
-        return new ExclusionConfiguration
-        {
-            ExcludedTypes = new List<string>(),
-            ExcludedMembers = new List<string>(),
-            ExcludedTypePatterns = new List<string>(),
-            ExcludedMemberPatterns = new List<string>(),
-            ExcludeCompilerGenerated = true,
-            ExcludeObsolete = false
-        };
-    }
-
-    /// <summary>
-    /// Converts a wildcard pattern to a regular expression
-    /// </summary>
-    /// <param name="pattern">The wildcard pattern</param>
-    /// <returns>A regular expression pattern</returns>
-    private static string WildcardToRegex(string pattern)
-    {
-        return "^" + Regex.Escape(pattern)
-                          .Replace("\\*", ".*")
-                          .Replace("\\?", ".") + "$";
     }
 }

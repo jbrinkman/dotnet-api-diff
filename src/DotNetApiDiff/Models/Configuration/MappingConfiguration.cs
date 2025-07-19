@@ -34,6 +34,21 @@ public class MappingConfiguration
     public bool IgnoreCase { get; set; } = false;
 
     /// <summary>
+    /// Creates a default mapping configuration
+    /// </summary>
+    /// <returns>A default mapping configuration</returns>
+    public static MappingConfiguration CreateDefault()
+    {
+        return new MappingConfiguration
+        {
+            NamespaceMappings = new Dictionary<string, List<string>>(),
+            TypeMappings = new Dictionary<string, string>(),
+            AutoMapSameNameTypes = false,
+            IgnoreCase = false
+        };
+    }
+
+    /// <summary>
     /// Validates the mapping configuration
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
@@ -62,22 +77,6 @@ public class MappingConfiguration
         }
 
         return true;
-    }
-
-
-    /// <summary>
-    /// Creates a default mapping configuration
-    /// </summary>
-    /// <returns>A default mapping configuration</returns>
-    public static MappingConfiguration CreateDefault()
-    {
-        return new MappingConfiguration
-        {
-            NamespaceMappings = new Dictionary<string, List<string>>(),
-            TypeMappings = new Dictionary<string, string>(),
-            AutoMapSameNameTypes = false,
-            IgnoreCase = false
-        };
     }
 
     /// <summary>
