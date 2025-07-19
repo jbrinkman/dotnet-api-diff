@@ -40,11 +40,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     }
 
     /// <summary>
-    /// Loads an assembly with the given name
-    /// </summary>
-    /// <param name="assemblyName">The assembly name to load</param>
-    /// <returns>The loaded assembly or null if not found</returns>
-    /// <summary>
     /// Additional search paths for assemblies
     /// </summary>
     public List<string> AdditionalSearchPaths { get; } = new List<string>();
@@ -62,6 +57,11 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
     }
 
+    /// <summary>
+    /// Loads an assembly with the given name
+    /// </summary>
+    /// <param name="assemblyName">The assembly name to load</param>
+    /// <returns>The loaded assembly or null if not found</returns>
     protected override System.Reflection.Assembly? Load(AssemblyName assemblyName)
     {
         try
