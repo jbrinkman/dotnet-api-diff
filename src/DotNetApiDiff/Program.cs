@@ -1,12 +1,12 @@
+using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using DotNetApiDiff.Interfaces;
 
 namespace DotNetApiDiff;
 
-class Program
+public class Program
 {
-    static async Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         // Set up dependency injection
         var services = new ServiceCollection();

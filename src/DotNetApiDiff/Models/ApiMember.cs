@@ -38,7 +38,7 @@ public class ApiMember
     /// <summary>
     /// List of attributes applied to the member
     /// </summary>
-    public List<string> Attributes { get; set; } = new();
+    public List<string> Attributes { get; set; } = new List<string>();
 
     /// <summary>
     /// Name of the type that declares this member
@@ -74,7 +74,11 @@ public class ApiMember
     /// </summary>
     public override bool Equals(object? obj)
     {
-        if (obj is not ApiMember other) return false;
+        if (obj is not ApiMember other)
+        {
+            return false;
+        }
+
         return FullName == other.FullName && Signature == other.Signature;
     }
 

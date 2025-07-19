@@ -36,7 +36,7 @@ public class ApiChange
     /// <summary>
     /// Additional details about the change
     /// </summary>
-    public List<string> Details { get; set; } = new();
+    public List<string> Details { get; set; } = new List<string>();
 
     /// <summary>
     /// Validates the ApiChange instance
@@ -46,24 +46,34 @@ public class ApiChange
     {
         // Must have a description
         if (string.IsNullOrWhiteSpace(Description))
+        {
             return false;
+        }
 
         // Must have at least one member for most change types
         if (Type != ChangeType.Added && Type != ChangeType.Removed &&
             SourceMember == null && TargetMember == null)
+        {
             return false;
+        }
 
         // Added changes should have target member
         if (Type == ChangeType.Added && TargetMember == null)
+        {
             return false;
+        }
 
         // Removed changes should have source member
         if (Type == ChangeType.Removed && SourceMember == null)
+        {
             return false;
+        }
 
         // Modified changes should have both members
         if (Type == ChangeType.Modified && (SourceMember == null || TargetMember == null))
+        {
             return false;
+        }
 
         return true;
     }
@@ -73,7 +83,7 @@ public class ApiChange
     /// </summary>
     public string GetMemberName()
     {
-        return TargetMember?.FullName ?? SourceMember?.FullName ?? "Unknown";
+        return TargetMember?.FullName ?? SourceMember?.FullName ?? string.Empty;
     }
 
     /// <summary>
