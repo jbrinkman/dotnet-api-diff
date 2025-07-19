@@ -136,6 +136,3 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
     }
 }
-
-
-

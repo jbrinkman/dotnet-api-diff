@@ -135,6 +135,3 @@ public class ComparisonConfiguration
         File.WriteAllText(path, json);
     }
 }
-
-
-

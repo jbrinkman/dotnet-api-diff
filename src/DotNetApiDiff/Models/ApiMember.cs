@@ -91,6 +91,3 @@ public class ApiMember
         return HashCode.Combine(FullName, Signature);
     }
 }
-
-
-

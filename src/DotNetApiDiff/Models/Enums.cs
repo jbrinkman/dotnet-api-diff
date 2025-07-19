@@ -80,6 +80,3 @@ public enum ReportFormat
     Html,
     Markdown,
 }
-
-
-
