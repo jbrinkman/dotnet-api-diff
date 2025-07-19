@@ -34,7 +34,6 @@ public class Program
             logger.LogError(ex, "An error occurred during execution");
             return 1;
         }
-
         finally
         {
             serviceProvider.Dispose();

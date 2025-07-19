@@ -166,7 +166,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 this.logger.LogDebug("Successfully validated assembly: {Path}", assemblyPath);
                 return true;
             }
-
             finally
             {
                 // Unload the temporary context
