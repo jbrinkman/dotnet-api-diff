@@ -5,8 +5,16 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetApiDiff;
 
+/// <summary>
+/// Main entry point for the DotNet API Diff tool
+/// </summary>
 public class Program
 {
+    /// <summary>
+    /// Application entry point
+    /// </summary>
+    /// <param name="args">Command line arguments</param>
+    /// <returns>Exit code (0 for success, non-zero for failure)</returns>
     public static async Task<int> Main(string[] args)
     {
         // Set up dependency injection
@@ -40,6 +48,10 @@ public class Program
         }
     }
 
+    /// <summary>
+    /// Configures dependency injection services
+    /// </summary>
+    /// <param name="services">Service collection to configure</param>
     private static void ConfigureServices(IServiceCollection services)
     {
         // Configure logging
