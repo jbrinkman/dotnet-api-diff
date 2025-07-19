@@ -29,11 +29,13 @@ public class Program
             logger.LogInformation("DotNet API Diff Tool completed successfully");
             return 0;
         }
+
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during execution");
             return 1;
         }
+
         finally
         {
             serviceProvider.Dispose();
@@ -55,5 +57,6 @@ public class Program
         // services.AddScoped<IReportGenerator, ReportGenerator>();
     }
 }
+
 
 
