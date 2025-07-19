@@ -1,0 +1,9 @@
+{
+  "name": "dotnet-api-diff",
+  "version": "1.0.0",
+  "description": "Development dependencies for DotNetApiDiff",
+  "private": true,
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  }
+}

@@ -25,7 +25,12 @@ tasks:
     desc: Clean build outputs
     cmds:
       - dotnet clean {{.SOLUTION}}
-      - rm -rf {{.COVERAGE_DIR}} || true
+      - task: clean:coverage
+
+  clean:coverage:
+    desc: Clean coverage reports
+    cmds:
+      - npx rimraf {{.COVERAGE_DIR}}
 
   restore:
     desc: Restore NuGet packages
@@ -62,19 +67,32 @@ tasks:
 
   coverage:view:
     desc: Open coverage report in default browser
-    cmds:
-      - open {{.COVERAGE_DIR}}/index.html || xdg-open {{.COVERAGE_DIR}}/index.html || start {{.COVERAGE_DIR}}/index.html
+    platforms:
+      windows:
+        cmds:
+          - cmd.exe /c start {{.COVERAGE_DIR}}/index.html
+      darwin:
+        cmds:
+          - open {{.COVERAGE_DIR}}/index.html
+      linux:
+        cmds:
+          - xdg-open {{.COVERAGE_DIR}}/index.html
 
   tools:install:
     desc: Install required dotnet tools
     cmds:
       - dotnet new tool-manifest --force || true
-      - dotnet tool install dotnet-reportgenerator-globaltool
+      - dotnet tool install dotnet-reportgenerator-globaltool --ignore-failed-sources --version 5.2.0
 
   tools:restore:
     desc: Restore dotnet tools
     cmds:
       - dotnet tool restore
+
+  deps:install:
+    desc: Install npm dependencies
+    cmds:
+      - npm install
 
   run:
     desc: Run the application
@@ -89,6 +107,7 @@ tasks:
   ci:
     desc: Run CI build and test sequence
     cmds:
+      - task: deps:install
       - task: clean
       - task: restore
       - task: build
