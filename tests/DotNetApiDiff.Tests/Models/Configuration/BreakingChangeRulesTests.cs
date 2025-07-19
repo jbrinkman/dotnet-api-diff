@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using DotNetApiDiff.Models.Configuration;
 using System.Text.Json;
 using Xunit;

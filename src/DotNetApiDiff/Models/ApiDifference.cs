@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 namespace DotNetApiDiff.Models;
 
 /// <summary>

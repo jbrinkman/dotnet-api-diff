@@ -57,5 +57,8 @@ dotnet_diagnostic.SA1122.severity = warning
 # SA1116: Split parameters should start on line after declaration
 dotnet_diagnostic.SA1116.severity = warning
 
+# SA1200: Using directive should appear within a namespace declaration
+dotnet_diagnostic.SA1200.severity = none
+
 # Enforce final newline
 insert_final_newline = true
