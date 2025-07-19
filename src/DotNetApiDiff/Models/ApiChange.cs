@@ -83,7 +83,7 @@ public class ApiChange
     /// </summary>
     public string GetMemberName()
     {
-        return TargetMember?.FullName ?? SourceMember?.FullName ?? string.Empty;
+        return TargetMember?.FullName ?? SourceMember?.FullName ?? "Unknown";
     }
 
     /// <summary>
