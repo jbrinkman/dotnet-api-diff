@@ -52,7 +52,6 @@ public class ComparisonConfiguration
     [JsonPropertyName("failOnBreakingChanges")]
     public bool FailOnBreakingChanges { get; set; } = true;
 
-
     /// <summary>
     /// Creates a default configuration
     /// </summary>
