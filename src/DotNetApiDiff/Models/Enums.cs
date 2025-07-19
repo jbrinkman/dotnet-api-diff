@@ -9,7 +9,7 @@ public enum ChangeType
     Removed,
     Modified,
     Moved,
-    Excluded
+    Excluded,
 }
 
 /// <summary>
@@ -24,7 +24,7 @@ public enum ApiElementType
     Property,
     Field,
     Event,
-    Constructor
+    Constructor,
 }
 
 /// <summary>
@@ -41,7 +41,7 @@ public enum MemberType
     Property,
     Field,
     Event,
-    Constructor
+    Constructor,
 }
 
 /// <summary>
@@ -54,7 +54,7 @@ public enum AccessibilityLevel
     Internal,
     ProtectedInternal,
     ProtectedPrivate,
-    Public
+    Public,
 }
 
 /// <summary>
@@ -65,7 +65,7 @@ public enum SeverityLevel
     Info,
     Warning,
     Error,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -77,5 +77,5 @@ public enum ReportFormat
     Json,
     Xml,
     Html,
-    Markdown
+    Markdown,
 }

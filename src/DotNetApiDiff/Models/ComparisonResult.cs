@@ -23,12 +23,12 @@ public class ComparisonResult
     /// <summary>
     /// List of all detected API differences
     /// </summary>
-    public List<ApiDifference> Differences { get; set; } = new();
+    public List<ApiDifference> Differences { get; set; } = new List<ApiDifference>();
 
     /// <summary>
     /// Summary statistics of the comparison
     /// </summary>
-    public ComparisonSummary Summary { get; set; } = new();
+    public ComparisonSummary Summary { get; set; } = new ComparisonSummary();
 
     /// <summary>
     /// Gets whether any breaking changes were detected
