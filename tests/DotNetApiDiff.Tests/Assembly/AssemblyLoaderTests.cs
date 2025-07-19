@@ -260,7 +260,7 @@ public class AssemblyLoaderTests : IDisposable
 
         // Act
         context.AddSearchPath(null);
-        context.AddSearchPath("");
+        context.AddSearchPath(string.empty);
         context.AddSearchPath("   ");
         context.AddSearchPath("C:\\NonExistentPath\\That\\Does\\Not\\Exist");
 

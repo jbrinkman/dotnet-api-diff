@@ -160,7 +160,7 @@ public class ApiComparisonTests
         comparison.Additions.Add(new ApiChange
         {
             Type = ChangeType.Added,
-            Description = "", // Invalid - empty description
+            Description = string.empty, // Invalid - empty description
             TargetMember = new ApiMember { Name = "Test", FullName = "Test.Method", Signature = "void Method()" }
         });
 
