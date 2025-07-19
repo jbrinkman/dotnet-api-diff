@@ -32,6 +32,46 @@ dotnet build
 dotnet test
 ```
 
+## Using Taskfile
+
+This project uses [Taskfile](https://taskfile.dev/) to simplify common development tasks. Make sure you have Task installed:
+
+```bash
+# macOS
+brew install go-task
+
+# Linux
+sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+
+# Windows (with Chocolatey)
+choco install go-task
+```
+
+### Common Tasks
+
+```bash
+# List all available tasks
+task
+
+# Build the solution
+task build
+
+# Run all tests
+task test
+
+# Generate code coverage report
+task coverage
+
+# View coverage report in browser
+task coverage:view
+
+# Run the application with arguments
+task run -- --old old.dll --new new.dll
+
+# Run CI build sequence
+task ci
+```
+
 ## Usage
 
 ```bash
