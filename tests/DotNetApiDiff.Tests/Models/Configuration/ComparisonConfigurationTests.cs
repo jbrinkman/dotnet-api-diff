@@ -42,7 +42,7 @@ public class ComparisonConfigurationTests
     {
         // Arrange
         var config = ComparisonConfiguration.CreateDefault();
-        config.Mappings.NamespaceMappings.Add(string.empty, new List<string> { "NewNamespace" }); // Invalid empty key
+        config.Mappings.NamespaceMappings.Add(string.Empty, new List<string> { "NewNamespace" }); // Invalid empty key
 
         // Act & Assert
         Assert.False(config.IsValid());
@@ -53,7 +53,8 @@ public class ComparisonConfigurationTests
     {
         // Arrange
         var config = ComparisonConfiguration.CreateDefault();
-        config.Exclusions.ExcludedTypes.Add(string.empty); // Invalid empty type
+        config.Exclusions.ExcludedTypes.Add(string.Empty); // Invalid empty type
+
 
         // Act & Assert
         Assert.False(config.IsValid());
@@ -64,7 +65,7 @@ public class ComparisonConfigurationTests
     {
         // Arrange
         var config = ComparisonConfiguration.CreateDefault();
-        config.Filters.IncludeNamespaces.Add(string.empty); // Invalid empty namespace
+        config.Filters.IncludeNamespaces.Add(string.Empty); // Invalid empty namespace
 
         // Act & Assert
         Assert.False(config.IsValid());

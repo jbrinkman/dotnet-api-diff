@@ -72,7 +72,7 @@ public class ApiChangeTests
         var change = new ApiChange
         {
             Type = ChangeType.Added,
-            Description = string.empty,
+            Description = string.Empty,
             TargetMember = new ApiMember { Name = "TestMethod", FullName = "Test.TestMethod", Signature = "void TestMethod()" }
         };
 
