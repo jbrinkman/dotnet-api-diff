@@ -19,22 +19,12 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     /// Creates a new isolated assembly load context
     /// </summary>
     /// <param name="assemblyPath">Path to the main assembly</param>
-    public IsolatedAssemblyLoadContext(string assemblyPath)
+    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger)
         : base(isCollectible: true)
     {
         _mainAssemblyPath = assemblyPath;
         _assemblyDirectory = Path.GetDirectoryName(assemblyPath) ?? string.Empty;
         _resolver = new AssemblyDependencyResolver(assemblyPath);
-    }
-
-    /// <summary>
-    /// Creates a new isolated assembly load context with logging
-    /// </summary>
-    /// <param name="assemblyPath">Path to the main assembly</param>
-    /// <param name="logger">Logger for diagnostic information</param>
-    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger)
-        : this(assemblyPath)
-    {
         _logger = logger;
     }
 
@@ -43,6 +33,24 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     /// </summary>
     /// <param name="assemblyName">The assembly name to load</param>
     /// <returns>The loaded assembly or null if not found</returns>
+    /// <summary>
+    /// Additional search paths for assemblies
+    /// </summary>
+    public List<string> AdditionalSearchPaths { get; } = new List<string>();
+
+    /// <summary>
+    /// Adds an additional search path for assemblies
+    /// </summary>
+    /// <param name="path">Path to search for assemblies</param>
+    public void AddSearchPath(string path)
+    {
+        if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && !AdditionalSearchPaths.Contains(path))
+        {
+            AdditionalSearchPaths.Add(path);
+            _logger?.LogDebug("Added search path: {Path}", path);
+        }
+    }
+
     protected override System.Reflection.Assembly? Load(AssemblyName assemblyName)
     {
         try
@@ -76,11 +84,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
             throw;
         }
     }
-
-    /// <summary>
-    /// Additional search paths for assemblies
-    /// </summary>
-    public List<string> AdditionalSearchPaths { get; } = new List<string>();
 
     /// <summary>
     /// Loads a native library with the given name
@@ -118,19 +121,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
             _logger?.LogWarning(ex, "Error resolving native library {LibName} for {MainAssembly}",
                 libName, _mainAssemblyPath);
             throw;
-        }
-    }
-
-    /// <summary>
-    /// Adds an additional search path for assemblies
-    /// </summary>
-    /// <param name="path">Path to search for assemblies</param>
-    public void AddSearchPath(string path)
-    {
-        if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && !AdditionalSearchPaths.Contains(path))
-        {
-            AdditionalSearchPaths.Add(path);
-            _logger?.LogDebug("Added search path: {Path}", path);
         }
     }
 }

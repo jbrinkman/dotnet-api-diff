@@ -380,8 +380,11 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error building signature for constructor in type {TypeName}",
-                constructor.DeclaringType?.Name ?? "Unknown");
+            _logger.LogError(
+                ex,
+                "Error building signature for constructor in type {TypeName}",
+                constructor.DeclaringType?.Name ?? "Unknown"
+            );
             return $"Error: Constructor in {constructor.DeclaringType?.Name ?? "Unknown"}";
         }
     }
