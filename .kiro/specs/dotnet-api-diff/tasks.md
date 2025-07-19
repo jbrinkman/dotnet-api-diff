@@ -62,6 +62,14 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-3.3-github-workflows`, commit, push, and create PR
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
+  - [x] 3.4 Implement Taskfile.dev for common project tasks
+    - Create Taskfile.yml with common dotnet tasks (build, test, coverage)
+    - Add tasks for generating and viewing coverage reports
+    - Include tasks for running specific test categories
+    - Document Taskfile usage in README.md
+    - **Git Workflow**: Create branch `feature/task-3.4-taskfile`, commit, push, and create PR
+    - _Requirements: 2.3, 4.4_
+
 - [ ] 4. Build comparison engine core functionality
   - [ ] 4.1 Implement basic API comparison logic
     - Create ApiComparer class to identify additions, removals, and modifications

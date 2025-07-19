@@ -1,0 +1,96 @@
+version: "3"
+
+# Taskfile for DotNetApiDiff project
+# https://taskfile.dev
+
+vars:
+  SOLUTION: DotNetApiDiff.sln
+  PROJECT: src/DotNetApiDiff/DotNetApiDiff.csproj
+  TEST_PROJECT: tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj
+  COVERAGE_DIR: coverage-report
+  REPORT_DIR: reports
+
+tasks:
+  default:
+    desc: Lists all available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the solution
+    cmds:
+      - dotnet build {{.SOLUTION}} --configuration Release
+
+  clean:
+    desc: Clean build outputs
+    cmds:
+      - dotnet clean {{.SOLUTION}}
+      - rm -rf {{.COVERAGE_DIR}} || true
+
+  restore:
+    desc: Restore NuGet packages
+    cmds:
+      - dotnet restore {{.SOLUTION}}
+
+  test:
+    desc: Run all tests
+    cmds:
+      - dotnet test {{.SOLUTION}} --configuration Release
+
+  test:unit:
+    desc: Run unit tests only
+    cmds:
+      - dotnet test {{.TEST_PROJECT}} --filter "Category=Unit" --configuration Release
+
+  test:integration:
+    desc: Run integration tests only
+    cmds:
+      - dotnet test {{.TEST_PROJECT}} --filter "Category=Integration" --configuration Release
+
+  coverage:
+    desc: Generate code coverage report
+    cmds:
+      - dotnet test {{.TEST_PROJECT}} /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./coverage.info
+      - mkdir -p {{.COVERAGE_DIR}}
+      - task: coverage:report
+
+  coverage:report:
+    desc: Generate HTML report from coverage data
+    cmds:
+      - dotnet tool restore
+      - dotnet reportgenerator -reports:tests/DotNetApiDiff.Tests/coverage.info -targetdir:{{.COVERAGE_DIR}} -reporttypes:Html
+
+  coverage:view:
+    desc: Open coverage report in default browser
+    cmds:
+      - open {{.COVERAGE_DIR}}/index.html || xdg-open {{.COVERAGE_DIR}}/index.html || start {{.COVERAGE_DIR}}/index.html
+
+  tools:install:
+    desc: Install required dotnet tools
+    cmds:
+      - dotnet new tool-manifest --force || true
+      - dotnet tool install dotnet-reportgenerator-globaltool
+
+  tools:restore:
+    desc: Restore dotnet tools
+    cmds:
+      - dotnet tool restore
+
+  run:
+    desc: Run the application
+    cmds:
+      - dotnet run --project {{.PROJECT}} -- {{.CLI_ARGS}}
+
+  publish:
+    desc: Publish the application
+    cmds:
+      - dotnet publish {{.PROJECT}} -c Release -o ./publish
+
+  ci:
+    desc: Run CI build and test sequence
+    cmds:
+      - task: clean
+      - task: restore
+      - task: build
+      - task: test
+      - task: coverage
