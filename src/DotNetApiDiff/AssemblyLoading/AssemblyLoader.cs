@@ -157,7 +157,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
             }
 
             // Try to load the assembly in a temporary context to validate it
-            var tempContext = new IsolatedAssemblyLoadContext(assemblyPath);
+            var tempContext = new IsolatedAssemblyLoadContext(assemblyPath, this.logger);
             try
             {
                 var assembly = tempContext.LoadFromAssemblyPath(assemblyPath);
