@@ -611,104 +611,90 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             return "void";
         }
 
-        // Handle void return type
-        if (type == typeof(void))
+        // Special type handling based on type characteristics
+        switch (true)
         {
-            return "void";
-        }
+            case object _ when type == typeof(void):
+                return "void";
 
-        // Handle by-ref types
-        if (type.IsByRef)
-        {
-            return GetTypeName(type.GetElementType() ?? type);
-        }
+            case object _ when type.IsByRef:
+                return GetTypeName(type.GetElementType() ?? type);
 
-        // Handle array types
-        if (type.IsArray)
-        {
-            var elementType = type.GetElementType() ?? type;
-            var rank = type.GetArrayRank();
-            if (rank == 1)
-            {
-                return $"{GetTypeName(elementType)}[]";
-            }
-            else
-            {
-                var commas = new string(',', rank - 1);
-                return $"{GetTypeName(elementType)}[{commas}]";
-            }
-        }
-
-        // Handle pointer types
-        if (type.IsPointer)
-        {
-            var elementType = type.GetElementType() ?? type;
-            return $"{GetTypeName(elementType)}*";
-        }
-
-        // Handle generic type parameters
-        if (type.IsGenericParameter)
-        {
-            return type.Name;
-        }
-
-        // Handle primitive types with C# keywords
-        if (type == typeof(bool)) { return "bool"; }
-        if (type == typeof(byte)) { return "byte"; }
-        if (type == typeof(sbyte)) { return "sbyte"; }
-        if (type == typeof(char)) { return "char"; }
-        if (type == typeof(decimal)) { return "decimal"; }
-        if (type == typeof(double)) { return "double"; }
-        if (type == typeof(float)) { return "float"; }
-        if (type == typeof(int)) { return "int"; }
-        if (type == typeof(uint)) { return "uint"; }
-        if (type == typeof(long)) { return "long"; }
-        if (type == typeof(ulong)) { return "ulong"; }
-        if (type == typeof(short)) { return "short"; }
-        if (type == typeof(ushort)) { return "ushort"; }
-        if (type == typeof(string)) { return "string"; }
-        if (type == typeof(object)) { return "object"; }
-
-        // Handle generic types
-        if (type.IsGenericType)
-        {
-            var genericTypeDef = type.GetGenericTypeDefinition();
-            var genericArgs = type.GetGenericArguments();
-            var typeName = genericTypeDef.Name;
-
-            // Remove the `n suffix from generic type names
-            if (typeName.Contains('`'))
-            {
-                typeName = typeName.Substring(0, typeName.IndexOf('`'));
-            }
-
-            // Handle common generic collections
-            if (genericTypeDef == typeof(Nullable<>))
-            {
-                return $"{GetTypeName(genericArgs[0])}?";
-            }
-
-            // For other generic types, use the standard format
-            var sb = new StringBuilder();
-            sb.Append(typeName);
-            sb.Append('<');
-
-            for (int i = 0; i < genericArgs.Length; i++)
-            {
-                if (i > 0)
+            case object _ when type.IsArray:
+                var elementType = type.GetElementType() ?? type;
+                var rank = type.GetArrayRank();
+                if (rank == 1)
                 {
-                    sb.Append(", ");
+                    return $"{GetTypeName(elementType)}[]";
+                }
+                else
+                {
+                    var commas = new string(',', rank - 1);
+                    return $"{GetTypeName(elementType)}[{commas}]";
                 }
 
-                sb.Append(GetTypeName(genericArgs[i]));
-            }
+            case object _ when type.IsPointer:
+                return $"{GetTypeName(type.GetElementType() ?? type)}*";
 
-            sb.Append('>');
-            return sb.ToString();
+            case object _ when type.IsGenericParameter:
+                return type.Name;
+
+            case object _ when type.IsGenericType:
+                var genericTypeDef = type.GetGenericTypeDefinition();
+                var genericArgs = type.GetGenericArguments();
+                var typeName = genericTypeDef.Name;
+
+                // Remove the `n suffix from generic type names
+                if (typeName.Contains('`'))
+                {
+                    typeName = typeName.Substring(0, typeName.IndexOf('`'));
+                }
+
+                // Handle common generic collections
+                if (genericTypeDef == typeof(Nullable<>))
+                {
+                    return $"{GetTypeName(genericArgs[0])}?";
+                }
+
+                // For other generic types, use the standard format
+                var sb = new StringBuilder();
+                sb.Append(typeName);
+                sb.Append('<');
+
+                for (int i = 0; i < genericArgs.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                    }
+
+                    sb.Append(GetTypeName(genericArgs[i]));
+                }
+
+                sb.Append('>');
+                return sb.ToString();
         }
 
-        // For regular types, just return the name
-        return type.Name;
+        // Handle primitive types with C# keywords using a direct switch on type
+        return type switch
+        {
+            Type t when t == typeof(bool) => "bool",
+            Type t when t == typeof(byte) => "byte",
+            Type t when t == typeof(sbyte) => "sbyte",
+            Type t when t == typeof(char) => "char",
+            Type t when t == typeof(decimal) => "decimal",
+            Type t when t == typeof(double) => "double",
+            Type t when t == typeof(float) => "float",
+            Type t when t == typeof(int) => "int",
+            Type t when t == typeof(uint) => "uint",
+            Type t when t == typeof(long) => "long",
+            Type t when t == typeof(ulong) => "ulong",
+            Type t when t == typeof(short) => "short",
+            Type t when t == typeof(ushort) => "ushort",
+            Type t when t == typeof(string) => "string",
+            Type t when t == typeof(object) => "object",
+            _ => type.Name // For regular types, just return the name
+        };
     }
 
     /// <summary>
