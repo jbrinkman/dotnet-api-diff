@@ -35,8 +35,3 @@ jobs:
 
       - name: Run code analysis
         run: dotnet build --no-restore /p:EnforceCodeStyleInBuild=true /p:EnableNETAnalyzers=true /p:AnalysisLevel=latest /p:TreatWarningsAsErrors=true
-
-      - name: Run .NET Outdated
-        run: |
-          dotnet tool install --global dotnet-outdated-tool
-          dotnet outdated --version-lock Major
