@@ -67,16 +67,15 @@ tasks:
 
   coverage:view:
     desc: Open coverage report in default browser
-    platforms:
-      windows:
-        cmds:
-          - cmd.exe /c start {{.COVERAGE_DIR}}/index.html
-      darwin:
-        cmds:
-          - open {{.COVERAGE_DIR}}/index.html
-      linux:
-        cmds:
-          - xdg-open {{.COVERAGE_DIR}}/index.html
+    cmds:
+      - |
+        {{if eq OS "windows"}}
+        cmd.exe /c start {{.COVERAGE_DIR}}/index.html
+        {{else if eq OS "darwin"}}
+        open {{.COVERAGE_DIR}}/index.html
+        {{else}}
+        xdg-open {{.COVERAGE_DIR}}/index.html
+        {{end}}
 
   tools:install:
     desc: Install required dotnet tools
