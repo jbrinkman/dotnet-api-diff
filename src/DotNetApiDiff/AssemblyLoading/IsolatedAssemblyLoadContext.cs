@@ -19,12 +19,23 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
     /// Creates a new isolated assembly load context
     /// </summary>
     /// <param name="assemblyPath">Path to the main assembly</param>
-    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger)
+    public IsolatedAssemblyLoadContext(string assemblyPath)
         : base(isCollectible: true)
     {
         _mainAssemblyPath = assemblyPath;
         _assemblyDirectory = Path.GetDirectoryName(assemblyPath) ?? string.Empty;
         _resolver = new AssemblyDependencyResolver(assemblyPath);
+        _logger = null;
+    }
+
+    /// <summary>
+    /// Creates a new isolated assembly load context
+    /// </summary>
+    /// <param name="assemblyPath">Path to the main assembly</param>
+    /// <param name="logger">Logger for diagnostic information</param>
+    public IsolatedAssemblyLoadContext(string assemblyPath, ILogger logger)
+        : this(assemblyPath)
+    {
         _logger = logger;
     }
 
