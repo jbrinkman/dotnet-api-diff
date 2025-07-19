@@ -69,7 +69,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
             _logger?.LogDebug("Could not resolve assembly: {AssemblyName}", assemblyName.FullName);
             return null;
         }
-
         catch (Exception ex)
         {
             _logger?.LogWarning(ex, "Error resolving assembly {AssemblyName} for {MainAssembly}",
@@ -114,7 +113,6 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
             _logger?.LogDebug("Could not resolve native library: {LibName}", libName);
             return IntPtr.Zero;
         }
-
         catch (Exception ex)
         {
             _logger?.LogWarning(ex, "Error resolving native library {LibName} for {MainAssembly}",

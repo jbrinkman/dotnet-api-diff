@@ -47,20 +47,17 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             {
                 signature.Append("static ");
             }
-
             else if (method.IsVirtual && !method.IsFinal)
             {
                 if (method.IsAbstract)
                 {
                     signature.Append("abstract ");
                 }
-
                 else if (method.DeclaringType?.IsInterface == false)
                 {
                     signature.Append("virtual ");
                 }
             }
-
             else if (method.IsFinal && method.IsVirtual)
             {
                 signature.Append("sealed override ");
@@ -108,7 +105,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for method {MethodName}", method.Name);
@@ -144,17 +140,14 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                 var setAccess = GetAccessibilityString(setMethod);
                 signature.Append(GetMostAccessible(getAccess, setAccess));
             }
-
             else if (getMethod != null)
             {
                 signature.Append(GetAccessibilityString(getMethod));
             }
-
             else if (setMethod != null)
             {
                 signature.Append(GetAccessibilityString(setMethod));
             }
-
             else
             {
                 signature.Append("private");
@@ -175,13 +168,11 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                 {
                     signature.Append("abstract ");
                 }
-
                 else if (property.DeclaringType?.IsInterface == false)
                 {
                     signature.Append("virtual ");
                 }
             }
-
             else if (getMethod != null && getMethod.IsFinal && getMethod.IsVirtual)
             {
                 signature.Append("sealed override ");
@@ -210,7 +201,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for property {PropertyName}", property.Name);
@@ -263,7 +253,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for field {FieldName}", field.Name);
@@ -309,13 +298,11 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                     {
                         signature.Append("abstract ");
                     }
-
                     else if (eventInfo.DeclaringType?.IsInterface == false)
                     {
                         signature.Append("virtual ");
                     }
                 }
-
                 else if (addMethod.IsFinal && addMethod.IsVirtual)
                 {
                     signature.Append("sealed override ");
@@ -332,7 +319,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for event {EventName}", eventInfo.Name);
@@ -392,7 +378,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for constructor in type {TypeName}",
@@ -428,13 +413,11 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                 {
                     signature.Append("static ");
                 }
-
                 else
                 {
                     signature.Append("sealed ");
                 }
             }
-
             else if (type.IsAbstract && !type.IsInterface)
             {
                 signature.Append("abstract ");
@@ -445,22 +428,18 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             {
                 signature.Append("interface ");
             }
-
             else if (type.IsEnum)
             {
                 signature.Append("enum ");
             }
-
             else if (type.IsValueType)
             {
                 signature.Append("struct ");
             }
-
             else if (type.IsSubclassOf(typeof(MulticastDelegate)))
             {
                 signature.Append("delegate ");
             }
-
             else
             {
                 signature.Append("class ");
@@ -487,7 +466,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
                 signature.Append('>');
             }
-
             else if (type.IsGenericTypeDefinition)
             {
                 // For generic type definitions, include the type parameter names
@@ -523,7 +501,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                 {
                     signature.Append(" : ");
                 }
-
                 else
                 {
                     signature.Append(", ");
@@ -539,7 +516,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
                     signature.Append(GetTypeName(interfaces[i]));
                 }
             }
-
             else if (type.IsInterface && interfaces.Length > 0)
             {
                 // For interfaces, show base interfaces
@@ -557,7 +533,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
 
             return signature.ToString();
         }
-
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error building signature for type {TypeName}", type.Name);
@@ -579,12 +554,10 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         {
             signature.Append("out ");
         }
-
         else if (parameter.ParameterType.IsByRef)
         {
             signature.Append("ref ");
         }
-
         else if (parameter.IsDefined(typeof(ParamArrayAttribute), false))
         {
             signature.Append("params ");
@@ -611,12 +584,10 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             {
                 signature.Append("null");
             }
-
             else if (parameter.DefaultValue is string stringValue)
             {
                 signature.Append($"\"{stringValue}\"");
             }
-
             else
             {
                 signature.Append(parameter.DefaultValue);
@@ -659,7 +630,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             {
                 return $"{GetTypeName(elementType)}[]";
             }
-
             else
             {
                 var commas = new string(',', rank - 1);
@@ -758,7 +728,6 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         {
             constraints.Add("class");
         }
-
         else if (type.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint))
         {
             constraints.Add("struct");
@@ -799,27 +768,22 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         {
             return "public";
         }
-
         else if (methodBase.IsFamily)
         {
             return "protected";
         }
-
         else if (methodBase.IsFamilyOrAssembly)
         {
             return "protected internal";
         }
-
         else if (methodBase.IsFamilyAndAssembly)
         {
             return "private protected";
         }
-
         else if (methodBase.IsAssembly)
         {
             return "internal";
         }
-
         else
         {
             return "private";
@@ -837,27 +801,22 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         {
             return "public";
         }
-
         else if (field.IsFamily)
         {
             return "protected";
         }
-
         else if (field.IsFamilyOrAssembly)
         {
             return "protected internal";
         }
-
         else if (field.IsFamilyAndAssembly)
         {
             return "private protected";
         }
-
         else if (field.IsAssembly)
         {
             return "internal";
         }
-
         else
         {
             return "private";
@@ -875,27 +834,22 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         {
             return "public";
         }
-
         else if (type.IsNestedFamily)
         {
             return "protected";
         }
-
         else if (type.IsNestedFamORAssem)
         {
             return "protected internal";
         }
-
         else if (type.IsNestedFamANDAssem)
         {
             return "private protected";
         }
-
         else if (type.IsNestedAssembly || type.IsNotPublic)
         {
             return "internal";
         }
-
         else
         {
             return "private";
