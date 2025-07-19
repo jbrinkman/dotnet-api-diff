@@ -64,6 +64,22 @@ public class MappingConfiguration
         return true;
     }
 
+
+    /// <summary>
+    /// Creates a default mapping configuration
+    /// </summary>
+    /// <returns>A default mapping configuration</returns>
+    public static MappingConfiguration CreateDefault()
+    {
+        return new MappingConfiguration
+        {
+            NamespaceMappings = new Dictionary<string, List<string>>(),
+            TypeMappings = new Dictionary<string, string>(),
+            AutoMapSameNameTypes = false,
+            IgnoreCase = false
+        };
+    }
+
     /// <summary>
     /// Checks if there are circular references in namespace mappings
     /// </summary>
@@ -116,20 +132,5 @@ public class MappingConfiguration
 
         recursionStack.Remove(current);
         return false;
-    }
-
-    /// <summary>
-    /// Creates a default mapping configuration
-    /// </summary>
-    /// <returns>A default mapping configuration</returns>
-    public static MappingConfiguration CreateDefault()
-    {
-        return new MappingConfiguration
-        {
-            NamespaceMappings = new Dictionary<string, List<string>>(),
-            TypeMappings = new Dictionary<string, string>(),
-            AutoMapSameNameTypes = false,
-            IgnoreCase = false
-        };
     }
 }
