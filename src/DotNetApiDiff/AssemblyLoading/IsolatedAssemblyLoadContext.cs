@@ -79,8 +79,11 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Error resolving assembly {AssemblyName} for {MainAssembly}",
-                assemblyName.FullName, _mainAssemblyPath);
+            _logger?.LogWarning(
+                ex,
+                "Error resolving assembly {AssemblyName} for {MainAssembly}",
+                assemblyName.FullName,
+                _mainAssemblyPath);
             throw;
         }
     }
@@ -118,8 +121,11 @@ public class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Error resolving native library {LibName} for {MainAssembly}",
-                libName, _mainAssemblyPath);
+            _logger?.LogWarning(
+                ex,
+                "Error resolving native library {LibName} for {MainAssembly}",
+                libName,
+                _mainAssemblyPath);
             throw;
         }
     }

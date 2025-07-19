@@ -48,8 +48,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogDebug(
                 "Found {TypeCount} public types in assembly {AssemblyName}",
                 types.Count,
-                assembly.GetName().Name
-            );
+                assembly.GetName().Name);
 
             // Process each type
             foreach (var type in types)
@@ -67,8 +66,7 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug(
                         "Extracted {MemberCount} members from type {TypeName}",
                         typeMembers.Count,
-                        type.FullName
-                    );
+                        type.FullName);
                 }
                 catch (Exception ex)
                 {
@@ -79,8 +77,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogInformation(
                 "Extracted {MemberCount} total API members from assembly {AssemblyName}",
                 apiMembers.Count,
-                assembly.GetName().Name
-            );
+                assembly.GetName().Name);
 
             return apiMembers;
         }
@@ -108,8 +105,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogError(
                 ex,
                 "Error extracting API members from assembly {AssemblyName}",
-                assembly.GetName().name
-            );
+                assembly.GetName().Name);
             return apiMembers;
         }
     }
@@ -152,8 +148,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogError(
                 ex,
                 "Error extracting members from type {TypeName}",
-                type.FullName
-            );
+                type.FullName);
             return members;
         }
     }
@@ -182,8 +177,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogError(
                 ex,
                 "Error loading types from assembly {AssemblyName}",
-                assembly.GetName().Name
-            );
+                assembly.GetName().Name);
 
             // Return any types that were successfully loaded
             return ex.Types.Where(t => t != null).Cast<Type>();
@@ -193,8 +187,7 @@ public class ApiExtractor : IApiExtractor
             _logger.LogError(
                 ex,
                 "Error getting public types from assembly {AssemblyName}",
-                assembly.GetName().Name
-            );
+                assembly.GetName().Name);
             return Enumerable.Empty<Type>();
         }
     }
