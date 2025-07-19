@@ -93,7 +93,7 @@ public class ApiChange
     public override string ToString()
     {
         var memberName = GetMemberName();
-        var breakingIndicator = IsBreakingChange ? " [BREAKING]" : string.empty;
+        var breakingIndicator = IsBreakingChange ? " [BREAKING]" : "";
         return $"{Type}: {memberName}{breakingIndicator}";
     }
 }
