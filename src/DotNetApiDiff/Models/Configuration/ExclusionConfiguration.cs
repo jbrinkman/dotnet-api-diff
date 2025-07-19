@@ -69,6 +69,7 @@ public class ExclusionConfiguration
                 WildcardToRegex(pattern);
             }
         }
+
         catch (Exception ex)
         {
             // Log the exception details for debugging purposes
@@ -108,5 +109,6 @@ public class ExclusionConfiguration
         };
     }
 }
+
 
 

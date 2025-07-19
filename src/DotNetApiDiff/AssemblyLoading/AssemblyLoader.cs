@@ -89,26 +89,31 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
             return assembly;
         }
+
         catch (FileNotFoundException ex)
         {
             this.logger.LogError(ex, "Assembly file not found: {Path}", assemblyPath);
             throw;
         }
+
         catch (BadImageFormatException ex)
         {
             this.logger.LogError(ex, "Invalid assembly format: {Path}", assemblyPath);
             throw;
         }
+
         catch (SecurityException ex)
         {
             this.logger.LogError(ex, "Security exception loading assembly: {Path}", assemblyPath);
             throw;
         }
+
         catch (PathTooLongException ex)
         {
             this.logger.LogError(ex, "Path too long for assembly: {Path}", assemblyPath);
             throw;
         }
+
         catch (ReflectionTypeLoadException ex)
         {
             this.logger.LogError(ex, "Failed to load types from assembly: {Path}", assemblyPath);
@@ -127,6 +132,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
             throw;
         }
+
         catch (Exception ex)
         {
             this.logger.LogError(ex, "Unexpected error loading assembly: {Path}", assemblyPath);
@@ -166,12 +172,14 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 this.logger.LogDebug("Successfully validated assembly: {Path}", assemblyPath);
                 return true;
             }
+
             finally
             {
                 // Unload the temporary context
                 tempContext.Unload();
             }
         }
+
         catch (Exception ex)
         {
             this.logger.LogDebug(ex, "Assembly validation failed for {Path}: {Message}", assemblyPath, ex.Message);
@@ -192,6 +200,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
             {
                 context.Unload();
             }
+
             catch (Exception ex)
             {
                 this.logger.LogWarning(ex, "Error unloading assembly context");
@@ -212,5 +221,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
         GC.SuppressFinalize(this);
     }
 }
+
 
 
