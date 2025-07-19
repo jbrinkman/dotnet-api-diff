@@ -63,18 +63,6 @@ public class ExclusionConfiguration
     }
 
     /// <summary>
-    /// Converts a wildcard pattern to a regular expression
-    /// </summary>
-    /// <param name="pattern">The wildcard pattern</param>
-    /// <returns>A regular expression pattern</returns>
-    private static string WildcardToRegex(string pattern)
-    {
-        return "^" + Regex.Escape(pattern)
-                          .Replace("\\*", ".*")
-                          .Replace("\\?", ".") + "$";
-    }
-
-    /// <summary>
     /// Validates the exclusion configuration
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
@@ -106,5 +94,17 @@ public class ExclusionConfiguration
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Converts a wildcard pattern to a regular expression
+    /// </summary>
+    /// <param name="pattern">The wildcard pattern</param>
+    /// <returns>A regular expression pattern</returns>
+    private static string WildcardToRegex(string pattern)
+    {
+        return "^" + Regex.Escape(pattern)
+                          .Replace("\\*", ".*")
+                          .Replace("\\?", ".") + "$";
     }
 }
