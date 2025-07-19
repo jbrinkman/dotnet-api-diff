@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -12,13 +13,13 @@ public class MappingConfiguration
     /// Dictionary mapping source namespaces to one or more target namespaces
     /// </summary>
     [JsonPropertyName("namespaceMappings")]
-    public Dictionary<string, List<string>> NamespaceMappings { get; set; } = new();
+    public Dictionary<string, List<string>> NamespaceMappings { get; set; } = new Dictionary<string, List<string>>();
 
     /// <summary>
     /// Dictionary mapping source type names to target type names
     /// </summary>
     [JsonPropertyName("typeMappings")]
-    public Dictionary<string, string> TypeMappings { get; set; } = new();
+    public Dictionary<string, string> TypeMappings { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Whether to automatically map types with the same name but different namespaces

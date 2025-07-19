@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.Logging;

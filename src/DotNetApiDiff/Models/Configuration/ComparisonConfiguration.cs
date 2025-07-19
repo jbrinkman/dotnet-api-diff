@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,25 +14,25 @@ public class ComparisonConfiguration
     /// Configuration for namespace and type mappings
     /// </summary>
     [JsonPropertyName("mappings")]
-    public MappingConfiguration Mappings { get; set; } = new();
+    public MappingConfiguration Mappings { get; set; } = new MappingConfiguration();
 
     /// <summary>
     /// Configuration for excluding types and members
     /// </summary>
     [JsonPropertyName("exclusions")]
-    public ExclusionConfiguration Exclusions { get; set; } = new();
+    public ExclusionConfiguration Exclusions { get; set; } = new ExclusionConfiguration();
 
     /// <summary>
     /// Configuration for breaking change rules
     /// </summary>
     [JsonPropertyName("breakingChangeRules")]
-    public BreakingChangeRules BreakingChangeRules { get; set; } = new();
+    public BreakingChangeRules BreakingChangeRules { get; set; } = new BreakingChangeRules();
 
     /// <summary>
     /// Configuration for filtering types and namespaces
     /// </summary>
     [JsonPropertyName("filters")]
-    public FilterConfiguration Filters { get; set; } = new();
+    public FilterConfiguration Filters { get; set; } = new FilterConfiguration();
 
     /// <summary>
     /// Output format for the comparison results

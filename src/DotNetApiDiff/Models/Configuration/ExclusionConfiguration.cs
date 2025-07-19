@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -12,25 +13,25 @@ public class ExclusionConfiguration
     /// List of fully qualified type names to exclude
     /// </summary>
     [JsonPropertyName("excludedTypes")]
-    public List<string> ExcludedTypes { get; set; } = new();
+    public List<string> ExcludedTypes { get; set; } = new List<string>();
 
     /// <summary>
     /// List of fully qualified member names to exclude
     /// </summary>
     [JsonPropertyName("excludedMembers")]
-    public List<string> ExcludedMembers { get; set; } = new();
+    public List<string> ExcludedMembers { get; set; } = new List<string>();
 
     /// <summary>
     /// List of type name patterns to exclude (supports wildcards * and ?)
     /// </summary>
     [JsonPropertyName("excludedTypePatterns")]
-    public List<string> ExcludedTypePatterns { get; set; } = new();
+    public List<string> ExcludedTypePatterns { get; set; } = new List<string>();
 
     /// <summary>
     /// List of member name patterns to exclude (supports wildcards * and ?)
     /// </summary>
     [JsonPropertyName("excludedMemberPatterns")]
-    public List<string> ExcludedMemberPatterns { get; set; } = new();
+    public List<string> ExcludedMemberPatterns { get; set; } = new List<string>();
 
     /// <summary>
     /// Whether to exclude compiler-generated types and members

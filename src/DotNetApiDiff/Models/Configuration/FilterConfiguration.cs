@@ -1,3 +1,4 @@
+// Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -12,25 +13,25 @@ public class FilterConfiguration
     /// List of namespaces to include in the comparison (if empty, all namespaces are included)
     /// </summary>
     [JsonPropertyName("includeNamespaces")]
-    public List<string> IncludeNamespaces { get; set; } = new();
+    public List<string> IncludeNamespaces { get; set; } = new List<string>();
 
     /// <summary>
     /// List of namespaces to exclude from the comparison
     /// </summary>
     [JsonPropertyName("excludeNamespaces")]
-    public List<string> ExcludeNamespaces { get; set; } = new();
+    public List<string> ExcludeNamespaces { get; set; } = new List<string>();
 
     /// <summary>
     /// List of type name patterns to include in the comparison (if empty, all types are included)
     /// </summary>
     [JsonPropertyName("includeTypes")]
-    public List<string> IncludeTypes { get; set; } = new();
+    public List<string> IncludeTypes { get; set; } = new List<string>();
 
     /// <summary>
     /// List of type name patterns to exclude from the comparison
     /// </summary>
     [JsonPropertyName("excludeTypes")]
-    public List<string> ExcludeTypes { get; set; } = new();
+    public List<string> ExcludeTypes { get; set; } = new List<string>();
 
     /// <summary>
     /// Whether to include internal types in the comparison
