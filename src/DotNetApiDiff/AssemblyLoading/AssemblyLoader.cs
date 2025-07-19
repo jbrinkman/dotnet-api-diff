@@ -83,7 +83,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
             this.logger.LogInformation(
                 "Successfully loaded assembly: {AssemblyName} from {Path}",
-                assembly.GetName().Name, 
+                assembly.GetName().Name,
                 assemblyPath);
 
             return assembly;
