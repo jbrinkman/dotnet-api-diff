@@ -1,4 +1,5 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
+
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
@@ -49,8 +50,10 @@ public class NameMapper : INameMapper
         {
             if (string.Equals(mapping.Key, sourceNamespace, _stringComparison))
             {
-                _logger.LogDebug("Mapped namespace {SourceNamespace} to {TargetNamespaces}",
-                    sourceNamespace, string.Join(", ", mapping.Value));
+                _logger.LogDebug(
+                    "Mapped namespace {SourceNamespace} to {TargetNamespaces}",
+                    sourceNamespace,
+                    string.Join(", ", mapping.Value));
                 return mapping.Value;
             }
         }
@@ -63,8 +66,10 @@ public class NameMapper : INameMapper
                 var suffix = sourceNamespace.Substring(mapping.Key.Length + 1);
                 var results = mapping.Value.Select(target => CombineNamespaceParts(target, suffix)).ToList();
 
-                _logger.LogDebug("Mapped namespace {SourceNamespace} to {TargetNamespaces} using prefix mapping",
-                    sourceNamespace, string.Join(", ", results));
+                _logger.LogDebug(
+                    "Mapped namespace {SourceNamespace} to {TargetNamespaces} using prefix mapping",
+                    sourceNamespace,
+                    string.Join(", ", results));
                 return results;
             }
         }
@@ -90,8 +95,10 @@ public class NameMapper : INameMapper
         {
             if (string.Equals(mapping.Key, sourceTypeName, _stringComparison))
             {
-                _logger.LogDebug("Mapped type name {SourceTypeName} to {TargetTypeName}",
-                    sourceTypeName, mapping.Value);
+                _logger.LogDebug(
+                    "Mapped type name {SourceTypeName} to {TargetTypeName}",
+                    sourceTypeName,
+                    mapping.Value);
                 return mapping.Value;
             }
         }
@@ -117,8 +124,10 @@ public class NameMapper : INameMapper
         {
             if (string.Equals(mapping.Key, sourceFullName, _stringComparison))
             {
-                _logger.LogDebug("Mapped full type name {SourceFullName} to {TargetFullName} using exact type mapping",
-                    sourceFullName, mapping.Value);
+                _logger.LogDebug(
+                    "Mapped full type name {SourceFullName} to {TargetFullName} using exact type mapping",
+                    sourceFullName,
+                    mapping.Value);
                 return new[] { mapping.Value };
             }
         }
@@ -145,13 +154,17 @@ public class NameMapper : INameMapper
 
         if (results.Count > 1)
         {
-            _logger.LogDebug("Mapped full type name {SourceFullName} to multiple targets: {TargetFullNames}",
-                sourceFullName, string.Join(", ", results));
+            _logger.LogDebug(
+                "Mapped full type name {SourceFullName} to multiple targets: {TargetFullNames}",
+                sourceFullName,
+                string.Join(", ", results));
         }
         else if (results.Count == 1)
         {
-            _logger.LogDebug("Mapped full type name {SourceFullName} to {TargetFullName}",
-                sourceFullName, results[0]);
+            _logger.LogDebug(
+                "Mapped full type name {SourceFullName} to {TargetFullName}",
+                sourceFullName,
+                results[0]);
         }
 
         return results;
