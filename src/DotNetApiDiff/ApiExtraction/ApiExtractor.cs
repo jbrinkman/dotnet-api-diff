@@ -45,7 +45,8 @@ public class ApiExtractor : IApiExtractor
 
         if (filterConfig != null)
         {
-            _logger.LogInformation("Applying filter configuration with {IncludeCount} includes and {ExcludeCount} excludes",
+            _logger.LogInformation(
+                "Applying filter configuration with {IncludeCount} includes and {ExcludeCount} excludes",
                 filterConfig.IncludeNamespaces.Count + filterConfig.IncludeTypes.Count,
                 filterConfig.ExcludeNamespaces.Count + filterConfig.ExcludeTypes.Count);
         }
@@ -191,7 +192,8 @@ public class ApiExtractor : IApiExtractor
                 // Filter by namespace includes if specified
                 if (filterConfig.IncludeNamespaces.Count > 0)
                 {
-                    _logger.LogDebug("Filtering types to include only namespaces: {Namespaces}",
+                    _logger.LogDebug(
+                        "Filtering types to include only namespaces: {Namespaces}",
                         string.Join(", ", filterConfig.IncludeNamespaces));
 
                     types = types.Where(
@@ -204,7 +206,8 @@ public class ApiExtractor : IApiExtractor
                 // Filter by namespace excludes
                 if (filterConfig.ExcludeNamespaces.Count > 0)
                 {
-                    _logger.LogDebug("Filtering types to exclude namespaces: {Namespaces}",
+                    _logger.LogDebug(
+                        "Filtering types to exclude namespaces: {Namespaces}",
                         string.Join(", ", filterConfig.ExcludeNamespaces));
 
                     types = types.Where(
@@ -217,7 +220,8 @@ public class ApiExtractor : IApiExtractor
                 // Filter by type name includes if specified
                 if (filterConfig.IncludeTypes.Count > 0)
                 {
-                    _logger.LogDebug("Filtering types to include only types matching patterns: {Patterns}",
+                    _logger.LogDebug(
+                        "Filtering types to include only types matching patterns: {Patterns}",
                         string.Join(", ", filterConfig.IncludeTypes));
 
                     types = types.Where(
@@ -230,7 +234,8 @@ public class ApiExtractor : IApiExtractor
                 // Filter by type name excludes
                 if (filterConfig.ExcludeTypes.Count > 0)
                 {
-                    _logger.LogDebug("Filtering types to exclude types matching patterns: {Patterns}",
+                    _logger.LogDebug(
+                        "Filtering types to exclude types matching patterns: {Patterns}",
                         string.Join(", ", filterConfig.ExcludeTypes));
 
                     types = types.Where(
