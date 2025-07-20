@@ -37,13 +37,18 @@ public class CompareCommandFilteringTests
         _mockSourceAssembly = typeof(CompareCommandFilteringTests).Assembly;
         _mockTargetAssembly = typeof(CompareCommandFilteringTests).Assembly;
 
-        // Create a mock command context
-        _commandContext = new Mock<CommandContext>().Object;
+        // Create a command context
+        _commandContext = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Set up mock assembly loader
         _mockAssemblyLoader
             .Setup(m => m.LoadAssembly(It.IsAny<string>()))
             .Returns(_mockSourceAssembly);
+
+        // Set up mock API extractor
+        _mockApiExtractor
+            .Setup(m => m.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>(), It.IsAny<FilterConfiguration?>()))
+            .Returns(new List<ApiMember>());
 
         // Set up mock comparison result
         _mockComparisonResult = new ComparisonResult

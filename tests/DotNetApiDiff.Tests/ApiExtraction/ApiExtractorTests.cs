@@ -64,7 +64,7 @@ public class ApiExtractorTests
 
         // Create a partial mock to override GetPublicTypes
         var partialMock = new Mock<ApiExtractor>(_mockTypeAnalyzer.Object, _mockLogger.Object) { CallBase = true };
-        partialMock.Setup(x => x.GetPublicTypes(assembly)).Returns(types);
+        partialMock.Setup(x => x.GetPublicTypes(assembly, default)).Returns(types);
 
         // Act
         var result = partialMock.Object.ExtractApiMembers(assembly).ToList();
