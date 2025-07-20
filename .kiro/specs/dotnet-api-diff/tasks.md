@@ -100,7 +100,7 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-5.1-cli-interface`, commit, push, and create PR
     - _Requirements: 2.3, 4.1_
 
-  - [ ] 5.2 Add filtering and configuration options
+  - [x] 5.2 Add filtering and configuration options
     - Implement namespace and type filtering command-line options
     - Add configuration file loading from CLI arguments
     - Create integration tests for filtering and configuration scenarios
