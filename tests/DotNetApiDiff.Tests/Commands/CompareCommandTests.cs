@@ -261,7 +261,8 @@ public class CompareCommandTests
             Assert.Equal(0, result);
             mockAssemblyLoader.Verify(al => al.LoadAssembly(sourceAssemblyPath), Times.Once);
             mockAssemblyLoader.Verify(al => al.LoadAssembly(targetAssemblyPath), Times.Once);
-            mockApiExtractor.Verify(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()), Times.Exactly(2));
+            const int EXPECTED_API_EXTRACTION_CALLS = 2; // Number of assemblies processed: source and target
+            mockApiExtractor.Verify(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()), Times.Exactly(EXPECTED_API_EXTRACTION_CALLS));
             mockApiComparer.Verify(ac => ac.CompareAssemblies(sourceAssembly, targetAssembly), Times.Once);
             mockReportGenerator.Verify(rg => rg.GenerateReport(comparisonResult, ReportFormat.Console), Times.Once);
         }

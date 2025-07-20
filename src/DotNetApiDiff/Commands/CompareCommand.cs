@@ -227,7 +227,7 @@ public class CompareCommand : Command<CompareCommandSettings>
 
             var report = reportGenerator.GenerateReport(comparisonResult, format);
 
-            // Output report
+            // Output the formatted report to the console using the AnsiConsole library
             AnsiConsole.Write(report);
 
             // Determine exit code based on breaking changes
