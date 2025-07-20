@@ -71,14 +71,14 @@ Each task should follow this git workflow:
     - _Requirements: 2.3, 4.4_
 
 - [ ] 4. Build comparison engine core functionality
-  - [ ] 4.1 Implement basic API comparison logic
+  - [x] 4.1 Implement basic API comparison logic
     - Create ApiComparer class to identify additions, removals, and modifications
     - Implement DifferenceCalculator for detailed change analysis
     - Write unit tests comparing known assembly versions
     - **Git Workflow**: Create branch `feature/task-4.1-api-comparer`, commit, push, and create PR
     - _Requirements: 1.2, 1.3, 8.2, 8.3_
 
-  - [ ] 4.2 Add namespace and type mapping capabilities
+  - [x] 4.2 Add namespace and type mapping capabilities
     - Implement NameMapper class for namespace and type name transformations
     - Integrate mapping logic into ApiComparer workflow
     - Create unit tests for various mapping scenarios including one-to-many mappings
