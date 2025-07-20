@@ -113,8 +113,8 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"+ {change.NewSignature}");
                 }
-
             }
+
             output.AppendLine();
         }
 
@@ -129,8 +129,8 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"- {change.OldSignature}");
                 }
-
             }
+
             output.AppendLine();
         }
 
@@ -150,8 +150,8 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"+ {change.NewSignature}");
                 }
-
             }
+
             output.AppendLine();
         }
 
