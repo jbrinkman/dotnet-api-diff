@@ -1,7 +1,9 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
+using DotNetApiDiff.Commands;
 using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Console.Cli;
 
 namespace DotNetApiDiff;
 
@@ -15,7 +17,7 @@ public class Program
     /// </summary>
     /// <param name="args">Command line arguments</param>
     /// <returns>Exit code (0 for success, non-zero for failure)</returns>
-    public static async Task<int> Main(string[] args)
+    public static int Main(string[] args)
     {
         // Set up dependency injection
         var services = new ServiceCollection();
@@ -28,23 +30,37 @@ public class Program
         {
             logger.LogInformation("DotNet API Diff Tool started");
 
-            // TODO: Parse command line arguments and execute comparison
-            // This will be implemented in subsequent tasks
+            // Configure Spectre.Console command app
+            var app = new CommandApp(new TypeRegistrar(serviceProvider));
 
-            // Add a minimal await to satisfy the async method requirement
-            await Task.Delay(0);
+            app.Configure(config =>
+            {
+                config.SetApplicationName("dotnet-api-diff");
 
-            logger.LogInformation("DotNet API Diff Tool completed successfully");
-            return 0;
+                config.AddExample(new[] { "compare", "old.dll", "new.dll" });
+                config.AddExample(new[] { "compare", "old.dll", "new.dll", "--output", "json" });
+                config.AddExample(new[] { "compare", "old.dll", "new.dll", "--config", "config.json" });
+
+                config.SetExceptionHandler(ex =>
+                {
+                    logger.LogError(ex, "An unhandled exception occurred");
+                    return 1;
+                });
+
+                // Register the compare command
+                config.AddCommand<CompareCommand>("compare")
+                    .WithDescription("Compare two .NET assemblies and report API differences")
+                    .WithExample(new[] { "compare", "old.dll", "new.dll" })
+                    .WithExample(new[] { "compare", "old.dll", "new.dll", "--output", "json" })
+                    .WithExample(new[] { "compare", "old.dll", "new.dll", "--filter", "System.Collections" });
+            });
+
+            return app.Run(args);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during execution");
             return 1;
-        }
-        finally
-        {
-            serviceProvider.Dispose();
         }
     }
 
@@ -92,5 +108,8 @@ public class Program
 
         // Register the ApiComparer with NameMapper
         // services.AddScoped<IApiComparer, ApiComparer>();
+
+        // Register the ReportGenerator
+        // services.AddScoped<IReportGenerator, ReportGenerator>();
     }
 }
