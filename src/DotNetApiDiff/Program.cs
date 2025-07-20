@@ -72,6 +72,7 @@ public class Program
         services.AddScoped<INameMapper>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<ApiExtraction.NameMapper>>();
+
             // Create a default mapping configuration - in real usage this would be loaded from config
             var mappingConfig = Models.Configuration.MappingConfiguration.CreateDefault();
             return new ApiExtraction.NameMapper(mappingConfig, logger);

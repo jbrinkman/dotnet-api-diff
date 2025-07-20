@@ -194,8 +194,10 @@ public class ApiComparer : IApiComparer
                     if (TryFindTypeBySimpleName(newTypeName, oldTypesList, out var matchedOldTypeName))
                     {
                         foundMatch = true;
-                        _logger.LogDebug("Auto-mapped type {NewTypeName} to {OldTypeName} by simple name",
-                            newTypeName, matchedOldTypeName);
+                        _logger.LogDebug(
+                            "Auto-mapped type {NewTypeName} to {OldTypeName} by simple name",
+                            newTypeName,
+                            matchedOldTypeName);
                     }
                 }
             }
@@ -237,8 +239,10 @@ public class ApiComparer : IApiComparer
                     if (TryFindTypeBySimpleName(oldTypeName, newTypesList, out var matchedNewTypeName))
                     {
                         foundMatch = true;
-                        _logger.LogDebug("Auto-mapped type {OldTypeName} to {NewTypeName} by simple name",
-                            oldTypeName, matchedNewTypeName);
+                        _logger.LogDebug(
+                            "Auto-mapped type {OldTypeName} to {NewTypeName} by simple name",
+                            oldTypeName,
+                            matchedNewTypeName);
                     }
                 }
             }
@@ -306,7 +310,7 @@ public class ApiComparer : IApiComparer
     /// <param name="candidateTypes">List of candidate types to search</param>
     /// <param name="matchedTypeName">The matched type name, if found</param>
     /// <returns>True if a match was found, false otherwise</returns>
-    private bool TryFindTypeBySimpleName(string typeName, IEnumerable<Type> candidateTypes, out string matchedTypeName)
+    private bool TryFindTypeBySimpleName(string typeName, IEnumerable<Type> candidateTypes, out string? matchedTypeName)
     {
         matchedTypeName = null;
 
@@ -329,8 +333,12 @@ public class ApiComparer : IApiComparer
             {
                 string candidateSimpleTypeName = candidateTypeName.Substring(candidateLastDotIndex + 1);
 
-                if (string.Equals(simpleTypeName, candidateSimpleTypeName,
-                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                if (string.Equals(
+                    simpleTypeName,
+                    candidateSimpleTypeName,
+                    _nameMapper.Configuration.IgnoreCase ?
+                        StringComparison.OrdinalIgnoreCase :
+                        StringComparison.Ordinal))
                 {
                     matchedTypeName = candidateTypeName;
                     return true;
