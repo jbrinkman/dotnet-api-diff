@@ -8,7 +8,7 @@ vars:
   PROJECT: src/DotNetApiDiff/DotNetApiDiff.csproj
   TEST_PROJECT: tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj
   COVERAGE_DIR: coverage-report
-  REPORT_DIR: reports
+  TEST_REPORT_DIR: test-report
 
 tasks:
   default:
@@ -52,6 +52,41 @@ tasks:
     cmds:
       - dotnet test {{.TEST_PROJECT}} --filter "Category=Integration" --configuration Release
 
+  test:report:
+    desc: Run tests with detailed HTML report
+    cmds:
+      - mkdir -p {{.TEST_REPORT_DIR}}
+      - dotnet test {{.TEST_PROJECT}} --results-directory {{.TEST_REPORT_DIR}} --logger "html;LogFileName=test-results.html"
+      - echo "Test report generated in {{.TEST_REPORT_DIR}}/test-results.html"
+
+  ensure-test-report:
+    desc: Ensure test report exists
+    internal: true
+    cmds:
+      - |
+        if [ ! -f "{{.TEST_REPORT_DIR}}/test-results.html" ]; then
+          echo "Test report not found. Generating it now..."
+          task test:report
+        fi
+
+  test:report:view:
+    desc: Open test report in default browser (generates report if it doesn't exist)
+    cmds:
+      - task: ensure-test-report
+      - |
+        {{if eq OS "windows"}}
+        cmd.exe /c start {{.TEST_REPORT_DIR}}/test-results.html
+        {{else if eq OS "darwin"}}
+        open {{.TEST_REPORT_DIR}}/test-results.html
+        {{else}}
+        xdg-open {{.TEST_REPORT_DIR}}/test-results.html
+        {{end}}
+
+  test:watch:
+    desc: Run tests in watch mode (rerun on file changes)
+    cmds:
+      - dotnet watch test --project {{.TEST_PROJECT}}
+
   coverage:
     desc: Generate code coverage report
     cmds:
@@ -65,9 +100,28 @@ tasks:
       - dotnet tool restore
       - dotnet reportgenerator -reports:tests/DotNetApiDiff.Tests/coverage.info -targetdir:{{.COVERAGE_DIR}} -reporttypes:Html
 
-  coverage:view:
-    desc: Open coverage report in default browser
+  coverage:report:detailed:
+    desc: Generate detailed HTML report with multiple formats
     cmds:
+      - dotnet tool restore
+      - dotnet reportgenerator -reports:tests/DotNetApiDiff.Tests/coverage.info -targetdir:{{.COVERAGE_DIR}} -reporttypes:"Html;HtmlSummary;Cobertura;TextSummary"
+      - echo "Coverage report generated in {{.COVERAGE_DIR}}"
+      - cat {{.COVERAGE_DIR}}/Summary.txt
+
+  ensure-coverage-report:
+    desc: Ensure coverage report exists
+    internal: true
+    cmds:
+      - |
+        if [ ! -f "{{.COVERAGE_DIR}}/index.html" ]; then
+          echo "Coverage report not found. Generating it now..."
+          task coverage
+        fi
+
+  coverage:view:
+    desc: Open coverage report in default browser (generates report if it doesn't exist)
+    cmds:
+      - task: ensure-coverage-report
       - |
         {{if eq OS "windows"}}
         cmd.exe /c start {{.COVERAGE_DIR}}/index.html

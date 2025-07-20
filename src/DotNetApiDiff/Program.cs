@@ -37,9 +37,9 @@ public class Program
             {
                 config.SetApplicationName("dotnet-api-diff");
 
-                config.AddExample(new[] { "compare", "old.dll", "new.dll" });
-                config.AddExample(new[] { "compare", "old.dll", "new.dll", "--output", "json" });
-                config.AddExample(new[] { "compare", "old.dll", "new.dll", "--config", "config.json" });
+                config.AddExample(new[] { "compare", "source.dll", "target.dll" });
+                config.AddExample(new[] { "compare", "source.dll", "target.dll", "--output", "json" });
+                config.AddExample(new[] { "compare", "source.dll", "target.dll", "--config", "config.json" });
 
                 config.SetExceptionHandler(ex =>
                 {
@@ -50,9 +50,9 @@ public class Program
                 // Register the compare command
                 config.AddCommand<CompareCommand>("compare")
                     .WithDescription("Compare two .NET assemblies and report API differences")
-                    .WithExample(new[] { "compare", "old.dll", "new.dll" })
-                    .WithExample(new[] { "compare", "old.dll", "new.dll", "--output", "json" })
-                    .WithExample(new[] { "compare", "old.dll", "new.dll", "--filter", "System.Collections" });
+                    .WithExample(new[] { "compare", "source.dll", "target.dll" })
+                    .WithExample(new[] { "compare", "source.dll", "target.dll", "--output", "json" })
+                    .WithExample(new[] { "compare", "source.dll", "target.dll", "--filter", "System.Collections" });
             });
 
             return app.Run(args);
