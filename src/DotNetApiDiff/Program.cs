@@ -110,6 +110,6 @@ public class Program
         // services.AddScoped<IApiComparer, ApiComparer>();
 
         // Register the ReportGenerator
-        // services.AddScoped<IReportGenerator, ReportGenerator>();
+        services.AddScoped<IReportGenerator, Reporting.ReportGenerator>();
     }
 }
