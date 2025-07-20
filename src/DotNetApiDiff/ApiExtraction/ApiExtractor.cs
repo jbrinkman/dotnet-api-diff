@@ -248,7 +248,7 @@ public class ApiExtractor : IApiExtractor
                 // Filter internal types if not included
                 if (!filterConfig.IncludeInternals)
                 {
-                    types = types.Where(t => t.IsPublic || t.IsNestedPublic);
+                    types = types.Where(t => t.IsPublic);
                 }
 
                 // Filter compiler-generated types if not included
