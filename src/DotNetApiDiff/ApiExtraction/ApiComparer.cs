@@ -336,9 +336,7 @@ public class ApiComparer : IApiComparer
                 if (string.Equals(
                     simpleTypeName,
                     candidateSimpleTypeName,
-                    _nameMapper.Configuration.IgnoreCase ?
-                        StringComparison.OrdinalIgnoreCase :
-                        StringComparison.Ordinal))
+                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                 {
                     matchedTypeName = candidateTypeName;
                     return true;
