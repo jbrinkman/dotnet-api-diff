@@ -108,7 +108,7 @@ Each task should follow this git workflow:
     - _Requirements: 3.2, 3.3, 5.1, 5.2, 5.3, 5.4_
 
 - [ ] 6. Implement output formatting and reporting
-  - [ ] 6.1 Create ReportGenerator and console output formatter
+  - [x] 6.1 Create ReportGenerator and console output formatter
     - Implement ReportGenerator interface with support for multiple formats
     - Create ConsoleFormatter with colored output for additions, removals, modifications
     - Add summary statistics and breaking change indicators
@@ -116,7 +116,7 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-6.1-report-generator`, commit, push, and create PR
     - _Requirements: 4.4, 8.1, 8.4_
 
-  - [ ] 6.2 Implement JSON output formatter
+  - [x] 6.2 Implement JSON output formatter
     - Create JsonFormatter producing structured, valid JSON output
     - Include all comparison details suitable for programmatic consumption
     - Write unit tests validating JSON structure and content
