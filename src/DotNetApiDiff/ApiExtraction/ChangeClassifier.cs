@@ -15,8 +15,8 @@ public class ChangeClassifier : IChangeClassifier
     private readonly BreakingChangeRules _breakingChangeRules;
     private readonly ExclusionConfiguration _exclusionConfig;
     private readonly ILogger<ChangeClassifier> _logger;
-    private readonly Dictionary<string, Regex> _typePatternCache = new ();
-    private readonly Dictionary<string, Regex> _memberPatternCache = new ();
+    private readonly Dictionary<string, Regex> _typePatternCache = new();
+    private readonly Dictionary<string, Regex> _memberPatternCache = new();
 
     /// <summary>
     /// Creates a new instance of the ChangeClassifier
@@ -309,7 +309,7 @@ public class ChangeClassifier : IChangeClassifier
             difference.IsBreakingChange = true;
             difference.Severity = SeverityLevel.Error;
         }
-        
+
         // If not already classified as breaking, keep the original classification
         else if (!difference.IsBreakingChange)
         {

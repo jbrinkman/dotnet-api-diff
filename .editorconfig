@@ -18,13 +18,19 @@ trim_trailing_whitespace = false
 # SA1309: Field names should not begin with underscore
 dotnet_diagnostic.SA1309.severity = none
 
+# SA1000: Keywords should be spaced correctly
+dotnet_diagnostic.SA1000.severity = none
+
 # SA1200: Using directive should appear within a namespace declaration
 dotnet_diagnostic.SA1200.severity = none
 
+# SA1201: Elements should appear in the correct order
 dotnet_diagnostic.SA1201.severity = none
 
+# SA1202: Elements should be ordered by accessibility
 dotnet_diagnostic.SA1202.severity = none
 
+# SA1208: System using directives should be placed before other using directives
 dotnet_diagnostic.SA1208.severity = none
 
 # SA1633: File should have header
