@@ -2,6 +2,7 @@
 using System.Reflection;
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models;
+using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetApiDiff.ApiExtraction;
@@ -13,6 +14,7 @@ public class ApiComparer : IApiComparer
 {
     private readonly IApiExtractor _apiExtractor;
     private readonly IDifferenceCalculator _differenceCalculator;
+    private readonly INameMapper _nameMapper;
     private readonly ILogger<ApiComparer> _logger;
 
     /// <summary>
@@ -20,14 +22,17 @@ public class ApiComparer : IApiComparer
     /// </summary>
     /// <param name="apiExtractor">API extractor for getting API members</param>
     /// <param name="differenceCalculator">Calculator for detailed change analysis</param>
+    /// <param name="nameMapper">Mapper for namespace and type name transformations</param>
     /// <param name="logger">Logger for diagnostic information</param>
     public ApiComparer(
         IApiExtractor apiExtractor,
         IDifferenceCalculator differenceCalculator,
+        INameMapper nameMapper,
         ILogger<ApiComparer> logger)
     {
         _apiExtractor = apiExtractor ?? throw new ArgumentNullException(nameof(apiExtractor));
         _differenceCalculator = differenceCalculator ?? throw new ArgumentNullException(nameof(differenceCalculator));
+        _nameMapper = nameMapper ?? throw new ArgumentNullException(nameof(nameMapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -133,11 +138,90 @@ public class ApiComparer : IApiComparer
         var oldTypesByFullName = oldTypesList.ToDictionary(t => t.FullName ?? t.Name);
         var newTypesByFullName = newTypesList.ToDictionary(t => t.FullName ?? t.Name);
 
+        // Create a lookup for mapped types
+        var mappedTypeLookup = new Dictionary<string, List<Type>>();
+
+        // Build the mapped type lookup
+        foreach (var oldType in oldTypesList)
+        {
+            var oldTypeName = oldType.FullName ?? oldType.Name;
+            var mappedNames = _nameMapper.MapFullTypeName(oldTypeName).ToList();
+
+            foreach (var mappedName in mappedNames)
+            {
+                if (mappedName != oldTypeName)
+                {
+                    _logger.LogDebug("Mapped type {OldTypeName} to {MappedTypeName}", oldTypeName, mappedName);
+
+                    if (!mappedTypeLookup.ContainsKey(mappedName))
+                    {
+                        mappedTypeLookup[mappedName] = new List<Type>();
+                    }
+
+                    mappedTypeLookup[mappedName].Add(oldType);
+                }
+            }
+        }
+
         // Find added types
         foreach (var newType in newTypesList)
         {
             var newTypeName = newType.FullName ?? newType.Name;
-            if (!oldTypesByFullName.ContainsKey(newTypeName))
+            bool foundMatch = false;
+
+            // Check direct match
+            if (oldTypesByFullName.ContainsKey(newTypeName))
+            {
+                foundMatch = true;
+            }
+            else
+            {
+                // Check if this type matches any mapped old types
+                var mappedOldNames = _nameMapper.MapFullTypeName(newTypeName).ToList();
+
+                foreach (var mappedName in mappedOldNames)
+                {
+                    if (oldTypesByFullName.ContainsKey(mappedName))
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+
+                // Check for auto-mapping if enabled
+                if (!foundMatch && _nameMapper.ShouldAutoMapType(newTypeName))
+                {
+                    // Extract simple type name for auto-mapping
+                    int lastDotIndex = newTypeName.LastIndexOf('.');
+                    if (lastDotIndex > 0)
+                    {
+                        string simpleTypeName = newTypeName.Substring(lastDotIndex + 1);
+
+                        // Look for any old type with the same simple name
+                        foreach (var oldType in oldTypesList)
+                        {
+                            var oldTypeName = oldType.FullName ?? oldType.Name;
+                            int oldLastDotIndex = oldTypeName.LastIndexOf('.');
+
+                            if (oldLastDotIndex > 0)
+                            {
+                                string oldSimpleTypeName = oldTypeName.Substring(oldLastDotIndex + 1);
+
+                                if (string.Equals(simpleTypeName, oldSimpleTypeName,
+                                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                                {
+                                    foundMatch = true;
+                                    _logger.LogDebug("Auto-mapped type {NewTypeName} to {OldTypeName} by simple name",
+                                        newTypeName, oldTypeName);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!foundMatch)
             {
                 differences.Add(_differenceCalculator.CalculateAddedType(newType));
             }
@@ -147,16 +231,72 @@ public class ApiComparer : IApiComparer
         foreach (var oldType in oldTypesList)
         {
             var oldTypeName = oldType.FullName ?? oldType.Name;
-            if (!newTypesByFullName.ContainsKey(oldTypeName))
+            bool foundMatch = false;
+
+            // Check direct match
+            if (newTypesByFullName.ContainsKey(oldTypeName))
+            {
+                foundMatch = true;
+            }
+            else
+            {
+                // Check mapped names
+                var mappedNames = _nameMapper.MapFullTypeName(oldTypeName).ToList();
+
+                foreach (var mappedName in mappedNames)
+                {
+                    if (newTypesByFullName.ContainsKey(mappedName))
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+
+                // Check for auto-mapping if enabled
+                if (!foundMatch && _nameMapper.ShouldAutoMapType(oldTypeName))
+                {
+                    // Extract simple type name for auto-mapping
+                    int lastDotIndex = oldTypeName.LastIndexOf('.');
+                    if (lastDotIndex > 0)
+                    {
+                        string simpleTypeName = oldTypeName.Substring(lastDotIndex + 1);
+
+                        // Look for any new type with the same simple name
+                        foreach (var newType in newTypesList)
+                        {
+                            var newTypeName = newType.FullName ?? newType.Name;
+                            int newLastDotIndex = newTypeName.LastIndexOf('.');
+
+                            if (newLastDotIndex > 0)
+                            {
+                                string newSimpleTypeName = newTypeName.Substring(newLastDotIndex + 1);
+
+                                if (string.Equals(simpleTypeName, newSimpleTypeName,
+                                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                                {
+                                    foundMatch = true;
+                                    _logger.LogDebug("Auto-mapped type {OldTypeName} to {NewTypeName} by simple name",
+                                        oldTypeName, newTypeName);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!foundMatch)
             {
                 differences.Add(_differenceCalculator.CalculateRemovedType(oldType));
             }
         }
 
-        // Find modified types
+        // Find modified types - direct matches
         foreach (var oldType in oldTypesList)
         {
             var oldTypeName = oldType.FullName ?? oldType.Name;
+
+            // Check direct match first
             if (newTypesByFullName.TryGetValue(oldTypeName, out var newType))
             {
                 // Compare the types
@@ -168,6 +308,32 @@ public class ApiComparer : IApiComparer
                 if (typeDifference != null)
                 {
                     differences.Add(typeDifference);
+                }
+            }
+            else
+            {
+                // Check mapped names
+                var mappedNames = _nameMapper.MapFullTypeName(oldTypeName).ToList();
+
+                foreach (var mappedName in mappedNames)
+                {
+                    if (newTypesByFullName.TryGetValue(mappedName, out var mappedNewType))
+                    {
+                        _logger.LogDebug("Comparing mapped types: {OldTypeName} -> {MappedTypeName}", oldTypeName, mappedName);
+
+                        // Compare the types
+                        var memberDifferences = CompareMembers(oldType, mappedNewType).ToList();
+                        differences.AddRange(memberDifferences);
+
+                        // Check for type-level changes
+                        var typeDifference = _differenceCalculator.CalculateTypeChanges(oldType, mappedNewType);
+                        if (typeDifference != null)
+                        {
+                            differences.Add(typeDifference);
+                        }
+
+                        break;
+                    }
                 }
             }
         }

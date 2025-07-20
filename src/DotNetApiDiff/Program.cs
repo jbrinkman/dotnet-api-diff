@@ -63,7 +63,20 @@ public class Program
 
         // Register interfaces - implementations will be added in subsequent tasks
         // services.AddScoped<IAssemblyLoader, AssemblyLoader>();
+        // services.AddScoped<IApiExtractor, ApiExtractor>();
+        // services.AddScoped<ITypeAnalyzer, TypeAnalyzer>();
+        // services.AddScoped<IMemberSignatureBuilder, MemberSignatureBuilder>();
+        // services.AddScoped<IDifferenceCalculator, DifferenceCalculator>();
+
+        // Register the NameMapper
+        services.AddScoped<INameMapper>(provider => {
+            var logger = provider.GetRequiredService<ILogger<ApiExtraction.NameMapper>>();
+            // Create a default mapping configuration - in real usage this would be loaded from config
+            var mappingConfig = Models.Configuration.MappingConfiguration.CreateDefault();
+            return new ApiExtraction.NameMapper(mappingConfig, logger);
+        });
+
+        // Register the ApiComparer with NameMapper
         // services.AddScoped<IApiComparer, ApiComparer>();
-        // services.AddScoped<IReportGenerator, ReportGenerator>();
     }
 }
