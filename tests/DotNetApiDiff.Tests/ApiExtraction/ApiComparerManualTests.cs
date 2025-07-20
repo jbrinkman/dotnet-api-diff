@@ -54,8 +54,13 @@ public class ApiComparerManualTests
         // Create a mock NameMapper
         var mockNameMapper = new Mock<INameMapper>();
 
+        // Create a mock ChangeClassifier
+        var mockChangeClassifier = new Mock<IChangeClassifier>();
+        mockChangeClassifier.Setup(x => x.ClassifyChange(It.IsAny<ApiDifference>()))
+            .Returns<ApiDifference>(diff => diff);
+
         // Create the comparer with our manual mocks
-        var apiComparer = new ApiComparer(mockApiExtractor.Object, mockDiffCalc.Object, mockNameMapper.Object, logger);
+        var apiComparer = new ApiComparer(mockApiExtractor.Object, mockDiffCalc.Object, mockNameMapper.Object, mockChangeClassifier.Object, logger);
 
         // Act
         Console.WriteLine("About to call CompareMembers");

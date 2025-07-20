@@ -78,6 +78,18 @@ public class Program
             return new ApiExtraction.NameMapper(mappingConfig, logger);
         });
 
+        // Register the ChangeClassifier
+        services.AddScoped<IChangeClassifier>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<ApiExtraction.ChangeClassifier>>();
+
+            // Create default configurations - in real usage these would be loaded from config
+            var breakingChangeRules = Models.Configuration.BreakingChangeRules.CreateDefault();
+            var exclusionConfig = Models.Configuration.ExclusionConfiguration.CreateDefault();
+
+            return new ApiExtraction.ChangeClassifier(breakingChangeRules, exclusionConfig, logger);
+        });
+
         // Register the ApiComparer with NameMapper
         // services.AddScoped<IApiComparer, ApiComparer>();
     }

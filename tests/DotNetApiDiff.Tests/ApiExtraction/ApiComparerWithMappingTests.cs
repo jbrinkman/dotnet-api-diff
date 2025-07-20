@@ -41,6 +41,7 @@ namespace DotNetApiDiff.Tests.ApiExtraction
     {
         private readonly Mock<IApiExtractor> _apiExtractorMock;
         private readonly Mock<IDifferenceCalculator> _differenceCalculatorMock;
+        private readonly Mock<IChangeClassifier> _changeClassifierMock;
         private readonly Mock<ILogger<ApiComparer>> _loggerMock;
         private readonly Mock<ILogger<NameMapper>> _nameMapperLoggerMock;
 
@@ -48,12 +49,17 @@ namespace DotNetApiDiff.Tests.ApiExtraction
         {
             _apiExtractorMock = new Mock<IApiExtractor>();
             _differenceCalculatorMock = new Mock<IDifferenceCalculator>();
+            _changeClassifierMock = new Mock<IChangeClassifier>();
             _loggerMock = new Mock<ILogger<ApiComparer>>();
             _nameMapperLoggerMock = new Mock<ILogger<NameMapper>>();
 
             // Setup default behavior for all tests
             _apiExtractorMock.Setup(x => x.ExtractTypeMembers(It.IsAny<Type>())).Returns(new List<ApiMember>());
             _differenceCalculatorMock.Setup(x => x.CalculateTypeChanges(It.IsAny<Type>(), It.IsAny<Type>())).Returns((ApiDifference?)null);
+
+            // Setup the change classifier to return the same difference that is passed to it
+            _changeClassifierMock.Setup(x => x.ClassifyChange(It.IsAny<ApiDifference>()))
+                .Returns<ApiDifference>(diff => diff);
         }
 
         [Fact]
@@ -146,7 +152,7 @@ namespace DotNetApiDiff.Tests.ApiExtraction
             var mappingConfig = new MappingConfiguration(); // No mappings
 
             var nameMapper = new NameMapper(mappingConfig, _nameMapperLoggerMock.Object);
-            var apiComparer = new ApiComparer(_apiExtractorMock.Object, _differenceCalculatorMock.Object, nameMapper, _loggerMock.Object);
+            var apiComparer = new ApiComparer(_apiExtractorMock.Object, _differenceCalculatorMock.Object, nameMapper, _changeClassifierMock.Object, _loggerMock.Object);
 
             var addedDifference = new ApiDifference { ChangeType = ChangeType.Added };
             var removedDifference = new ApiDifference { ChangeType = ChangeType.Removed };
