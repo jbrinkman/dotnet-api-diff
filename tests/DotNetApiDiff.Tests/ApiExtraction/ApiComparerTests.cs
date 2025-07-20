@@ -75,8 +75,8 @@ public class ApiComparerTests
         var newTypes = new List<Type> { typeof(string), typeof(int) };
 
         // Setup the extractor mock
-        _mockApiExtractor.Setup(x => x.GetPublicTypes(oldAssembly)).Returns(oldTypes);
-        _mockApiExtractor.Setup(x => x.GetPublicTypes(newAssembly)).Returns(newTypes);
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(oldAssembly, default)).Returns(oldTypes);
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(newAssembly, default)).Returns(newTypes);
 
         var typeDifference = new ApiDifference
         {
@@ -386,8 +386,8 @@ public class ApiComparerTests
         var newTypes = new List<Type> { typeof(string), typeof(int) };
 
         // Setup the extractor mock
-        _mockApiExtractor.Setup(x => x.GetPublicTypes(oldAssembly)).Returns(oldTypes);
-        _mockApiExtractor.Setup(x => x.GetPublicTypes(newAssembly)).Returns(newTypes);
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(oldAssembly, default)).Returns(oldTypes);
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(newAssembly, default)).Returns(newTypes);
 
         var typeDifference = new ApiDifference
         {

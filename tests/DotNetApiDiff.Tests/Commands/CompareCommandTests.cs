@@ -231,7 +231,7 @@ public class CompareCommandTests
 
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))
             .Returns(sourceAssembly);
-        mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()))
+        mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>(), It.IsAny<DotNetApiDiff.Models.Configuration.FilterConfiguration?>()))
             .Returns(sourceApi);
         mockApiComparer.Setup(ac => ac.CompareAssemblies(It.IsAny<System.Reflection.Assembly>(), It.IsAny<System.Reflection.Assembly>()))
             .Returns(comparisonResult);
@@ -262,7 +262,7 @@ public class CompareCommandTests
             mockAssemblyLoader.Verify(al => al.LoadAssembly(sourceAssemblyPath), Times.Once);
             mockAssemblyLoader.Verify(al => al.LoadAssembly(targetAssemblyPath), Times.Once);
             const int EXPECTED_API_EXTRACTION_CALLS = 2; // Number of assemblies processed: source and target
-            mockApiExtractor.Verify(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()), Times.Exactly(EXPECTED_API_EXTRACTION_CALLS));
+            mockApiExtractor.Verify(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>(), It.IsAny<DotNetApiDiff.Models.Configuration.FilterConfiguration?>()), Times.Exactly(EXPECTED_API_EXTRACTION_CALLS));
             mockApiComparer.Verify(ac => ac.CompareAssemblies(sourceAssembly, targetAssembly), Times.Once);
             mockReportGenerator.Verify(rg => rg.GenerateReport(comparisonResult, ReportFormat.Console), Times.Once);
         }
@@ -322,7 +322,7 @@ public class CompareCommandTests
 
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))
             .Returns(sourceAssembly);
-        mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()))
+        mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>(), It.IsAny<DotNetApiDiff.Models.Configuration.FilterConfiguration?>()))
             .Returns(sourceApi);
         mockApiComparer.Setup(ac => ac.CompareAssemblies(It.IsAny<System.Reflection.Assembly>(), It.IsAny<System.Reflection.Assembly>()))
             .Returns(comparisonResult);

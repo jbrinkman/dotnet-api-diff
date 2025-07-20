@@ -89,7 +89,8 @@ public class ComparisonConfiguration
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
+            AllowTrailingCommas = true,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         var config = JsonSerializer.Deserialize<ComparisonConfiguration>(json, options);

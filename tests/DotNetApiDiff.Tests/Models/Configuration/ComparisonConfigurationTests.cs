@@ -28,7 +28,8 @@ public class ComparisonConfigurationTests
     public void LoadFromJsonFile_WithValidFile_LoadsConfiguration()
     {
         // Arrange
-        var configPath = Path.Combine("TestData", "sample-config.json");
+        var testDirectory = Path.GetDirectoryName(typeof(ComparisonConfigurationTests).Assembly.Location);
+        var configPath = Path.Combine(testDirectory!, "TestData", "sample-config.json");
 
         // Act
         var config = ComparisonConfiguration.LoadFromJsonFile(configPath);
