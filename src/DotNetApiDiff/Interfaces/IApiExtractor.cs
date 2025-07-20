@@ -13,8 +13,9 @@ public interface IApiExtractor
     /// Extracts all public API members from the specified assembly
     /// </summary>
     /// <param name="assembly">Assembly to extract API members from</param>
+    /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public API members</returns>
-    IEnumerable<ApiMember> ExtractApiMembers(Assembly assembly);
+    IEnumerable<ApiMember> ExtractApiMembers(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null);
 
     /// <summary>
     /// Extracts public API members from a specific type
@@ -27,6 +28,7 @@ public interface IApiExtractor
     /// Gets all public types from the specified assembly
     /// </summary>
     /// <param name="assembly">Assembly to get types from</param>
+    /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public types</returns>
-    IEnumerable<Type> GetPublicTypes(Assembly assembly);
+    IEnumerable<Type> GetPublicTypes(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null);
 }
