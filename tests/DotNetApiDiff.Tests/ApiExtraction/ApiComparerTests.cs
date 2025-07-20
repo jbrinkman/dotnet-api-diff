@@ -14,6 +14,7 @@ public class ApiComparerTests
     private readonly Mock<IApiExtractor> _mockApiExtractor;
     private readonly Mock<IDifferenceCalculator> _mockDifferenceCalculator;
     private readonly Mock<INameMapper> _mockNameMapper;
+    private readonly Mock<IChangeClassifier> _mockChangeClassifier;
     private readonly Mock<ILogger<ApiComparer>> _mockLogger;
     private readonly ApiComparer _apiComparer;
 
@@ -22,9 +23,19 @@ public class ApiComparerTests
         _mockApiExtractor = new Mock<IApiExtractor>();
         _mockDifferenceCalculator = new Mock<IDifferenceCalculator>();
         _mockNameMapper = new Mock<INameMapper>();
+        _mockChangeClassifier = new Mock<IChangeClassifier>();
         _mockLogger = new Mock<ILogger<ApiComparer>>();
 
-        _apiComparer = new ApiComparer(_mockApiExtractor.Object, _mockDifferenceCalculator.Object, _mockNameMapper.Object, _mockLogger.Object);
+        // Setup the change classifier to return the same difference that is passed to it
+        _mockChangeClassifier.Setup(x => x.ClassifyChange(It.IsAny<ApiDifference>()))
+            .Returns<ApiDifference>(diff => diff);
+
+        _apiComparer = new ApiComparer(
+            _mockApiExtractor.Object,
+            _mockDifferenceCalculator.Object,
+            _mockNameMapper.Object,
+            _mockChangeClassifier.Object,
+            _mockLogger.Object);
     }
 
     [Fact]
@@ -362,5 +373,55 @@ public class ApiComparerTests
         Assert.Single(result);
         Assert.Equal(ChangeType.Modified, result[0].ChangeType);
         Assert.Equal("System.String.Method", result[0].ElementName);
+    }
+
+    [Fact]
+    public void CompareAssemblies_ClassifiesChanges()
+    {
+        // Arrange
+        var oldAssembly = typeof(System.Text.StringBuilder).Assembly;
+        var newAssembly = typeof(System.Uri).Assembly;
+
+        var oldTypes = new List<Type> { typeof(string) };
+        var newTypes = new List<Type> { typeof(string), typeof(int) };
+
+        // Setup the extractor mock
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(oldAssembly)).Returns(oldTypes);
+        _mockApiExtractor.Setup(x => x.GetPublicTypes(newAssembly)).Returns(newTypes);
+
+        var typeDifference = new ApiDifference
+        {
+            ChangeType = ChangeType.Added,
+            ElementType = ApiElementType.Type,
+            ElementName = "System.Int32",
+            Description = "Added class 'System.Int32'",
+            IsBreakingChange = false
+        };
+
+        var classifiedDifference = new ApiDifference
+        {
+            ChangeType = ChangeType.Added,
+            ElementType = ApiElementType.Type,
+            ElementName = "System.Int32",
+            Description = "Added class 'System.Int32'",
+            IsBreakingChange = false,
+            Severity = SeverityLevel.Info // This is set by the classifier
+        };
+
+        _mockDifferenceCalculator.Setup(x => x.CalculateAddedType(typeof(int))).Returns(typeDifference);
+        _mockChangeClassifier.Setup(x => x.ClassifyChange(typeDifference)).Returns(classifiedDifference);
+
+        // Ensure member comparison returns empty to avoid additional complexity
+        _mockApiExtractor.Setup(x => x.ExtractTypeMembers(It.IsAny<Type>())).Returns(new List<ApiMember>());
+
+        // Act
+        var result = _apiComparer.CompareAssemblies(oldAssembly, newAssembly);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Contains(result.Differences, d => d.ElementName == "System.Int32");
+
+        // Verify that the change classifier was called
+        _mockChangeClassifier.Verify(x => x.ClassifyChange(It.IsAny<ApiDifference>()), Times.Once);
     }
 }

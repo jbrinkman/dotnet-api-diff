@@ -15,6 +15,7 @@ public class ApiComparer : IApiComparer
     private readonly IApiExtractor _apiExtractor;
     private readonly IDifferenceCalculator _differenceCalculator;
     private readonly INameMapper _nameMapper;
+    private readonly IChangeClassifier _changeClassifier;
     private readonly ILogger<ApiComparer> _logger;
 
     /// <summary>
@@ -23,16 +24,19 @@ public class ApiComparer : IApiComparer
     /// <param name="apiExtractor">API extractor for getting API members</param>
     /// <param name="differenceCalculator">Calculator for detailed change analysis</param>
     /// <param name="nameMapper">Mapper for namespace and type name transformations</param>
+    /// <param name="changeClassifier">Classifier for breaking changes and exclusions</param>
     /// <param name="logger">Logger for diagnostic information</param>
     public ApiComparer(
         IApiExtractor apiExtractor,
         IDifferenceCalculator differenceCalculator,
         INameMapper nameMapper,
+        IChangeClassifier changeClassifier,
         ILogger<ApiComparer> logger)
     {
         _apiExtractor = apiExtractor ?? throw new ArgumentNullException(nameof(apiExtractor));
         _differenceCalculator = differenceCalculator ?? throw new ArgumentNullException(nameof(differenceCalculator));
         _nameMapper = nameMapper ?? throw new ArgumentNullException(nameof(nameMapper));
+        _changeClassifier = changeClassifier ?? throw new ArgumentNullException(nameof(changeClassifier));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -80,10 +84,12 @@ public class ApiComparer : IApiComparer
             // Compare types
             var typeDifferences = CompareTypes(oldTypes, newTypes).ToList();
 
-            // Add the differences to the result
+            // Classify and add the differences to the result
             foreach (var diff in typeDifferences)
             {
-                result.Differences.Add(diff);
+                // Classify the difference using the change classifier
+                var classifiedDiff = _changeClassifier.ClassifyChange(diff);
+                result.Differences.Add(classifiedDiff);
             }
 
             // Update summary statistics
