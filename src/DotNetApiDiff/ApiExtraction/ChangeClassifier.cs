@@ -15,8 +15,8 @@ public class ChangeClassifier : IChangeClassifier
     private readonly BreakingChangeRules _breakingChangeRules;
     private readonly ExclusionConfiguration _exclusionConfig;
     private readonly ILogger<ChangeClassifier> _logger;
-    private readonly Dictionary<string, Regex> _typePatternCache = new();
-    private readonly Dictionary<string, Regex> _memberPatternCache = new();
+    private readonly Dictionary<string, Regex> _typePatternCache = new ();
+    private readonly Dictionary<string, Regex> _memberPatternCache = new ();
 
     /// <summary>
     /// Creates a new instance of the ChangeClassifier
@@ -57,8 +57,10 @@ public class ChangeClassifier : IChangeClassifier
             difference.Severity = SeverityLevel.Info;
             difference.Description = $"Excluded {difference.ElementType}: {difference.ElementName}";
 
-            _logger.LogDebug("Classified {ElementType} '{ElementName}' as excluded",
-                difference.ElementType, difference.ElementName);
+            _logger.LogDebug(
+                "Classified {ElementType} '{ElementName}' as excluded",
+                difference.ElementType,
+                difference.ElementName);
 
             return difference;
         }
@@ -83,8 +85,12 @@ public class ChangeClassifier : IChangeClassifier
                 break;
         }
 
-        _logger.LogDebug("Classified {ElementType} '{ElementName}' as {ChangeType}, Breaking: {IsBreaking}",
-            difference.ElementType, difference.ElementName, difference.ChangeType, difference.IsBreakingChange);
+        _logger.LogDebug(
+            "Classified {ElementType} '{ElementName}' as {ChangeType}, Breaking: {IsBreaking}",
+            difference.ElementType,
+            difference.ElementName,
+            difference.ChangeType,
+            difference.IsBreakingChange);
 
         return difference;
     }
@@ -166,6 +172,18 @@ public class ChangeClassifier : IChangeClassifier
     }
 
     /// <summary>
+    /// Converts a wildcard pattern to a regular expression
+    /// </summary>
+    /// <param name="pattern">The wildcard pattern</param>
+    /// <returns>A regular expression pattern</returns>
+    private static string WildcardToRegex(string pattern)
+    {
+        return "^" + Regex.Escape(pattern)
+                          .Replace("\\*", ".*")
+                          .Replace("\\?", ".") + "$";
+    }
+
+    /// <summary>
     /// Initializes the regex pattern caches for type and member exclusion patterns
     /// </summary>
     private void InitializePatternCaches()
@@ -202,18 +220,6 @@ public class ChangeClassifier : IChangeClassifier
             "Initialized exclusion pattern caches with {TypePatternCount} type patterns and {MemberPatternCount} member patterns",
             _typePatternCache.Count,
             _memberPatternCache.Count);
-    }
-
-    /// <summary>
-    /// Converts a wildcard pattern to a regular expression
-    /// </summary>
-    /// <param name="pattern">The wildcard pattern</param>
-    /// <returns>A regular expression pattern</returns>
-    private static string WildcardToRegex(string pattern)
-    {
-        return "^" + Regex.Escape(pattern)
-                          .Replace("\\*", ".*")
-                          .Replace("\\?", ".") + "$";
     }
 
     /// <summary>
@@ -303,6 +309,7 @@ public class ChangeClassifier : IChangeClassifier
             difference.IsBreakingChange = true;
             difference.Severity = SeverityLevel.Error;
         }
+        
         // If not already classified as breaking, keep the original classification
         else if (!difference.IsBreakingChange)
         {
