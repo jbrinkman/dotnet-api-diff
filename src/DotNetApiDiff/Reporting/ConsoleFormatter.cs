@@ -92,6 +92,7 @@ public class ConsoleFormatter : IReportFormatter
             {
                 output.AppendLine($"{change.ElementType} | {change.ElementName} | {change.Description} | {change.Severity}");
             }
+
             output.AppendLine();
         }
 
@@ -112,6 +113,7 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"+ {change.NewSignature}");
                 }
+
             }
             output.AppendLine();
         }
@@ -127,6 +129,7 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"- {change.OldSignature}");
                 }
+
             }
             output.AppendLine();
         }
@@ -142,10 +145,12 @@ public class ConsoleFormatter : IReportFormatter
                 {
                     output.AppendLine($"- {change.OldSignature}");
                 }
+
                 if (!string.IsNullOrEmpty(change.NewSignature))
                 {
                     output.AppendLine($"+ {change.NewSignature}");
                 }
+
             }
             output.AppendLine();
         }
@@ -193,8 +198,7 @@ public class ConsoleFormatter : IReportFormatter
             new Markup($"Modified: [yellow]{result.Summary.ModifiedCount}[/]"),
             new Markup($"Breaking Changes: [bold red]{result.Summary.BreakingChangesCount}[/]"),
             new Text(" "),
-            new Markup($"Total Changes: [blue]{result.Summary.TotalChanges}[/]")
-        ))
+            new Markup($"Total Changes: [blue]{result.Summary.TotalChanges}[/]")))
         {
             Header = new PanelHeader("Summary"),
             Border = BoxBorder.Rounded,
@@ -236,8 +240,7 @@ public class ConsoleFormatter : IReportFormatter
                 change.ElementType.ToString(),
                 change.ElementName,
                 change.Description,
-                severityText
-            );
+                severityText);
         }
 
         return table.ToString() ?? string.Empty;

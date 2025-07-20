@@ -31,6 +31,7 @@ public class ReportGenerator : IReportGenerator
             _formatters = new Dictionary<ReportFormat, IReportFormatter>
             {
                 { ReportFormat.Console, new ConsoleFormatter() }
+
                 // Other formatters will be added in subsequent tasks
                 // { ReportFormat.Json, new JsonFormatter() }
                 // { ReportFormat.Markdown, new MarkdownFormatter() }
