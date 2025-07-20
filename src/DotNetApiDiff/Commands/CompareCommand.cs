@@ -18,11 +18,11 @@ public class CompareCommandSettings : CommandSettings
 {
     [CommandArgument(0, "<sourceAssembly>")]
     [Description("Path to the source/baseline assembly")]
-    public required string SourceAssemblyPath { get; init; }
+    required public string SourceAssemblyPath { get; init; }
 
     [CommandArgument(1, "<targetAssembly>")]
     [Description("Path to the target/current assembly")]
-    public required string TargetAssemblyPath { get; init; }
+    required public string TargetAssemblyPath { get; init; }
 
     [CommandOption("-c|--config <configFile>")]
     [Description("Path to configuration file")]
@@ -128,6 +128,7 @@ public class CompareCommand : Command<CompareCommandSettings>
             if (!string.IsNullOrEmpty(settings.ConfigFile))
             {
                 logger.LogInformation("Loading configuration from {ConfigFile}", settings.ConfigFile);
+
                 // In a real implementation, we would load the configuration from the file
                 config = ComparisonConfiguration.CreateDefault();
             }
@@ -141,6 +142,7 @@ public class CompareCommand : Command<CompareCommandSettings>
             if (settings.NamespaceFilters != null && settings.NamespaceFilters.Length > 0)
             {
                 logger.LogInformation("Applying namespace filters: {Filters}", string.Join(", ", settings.NamespaceFilters));
+
                 // In a real implementation, we would update the configuration with the filters
             }
 
@@ -148,6 +150,7 @@ public class CompareCommand : Command<CompareCommandSettings>
             if (settings.ExcludePatterns != null && settings.ExcludePatterns.Length > 0)
             {
                 logger.LogInformation("Applying exclusion patterns: {Patterns}", string.Join(", ", settings.ExcludePatterns));
+
                 // In a real implementation, we would update the configuration with the exclusions
             }
 
