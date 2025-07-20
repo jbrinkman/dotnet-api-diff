@@ -22,15 +22,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "console"
             };
 
@@ -43,30 +43,30 @@ public class CompareCommandTests
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
     [Fact]
-    public void Validate_WithInvalidOldAssemblyPath_ReturnsError()
+    public void Validate_WithInvalidSourceAssemblyPath_ReturnsError()
     {
         // Arrange
         var command = new CompareCommand(Mock.Of<IServiceProvider>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
-        // Create temporary file for new assembly
-        string newAssemblyPath = Path.GetTempFileName();
+        // Create temporary file for target assembly
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = "non_existent_file.dll",
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = "non_existent_file.dll",
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "console"
             };
 
@@ -75,32 +75,32 @@ public class CompareCommandTests
 
             // Assert
             Assert.False(result.Successful);
-            Assert.Contains("Old assembly file not found", result.Message);
+            Assert.Contains("Source assembly file not found", result.Message);
         }
         finally
         {
             // Clean up temporary file
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
     [Fact]
-    public void Validate_WithInvalidNewAssemblyPath_ReturnsError()
+    public void Validate_WithInvalidTargetAssemblyPath_ReturnsError()
     {
         // Arrange
         var command = new CompareCommand(Mock.Of<IServiceProvider>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
-        // Create temporary file for old assembly
-        string oldAssemblyPath = Path.GetTempFileName();
+        // Create temporary file for source assembly
+        string sourceAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = "non_existent_file.dll",
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = "non_existent_file.dll",
                 OutputFormat = "console"
             };
 
@@ -109,13 +109,13 @@ public class CompareCommandTests
 
             // Assert
             Assert.False(result.Successful);
-            Assert.Contains("New assembly file not found", result.Message);
+            Assert.Contains("Target assembly file not found", result.Message);
         }
         finally
         {
             // Clean up temporary file
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
         }
     }
 
@@ -127,15 +127,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for assemblies
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 ConfigFile = "non_existent_config.json",
                 OutputFormat = "console"
             };
@@ -150,11 +150,11 @@ public class CompareCommandTests
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
@@ -166,15 +166,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for assemblies
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "invalid"
             };
 
@@ -188,11 +188,11 @@ public class CompareCommandTests
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
@@ -220,19 +220,19 @@ public class CompareCommandTests
             .Returns(mockReportGenerator.Object);
 
         // Set up mock behavior
-        var oldAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var newAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var oldApi = new List<ApiMember>();
-        var newApi = new List<ApiMember>();
+        var sourceAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var targetAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var sourceApi = new List<ApiMember>();
+        var targetApi = new List<ApiMember>();
         var comparisonResult = new ComparisonResult
         {
             Differences = new List<ApiDifference>()
         };
 
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))
-            .Returns(oldAssembly);
+            .Returns(sourceAssembly);
         mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()))
-            .Returns(oldApi);
+            .Returns(sourceApi);
         mockApiComparer.Setup(ac => ac.CompareAssemblies(It.IsAny<System.Reflection.Assembly>(), It.IsAny<System.Reflection.Assembly>()))
             .Returns(comparisonResult);
         mockReportGenerator.Setup(rg => rg.GenerateReport(It.IsAny<ComparisonResult>(), It.IsAny<ReportFormat>()))
@@ -242,15 +242,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "console"
             };
 
@@ -259,20 +259,20 @@ public class CompareCommandTests
 
             // Assert
             Assert.Equal(0, result);
-            mockAssemblyLoader.Verify(al => al.LoadAssembly(oldAssemblyPath), Times.Once);
-            mockAssemblyLoader.Verify(al => al.LoadAssembly(newAssemblyPath), Times.Once);
+            mockAssemblyLoader.Verify(al => al.LoadAssembly(sourceAssemblyPath), Times.Once);
+            mockAssemblyLoader.Verify(al => al.LoadAssembly(targetAssemblyPath), Times.Once);
             mockApiExtractor.Verify(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()), Times.Exactly(2));
-            mockApiComparer.Verify(ac => ac.CompareAssemblies(oldAssembly, newAssembly), Times.Once);
+            mockApiComparer.Verify(ac => ac.CompareAssemblies(sourceAssembly, targetAssembly), Times.Once);
             mockReportGenerator.Verify(rg => rg.GenerateReport(comparisonResult, ReportFormat.Console), Times.Once);
         }
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
@@ -300,10 +300,10 @@ public class CompareCommandTests
             .Returns(mockReportGenerator.Object);
 
         // Set up mock behavior with breaking changes
-        var oldAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var newAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var oldApi = new List<ApiMember>();
-        var newApi = new List<ApiMember>();
+        var sourceAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var targetAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var sourceApi = new List<ApiMember>();
+        var targetApi = new List<ApiMember>();
 
         // Create a comparison result with breaking changes
         var comparisonResult = new ComparisonResult
@@ -320,9 +320,9 @@ public class CompareCommandTests
         };
 
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))
-            .Returns(oldAssembly);
+            .Returns(sourceAssembly);
         mockApiExtractor.Setup(ae => ae.ExtractApiMembers(It.IsAny<System.Reflection.Assembly>()))
-            .Returns(oldApi);
+            .Returns(sourceApi);
         mockApiComparer.Setup(ac => ac.CompareAssemblies(It.IsAny<System.Reflection.Assembly>(), It.IsAny<System.Reflection.Assembly>()))
             .Returns(comparisonResult);
         mockReportGenerator.Setup(rg => rg.GenerateReport(It.IsAny<ComparisonResult>(), It.IsAny<ReportFormat>()))
@@ -332,15 +332,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "console"
             };
 
@@ -353,11 +353,11 @@ public class CompareCommandTests
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 
@@ -383,15 +383,15 @@ public class CompareCommandTests
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
-        string oldAssemblyPath = Path.GetTempFileName();
-        string newAssemblyPath = Path.GetTempFileName();
+        string sourceAssemblyPath = Path.GetTempFileName();
+        string targetAssemblyPath = Path.GetTempFileName();
 
         try
         {
             var settings = new CompareCommandSettings
             {
-                OldAssemblyPath = oldAssemblyPath,
-                NewAssemblyPath = newAssemblyPath,
+                SourceAssemblyPath = sourceAssemblyPath,
+                TargetAssemblyPath = targetAssemblyPath,
                 OutputFormat = "console"
             };
 
@@ -404,11 +404,11 @@ public class CompareCommandTests
         finally
         {
             // Clean up temporary files
-            if (File.Exists(oldAssemblyPath))
-                File.Delete(oldAssemblyPath);
+            if (File.Exists(sourceAssemblyPath))
+                File.Delete(sourceAssemblyPath);
 
-            if (File.Exists(newAssemblyPath))
-                File.Delete(newAssemblyPath);
+            if (File.Exists(targetAssemblyPath))
+                File.Delete(targetAssemblyPath);
         }
     }
 }

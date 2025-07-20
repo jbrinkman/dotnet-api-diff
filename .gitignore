@@ -90,4 +90,4 @@ node_modules/
 *.binlog
 
 # Local History for Visual Studio
-.localhistory/
+.localhistory/test-report/

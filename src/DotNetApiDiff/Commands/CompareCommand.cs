@@ -16,13 +16,13 @@ namespace DotNetApiDiff.Commands;
 /// </summary>
 public class CompareCommandSettings : CommandSettings
 {
-    [CommandArgument(0, "<oldAssembly>")]
-    [Description("Path to the old/baseline assembly")]
-    public required string OldAssemblyPath { get; init; }
+    [CommandArgument(0, "<sourceAssembly>")]
+    [Description("Path to the source/baseline assembly")]
+    public required string SourceAssemblyPath { get; init; }
 
-    [CommandArgument(1, "<newAssembly>")]
-    [Description("Path to the new/current assembly")]
-    public required string NewAssemblyPath { get; init; }
+    [CommandArgument(1, "<targetAssembly>")]
+    [Description("Path to the target/current assembly")]
+    public required string TargetAssemblyPath { get; init; }
 
     [CommandOption("-c|--config <configFile>")]
     [Description("Path to configuration file")]
@@ -76,16 +76,16 @@ public class CompareCommand : Command<CompareCommandSettings>
     /// <returns>ValidationResult indicating success or failure</returns>
     public override ValidationResult Validate([NotNull] CommandContext context, [NotNull] CompareCommandSettings settings)
     {
-        // Validate old assembly path
-        if (!File.Exists(settings.OldAssemblyPath))
+        // Validate source assembly path
+        if (!File.Exists(settings.SourceAssemblyPath))
         {
-            return ValidationResult.Error($"Old assembly file not found: {settings.OldAssemblyPath}");
+            return ValidationResult.Error($"Source assembly file not found: {settings.SourceAssemblyPath}");
         }
 
-        // Validate new assembly path
-        if (!File.Exists(settings.NewAssemblyPath))
+        // Validate target assembly path
+        if (!File.Exists(settings.TargetAssemblyPath))
         {
-            return ValidationResult.Error($"New assembly file not found: {settings.NewAssemblyPath}");
+            return ValidationResult.Error($"Target assembly file not found: {settings.TargetAssemblyPath}");
         }
 
         // Validate config file if specified
@@ -152,23 +152,23 @@ public class CompareCommand : Command<CompareCommandSettings>
             }
 
             // Load assemblies
-            logger.LogInformation("Loading old assembly: {Path}", settings.OldAssemblyPath);
-            logger.LogInformation("Loading new assembly: {Path}", settings.NewAssemblyPath);
+            logger.LogInformation("Loading source assembly: {Path}", settings.SourceAssemblyPath);
+            logger.LogInformation("Loading target assembly: {Path}", settings.TargetAssemblyPath);
 
             var assemblyLoader = _serviceProvider.GetRequiredService<IAssemblyLoader>();
-            var oldAssembly = assemblyLoader.LoadAssembly(settings.OldAssemblyPath);
-            var newAssembly = assemblyLoader.LoadAssembly(settings.NewAssemblyPath);
+            var sourceAssembly = assemblyLoader.LoadAssembly(settings.SourceAssemblyPath);
+            var targetAssembly = assemblyLoader.LoadAssembly(settings.TargetAssemblyPath);
 
             // Extract API information
             logger.LogInformation("Extracting API information from assemblies");
             var apiExtractor = _serviceProvider.GetRequiredService<IApiExtractor>();
-            var oldApi = apiExtractor.ExtractApiMembers(oldAssembly);
-            var newApi = apiExtractor.ExtractApiMembers(newAssembly);
+            var sourceApi = apiExtractor.ExtractApiMembers(sourceAssembly);
+            var targetApi = apiExtractor.ExtractApiMembers(targetAssembly);
 
             // Compare APIs
             logger.LogInformation("Comparing APIs");
             var apiComparer = _serviceProvider.GetRequiredService<IApiComparer>();
-            var comparisonResult = apiComparer.CompareAssemblies(oldAssembly, newAssembly);
+            var comparisonResult = apiComparer.CompareAssemblies(sourceAssembly, targetAssembly);
 
             // Create ApiComparison from ComparisonResult
             var comparison = new Models.ApiComparison

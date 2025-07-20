@@ -66,7 +66,7 @@ task coverage
 task coverage:view
 
 # Run the application with arguments
-task run -- --old old.dll --new new.dll
+task run -- compare source.dll target.dll
 
 # Run CI build sequence
 task ci
@@ -76,22 +76,36 @@ task ci
 
 ```bash
 # Basic comparison
-dotnet run -- --old path/to/old/assembly.dll --new path/to/new/assembly.dll
+dotnet run -- compare source.dll target.dll
 
 # Generate JSON report
-dotnet run -- --old old.dll --new new.dll --format json --output report.json
+dotnet run -- compare source.dll target.dll --output json
 
-# Show only breaking changes
-dotnet run -- --old old.dll --new new.dll --breaking-only
+# Generate markdown report
+dotnet run -- compare source.dll target.dll --output markdown
+
+# Filter to specific namespaces
+dotnet run -- compare source.dll target.dll --filter System.Collections
+
+# Use configuration file
+dotnet run -- compare source.dll target.dll --config config.json
+
+# Enable verbose output
+dotnet run -- compare source.dll target.dll --verbose
 ```
 
 ## Command Line Options
 
-- `--old, -o`: Path to the original assembly
-- `--new, -n`: Path to the new assembly to compare against
-- `--format, -f`: Output format (console, json, xml, html, markdown)
-- `--output, -out`: Output file path (optional, defaults to console)
-- `--breaking-only, -b`: Show only breaking changes
+### Compare Command
+
+- `<sourceAssembly>`: Path to the source/baseline assembly (required)
+- `<targetAssembly>`: Path to the target/current assembly (required)
+- `--config, -c`: Path to configuration file
+- `--output, -o`: Output format (console, json, markdown)
+- `--filter, -f`: Filter to specific namespaces (can be specified multiple times)
+- `--exclude, -e`: Exclude types matching pattern (can be specified multiple times)
+- `--no-color`: Disable colored output
+- `--verbose, -v`: Enable verbose output
 - `--help, -h`: Show help information
 
 ## Project Structure

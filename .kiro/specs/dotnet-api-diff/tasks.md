@@ -92,8 +92,8 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-4.3-change-classification`, commit, push, and create PR
     - _Requirements: 3.1, 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 5. Create CLI interface and argument parsing
-  - [ ] 5.1 Implement command-line interface using System.CommandLine
+- [x] 5. Create CLI interface and argument parsing
+  - [x] 5.1 Implement command-line interface using Spectre.Console.Cli
     - Create CLI commands and options for assembly paths, configuration, output format
     - Implement help text and usage examples
     - Write integration tests for CLI argument parsing
@@ -108,11 +108,12 @@ Each task should follow this git workflow:
     - _Requirements: 3.2, 3.3, 5.1, 5.2, 5.3, 5.4_
 
 - [ ] 6. Implement output formatting and reporting
-  - [ ] 6.1 Create console output formatter
-    - Implement ConsoleFormatter with colored output for additions, removals, modifications
+  - [ ] 6.1 Create ReportGenerator and console output formatter
+    - Implement ReportGenerator interface with support for multiple formats
+    - Create ConsoleFormatter with colored output for additions, removals, modifications
     - Add summary statistics and breaking change indicators
     - Write unit tests for console output formatting
-    - **Git Workflow**: Create branch `feature/task-6.1-console-formatter`, commit, push, and create PR
+    - **Git Workflow**: Create branch `feature/task-6.1-report-generator`, commit, push, and create PR
     - _Requirements: 4.4, 8.1, 8.4_
 
   - [ ] 6.2 Implement JSON output formatter
