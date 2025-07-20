@@ -32,11 +32,11 @@ public class JsonFormatterTests
         // Assert
         Assert.NotNull(jsonOutput);
         Assert.NotEmpty(jsonOutput);
-        
+
         // Verify it's valid JSON
         var exception = Record.Exception(() => JsonDocument.Parse(jsonOutput));
         Assert.Null(exception);
-        
+
         // Verify basic content
         Assert.Contains("source.dll", jsonOutput);
         Assert.Contains("target.dll", jsonOutput);
@@ -76,14 +76,14 @@ public class JsonFormatterTests
 
         // Assert
         var root = jsonDoc.RootElement;
-        
+
         // Verify summary
         Assert.Equal(1, root.GetProperty("summary").GetProperty("addedCount").GetInt32());
-        
+
         // Verify added items
         var added = root.GetProperty("added");
         Assert.Equal(1, added.GetArrayLength());
-        
+
         var addedItem = added[0];
         Assert.Equal("Added", addedItem.GetProperty("changeType").GetString());
         Assert.Equal("Method", addedItem.GetProperty("elementType").GetString());
@@ -128,15 +128,15 @@ public class JsonFormatterTests
 
         // Assert
         var root = jsonDoc.RootElement;
-        
+
         // Verify summary
         Assert.Equal(1, root.GetProperty("summary").GetProperty("removedCount").GetInt32());
         Assert.Equal(1, root.GetProperty("summary").GetProperty("breakingChangesCount").GetInt32());
-        
+
         // Verify removed items
         var removed = root.GetProperty("removed");
         Assert.Equal(1, removed.GetArrayLength());
-        
+
         var removedItem = removed[0];
         Assert.Equal("Removed", removedItem.GetProperty("changeType").GetString());
         Assert.Equal("Method", removedItem.GetProperty("elementType").GetString());
@@ -145,7 +145,7 @@ public class JsonFormatterTests
         Assert.True(removedItem.GetProperty("isBreakingChange").GetBoolean());
         Assert.Equal("Error", removedItem.GetProperty("severity").GetString());
         Assert.Equal("public void OldMethod()", removedItem.GetProperty("oldSignature").GetString());
-        
+
         // Verify breaking changes section
         var breakingChanges = root.GetProperty("breakingChanges");
         Assert.Equal(1, breakingChanges.GetArrayLength());
@@ -186,15 +186,15 @@ public class JsonFormatterTests
 
         // Assert
         var root = jsonDoc.RootElement;
-        
+
         // Verify summary
         Assert.Equal(1, root.GetProperty("summary").GetProperty("modifiedCount").GetInt32());
         Assert.Equal(1, root.GetProperty("summary").GetProperty("breakingChangesCount").GetInt32());
-        
+
         // Verify modified items
         var modified = root.GetProperty("modified");
         Assert.Equal(1, modified.GetArrayLength());
-        
+
         var modifiedItem = modified[0];
         Assert.Equal("Modified", modifiedItem.GetProperty("changeType").GetString());
         Assert.Equal("Property", modifiedItem.GetProperty("elementType").GetString());
@@ -268,14 +268,14 @@ public class JsonFormatterTests
 
         // Assert
         var root = jsonDoc.RootElement;
-        
+
         // Verify summary
         Assert.Equal(1, root.GetProperty("summary").GetProperty("addedCount").GetInt32());
         Assert.Equal(1, root.GetProperty("summary").GetProperty("removedCount").GetInt32());
         Assert.Equal(1, root.GetProperty("summary").GetProperty("modifiedCount").GetInt32());
         Assert.Equal(2, root.GetProperty("summary").GetProperty("breakingChangesCount").GetInt32());
         Assert.Equal(3, root.GetProperty("summary").GetProperty("totalChanges").GetInt32());
-        
+
         // Verify sections exist with correct counts
         Assert.Equal(1, root.GetProperty("added").GetArrayLength());
         Assert.Equal(1, root.GetProperty("removed").GetArrayLength());
@@ -283,7 +283,7 @@ public class JsonFormatterTests
         Assert.Equal(1, root.GetProperty("excluded").GetArrayLength());
         Assert.Equal(2, root.GetProperty("breakingChanges").GetArrayLength());
     }
-    
+
     [Fact]
     public void Format_WithNonIndentedOption_ReturnsCompactJson()
     {
@@ -302,14 +302,14 @@ public class JsonFormatterTests
         // Assert
         Assert.NotNull(compactOutput);
         Assert.NotEmpty(compactOutput);
-        
+
         // Compact should be shorter than indented
         Assert.True(compactOutput.Length < indentedOutput.Length);
-        
+
         // But should contain the same data
         var indentedDoc = JsonDocument.Parse(indentedOutput);
         var compactDoc = JsonDocument.Parse(compactOutput);
-        
+
         Assert.Equal(
             indentedDoc.RootElement.GetProperty("oldAssemblyPath").GetString(),
             compactDoc.RootElement.GetProperty("oldAssemblyPath").GetString());

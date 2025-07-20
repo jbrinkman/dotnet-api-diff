@@ -36,7 +36,7 @@ public class JsonFormatter : IReportFormatter
     {
         // Create a JSON-friendly representation of the comparison result
         var jsonModel = CreateJsonModel(result);
-        
+
         // Serialize to JSON
         return JsonSerializer.Serialize(jsonModel, _jsonOptions);
     }
@@ -74,7 +74,7 @@ public class JsonFormatter : IReportFormatter
         jsonResult.Modified = modifiedItems.Select(ConvertToJsonDifference).ToList();
         jsonResult.Excluded = excludedItems.Select(ConvertToJsonDifference).ToList();
         jsonResult.Moved = movedItems.Select(ConvertToJsonDifference).ToList();
-        
+
         // Add breaking changes separately for easy access
         jsonResult.BreakingChanges = result.Differences
             .Where(d => d.IsBreakingChange)
