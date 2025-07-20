@@ -87,12 +87,103 @@ dotnet run -- compare source.dll target.dll --output markdown
 # Filter to specific namespaces
 dotnet run -- compare source.dll target.dll --filter System.Collections
 
+# Filter to specific type patterns
+dotnet run -- compare source.dll target.dll --type "System.Collections.*"
+
+# Exclude specific namespaces or types
+dotnet run -- compare source.dll target.dll --exclude Internal --exclude "System.Diagnostics.*"
+
+# Include internal types in comparison
+dotnet run -- compare source.dll target.dll --include-internals
+
+# Include compiler-generated types in comparison
+dotnet run -- compare source.dll target.dll --include-compiler-generated
+
 # Use configuration file
 dotnet run -- compare source.dll target.dll --config config.json
 
 # Enable verbose output
 dotnet run -- compare source.dll target.dll --verbose
 ```
+
+## Configuration File
+
+You can use a JSON configuration file to customize the comparison behavior. The configuration file supports the following sections:
+
+### Sample Configuration File
+
+```json
+{
+  "mappings": {
+    "namespaceMappings": {
+      "OldNamespace": ["NewNamespace"],
+      "Legacy.Api": ["Modern.Api", "Modern.Api.V2"]
+    },
+    "typeMappings": {
+      "OldNamespace.OldType": "NewNamespace.NewType"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": true
+  },
+  "exclusions": {
+    "excludedTypes": ["System.Diagnostics.Debug"],
+    "excludedTypePatterns": ["*.Internal.*", "*.Private.*"],
+    "excludedMembers": ["System.Object.Finalize"],
+    "excludedMemberPatterns": ["*.Obsolete*"]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "filters": {
+    "includeNamespaces": ["System.Text", "System.IO"],
+    "excludeNamespaces": ["System.Diagnostics"],
+    "includeTypes": ["System.Text.*"],
+    "excludeTypes": ["*.Internal*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "outputFormat": "Console",
+  "outputPath": null,
+  "failOnBreakingChanges": true
+}
+```
+
+### Configuration Sections
+
+- **mappings**: Define namespace and type name mappings between assemblies
+  - **namespaceMappings**: Map source namespaces to target namespaces
+  - **typeMappings**: Map specific source types to target types
+  - **autoMapSameNameTypes**: Automatically map types with the same name but different namespaces
+  - **ignoreCase**: Ignore case when comparing type and namespace names
+
+- **exclusions**: Specify types and members to exclude from comparison
+  - **excludedTypes**: List of fully qualified type names to exclude
+  - **excludedTypePatterns**: Wildcard patterns for excluding types
+  - **excludedMembers**: List of fully qualified member names to exclude
+  - **excludedMemberPatterns**: Wildcard patterns for excluding members
+
+- **breakingChangeRules**: Configure what changes are considered breaking
+  - **treatTypeRemovalAsBreaking**: Whether removing a type is a breaking change
+  - **treatMemberRemovalAsBreaking**: Whether removing a member is a breaking change
+  - **treatAddedTypeAsBreaking**: Whether adding a type is a breaking change
+  - **treatAddedMemberAsBreaking**: Whether adding a member is a breaking change
+  - **treatSignatureChangeAsBreaking**: Whether changing a member signature is a breaking change
+
+- **filters**: Control which types and namespaces are included in the comparison
+  - **includeNamespaces**: List of namespaces to include (if empty, all namespaces are included)
+  - **excludeNamespaces**: List of namespaces to exclude
+  - **includeTypes**: List of type patterns to include
+  - **excludeTypes**: List of type patterns to exclude
+  - **includeInternals**: Whether to include internal types
+  - **includeCompilerGenerated**: Whether to include compiler-generated types
+
+- **outputFormat**: Format for the comparison report (Console, Json, Markdown)
+- **outputPath**: Path to save the report (if null, output to console)
+- **failOnBreakingChanges**: Whether to return a non-zero exit code if breaking changes are found
 
 ## Command Line Options
 
@@ -103,7 +194,10 @@ dotnet run -- compare source.dll target.dll --verbose
 - `--config, -c`: Path to configuration file
 - `--output, -o`: Output format (console, json, markdown)
 - `--filter, -f`: Filter to specific namespaces (can be specified multiple times)
+- `--type, -t`: Filter to specific type patterns (can be specified multiple times)
 - `--exclude, -e`: Exclude types matching pattern (can be specified multiple times)
+- `--include-internals`: Include internal types in the comparison
+- `--include-compiler-generated`: Include compiler-generated types in the comparison
 - `--no-color`: Disable colored output
 - `--verbose, -v`: Enable verbose output
 - `--help, -h`: Show help information
