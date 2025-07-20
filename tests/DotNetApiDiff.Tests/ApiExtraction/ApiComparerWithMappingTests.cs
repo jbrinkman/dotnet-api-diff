@@ -152,7 +152,12 @@ namespace DotNetApiDiff.Tests.ApiExtraction
             var mappingConfig = new MappingConfiguration(); // No mappings
 
             var nameMapper = new NameMapper(mappingConfig, _nameMapperLoggerMock.Object);
-            var apiComparer = new ApiComparer(_apiExtractorMock.Object, _differenceCalculatorMock.Object, nameMapper, _changeClassifierMock.Object, _loggerMock.Object);
+            var apiComparer = new ApiComparer(
+                _apiExtractorMock.Object,
+                _differenceCalculatorMock.Object,
+                nameMapper,
+                _changeClassifierMock.Object,
+                _loggerMock.Object);
 
             var addedDifference = new ApiDifference { ChangeType = ChangeType.Added };
             var removedDifference = new ApiDifference { ChangeType = ChangeType.Removed };
