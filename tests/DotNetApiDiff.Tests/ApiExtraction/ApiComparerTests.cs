@@ -13,6 +13,7 @@ public class ApiComparerTests
 {
     private readonly Mock<IApiExtractor> _mockApiExtractor;
     private readonly Mock<IDifferenceCalculator> _mockDifferenceCalculator;
+    private readonly Mock<INameMapper> _mockNameMapper;
     private readonly Mock<ILogger<ApiComparer>> _mockLogger;
     private readonly ApiComparer _apiComparer;
 
@@ -20,9 +21,10 @@ public class ApiComparerTests
     {
         _mockApiExtractor = new Mock<IApiExtractor>();
         _mockDifferenceCalculator = new Mock<IDifferenceCalculator>();
+        _mockNameMapper = new Mock<INameMapper>();
         _mockLogger = new Mock<ILogger<ApiComparer>>();
 
-        _apiComparer = new ApiComparer(_mockApiExtractor.Object, _mockDifferenceCalculator.Object, _mockLogger.Object);
+        _apiComparer = new ApiComparer(_mockApiExtractor.Object, _mockDifferenceCalculator.Object, _mockNameMapper.Object, _mockLogger.Object);
     }
 
     [Fact]

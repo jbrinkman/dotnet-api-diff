@@ -51,8 +51,11 @@ public class ApiComparerManualTests
 
         var logger = new NullLogger<ApiComparer>();
 
+        // Create a mock NameMapper
+        var mockNameMapper = new Mock<INameMapper>();
+
         // Create the comparer with our manual mocks
-        var apiComparer = new ApiComparer(mockApiExtractor.Object, mockDiffCalc.Object, logger);
+        var apiComparer = new ApiComparer(mockApiExtractor.Object, mockDiffCalc.Object, mockNameMapper.Object, logger);
 
         // Act
         Console.WriteLine("About to call CompareMembers");
