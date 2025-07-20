@@ -61,7 +61,7 @@ public class NameMapper : INameMapper
             if (sourceNamespace.StartsWith(mapping.Key + ".", _stringComparison))
             {
                 var suffix = sourceNamespace.Substring(mapping.Key.Length + 1);
-                var results = mapping.Value.Select(target => string.IsNullOrEmpty(target) ? suffix : $"{target}.{suffix}").ToList();
+                var results = mapping.Value.Select(target => CombineNamespaceParts(target, suffix)).ToList();
 
                 _logger.LogDebug("Mapped namespace {SourceNamespace} to {TargetNamespaces} using prefix mapping",
                     sourceNamespace, string.Join(", ", results));
@@ -140,7 +140,7 @@ public class NameMapper : INameMapper
 
         // Combine the mapped namespaces with the mapped type
         var results = mappedNamespaces
-            .Select(ns => string.IsNullOrEmpty(ns) ? mappedType : $"{ns}.{mappedType}")
+            .Select(ns => CombineNamespaceParts(ns, mappedType))
             .ToList();
 
         if (results.Count > 1)
@@ -191,5 +191,16 @@ public class NameMapper : INameMapper
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Combines namespace parts with proper handling of empty namespaces
+    /// </summary>
+    /// <param name="namespacePart">First namespace part</param>
+    /// <param name="suffix">Second namespace part</param>
+    /// <returns>Combined namespace</returns>
+    private string CombineNamespaceParts(string namespacePart, string suffix)
+    {
+        return string.IsNullOrEmpty(namespacePart) ? suffix : $"{namespacePart}.{suffix}";
     }
 }

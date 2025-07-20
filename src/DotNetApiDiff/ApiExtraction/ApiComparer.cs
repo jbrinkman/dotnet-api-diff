@@ -191,32 +191,11 @@ public class ApiComparer : IApiComparer
                 // Check for auto-mapping if enabled
                 if (!foundMatch && _nameMapper.ShouldAutoMapType(newTypeName))
                 {
-                    // Extract simple type name for auto-mapping
-                    int lastDotIndex = newTypeName.LastIndexOf('.');
-                    if (lastDotIndex > 0)
+                    if (TryFindTypeBySimpleName(newTypeName, oldTypesList, out var matchedOldTypeName))
                     {
-                        string simpleTypeName = newTypeName.Substring(lastDotIndex + 1);
-
-                        // Look for any old type with the same simple name
-                        foreach (var oldType in oldTypesList)
-                        {
-                            var oldTypeName = oldType.FullName ?? oldType.Name;
-                            int oldLastDotIndex = oldTypeName.LastIndexOf('.');
-
-                            if (oldLastDotIndex > 0)
-                            {
-                                string oldSimpleTypeName = oldTypeName.Substring(oldLastDotIndex + 1);
-
-                                if (string.Equals(simpleTypeName, oldSimpleTypeName,
-                                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                                {
-                                    foundMatch = true;
-                                    _logger.LogDebug("Auto-mapped type {NewTypeName} to {OldTypeName} by simple name",
-                                        newTypeName, oldTypeName);
-                                    break;
-                                }
-                            }
-                        }
+                        foundMatch = true;
+                        _logger.LogDebug("Auto-mapped type {NewTypeName} to {OldTypeName} by simple name",
+                            newTypeName, matchedOldTypeName);
                     }
                 }
             }
@@ -255,32 +234,11 @@ public class ApiComparer : IApiComparer
                 // Check for auto-mapping if enabled
                 if (!foundMatch && _nameMapper.ShouldAutoMapType(oldTypeName))
                 {
-                    // Extract simple type name for auto-mapping
-                    int lastDotIndex = oldTypeName.LastIndexOf('.');
-                    if (lastDotIndex > 0)
+                    if (TryFindTypeBySimpleName(oldTypeName, newTypesList, out var matchedNewTypeName))
                     {
-                        string simpleTypeName = oldTypeName.Substring(lastDotIndex + 1);
-
-                        // Look for any new type with the same simple name
-                        foreach (var newType in newTypesList)
-                        {
-                            var newTypeName = newType.FullName ?? newType.Name;
-                            int newLastDotIndex = newTypeName.LastIndexOf('.');
-
-                            if (newLastDotIndex > 0)
-                            {
-                                string newSimpleTypeName = newTypeName.Substring(newLastDotIndex + 1);
-
-                                if (string.Equals(simpleTypeName, newSimpleTypeName,
-                                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                                {
-                                    foundMatch = true;
-                                    _logger.LogDebug("Auto-mapped type {OldTypeName} to {NewTypeName} by simple name",
-                                        oldTypeName, newTypeName);
-                                    break;
-                                }
-                            }
-                        }
+                        foundMatch = true;
+                        _logger.LogDebug("Auto-mapped type {OldTypeName} to {NewTypeName} by simple name",
+                            oldTypeName, matchedNewTypeName);
                     }
                 }
             }
@@ -339,6 +297,48 @@ public class ApiComparer : IApiComparer
         }
 
         return differences;
+    }
+
+    /// <summary>
+    /// Tries to find a matching type by simple name (without namespace)
+    /// </summary>
+    /// <param name="typeName">The type name to find a match for</param>
+    /// <param name="candidateTypes">List of candidate types to search</param>
+    /// <param name="matchedTypeName">The matched type name, if found</param>
+    /// <returns>True if a match was found, false otherwise</returns>
+    private bool TryFindTypeBySimpleName(string typeName, IEnumerable<Type> candidateTypes, out string matchedTypeName)
+    {
+        matchedTypeName = null;
+
+        // Extract simple type name for auto-mapping
+        int lastDotIndex = typeName.LastIndexOf('.');
+        if (lastDotIndex <= 0)
+        {
+            return false;
+        }
+
+        string simpleTypeName = typeName.Substring(lastDotIndex + 1);
+
+        // Look for any type with the same simple name
+        foreach (var candidateType in candidateTypes)
+        {
+            var candidateTypeName = candidateType.FullName ?? candidateType.Name;
+            int candidateLastDotIndex = candidateTypeName.LastIndexOf('.');
+
+            if (candidateLastDotIndex > 0)
+            {
+                string candidateSimpleTypeName = candidateTypeName.Substring(candidateLastDotIndex + 1);
+
+                if (string.Equals(simpleTypeName, candidateSimpleTypeName,
+                    _nameMapper.Configuration.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                {
+                    matchedTypeName = candidateTypeName;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
