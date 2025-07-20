@@ -32,7 +32,9 @@ public class ApiExtractor : IApiExtractor
     /// <param name="assembly">Assembly to extract API members from</param>
     /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public API members</returns>
-    public IEnumerable<ApiMember> ExtractApiMembers(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null)
+    public IEnumerable<ApiMember> ExtractApiMembers(
+        Assembly assembly,
+        Models.Configuration.FilterConfiguration? filterConfig = null)
     {
         if (assembly == null)
         {
@@ -168,7 +170,9 @@ public class ApiExtractor : IApiExtractor
     /// <param name="assembly">Assembly to get types from</param>
     /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public types</returns>
-    public virtual IEnumerable<Type> GetPublicTypes(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null)
+    public virtual IEnumerable<Type> GetPublicTypes(
+        Assembly assembly,
+        Models.Configuration.FilterConfiguration? filterConfig = null)
     {
         if (assembly == null)
         {
@@ -190,9 +194,11 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug("Filtering types to include only namespaces: {Namespaces}",
                         string.Join(", ", filterConfig.IncludeNamespaces));
 
-                    types = types.Where(t =>
-                        filterConfig.IncludeNamespaces.Any(ns =>
-                            (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
+                    types = types.Where(
+                        t =>
+                            filterConfig.IncludeNamespaces.Any(
+                                ns =>
+                                    (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
                 }
 
                 // Filter by namespace excludes
@@ -201,9 +207,11 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug("Filtering types to exclude namespaces: {Namespaces}",
                         string.Join(", ", filterConfig.ExcludeNamespaces));
 
-                    types = types.Where(t =>
-                        !filterConfig.ExcludeNamespaces.Any(ns =>
-                            (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
+                    types = types.Where(
+                        t =>
+                            !filterConfig.ExcludeNamespaces.Any(
+                                ns =>
+                                    (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
                 }
 
                 // Filter by type name includes if specified
@@ -212,9 +220,11 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug("Filtering types to include only types matching patterns: {Patterns}",
                         string.Join(", ", filterConfig.IncludeTypes));
 
-                    types = types.Where(t =>
-                        filterConfig.IncludeTypes.Any(pattern =>
-                            IsTypeMatchingPattern(t, pattern)));
+                    types = types.Where(
+                        t =>
+                            filterConfig.IncludeTypes.Any(
+                                pattern =>
+                                    IsTypeMatchingPattern(t, pattern)));
                 }
 
                 // Filter by type name excludes
@@ -223,9 +233,11 @@ public class ApiExtractor : IApiExtractor
                     _logger.LogDebug("Filtering types to exclude types matching patterns: {Patterns}",
                         string.Join(", ", filterConfig.ExcludeTypes));
 
-                    types = types.Where(t =>
-                        !filterConfig.ExcludeTypes.Any(pattern =>
-                            IsTypeMatchingPattern(t, pattern)));
+                    types = types.Where(
+                        t =>
+                            !filterConfig.ExcludeTypes.Any(
+                                pattern =>
+                                    IsTypeMatchingPattern(t, pattern)));
                 }
 
                 // Filter internal types if not included
