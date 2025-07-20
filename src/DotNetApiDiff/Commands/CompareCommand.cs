@@ -41,6 +41,20 @@ public class CompareCommandSettings : CommandSettings
     [Description("Exclude types matching pattern (can be specified multiple times)")]
     public string[]? ExcludePatterns { get; init; }
 
+    [CommandOption("-t|--type <pattern>")]
+    [Description("Filter to specific type patterns (can be specified multiple times)")]
+    public string[]? TypePatterns { get; init; }
+
+    [CommandOption("--include-internals")]
+    [Description("Include internal types in the comparison")]
+    [DefaultValue(false)]
+    public bool IncludeInternals { get; init; }
+
+    [CommandOption("--include-compiler-generated")]
+    [Description("Include compiler-generated types in the comparison")]
+    [DefaultValue(false)]
+    public bool IncludeCompilerGenerated { get; init; }
+
     [CommandOption("--no-color")]
     [Description("Disable colored output")]
     [DefaultValue(false)]
@@ -129,8 +143,17 @@ public class CompareCommand : Command<CompareCommandSettings>
             {
                 logger.LogInformation("Loading configuration from {ConfigFile}", settings.ConfigFile);
 
-                // In a real implementation, we would load the configuration from the file
-                config = ComparisonConfiguration.CreateDefault();
+                try
+                {
+                    config = ComparisonConfiguration.LoadFromJsonFile(settings.ConfigFile);
+                    logger.LogInformation("Configuration loaded successfully");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error loading configuration from {ConfigFile}", settings.ConfigFile);
+                    AnsiConsole.MarkupLine($"[red]Error loading configuration:[/] {ex.Message}");
+                    return 2; // Error exit code
+                }
             }
             else
             {
@@ -143,7 +166,25 @@ public class CompareCommand : Command<CompareCommandSettings>
             {
                 logger.LogInformation("Applying namespace filters: {Filters}", string.Join(", ", settings.NamespaceFilters));
 
-                // In a real implementation, we would update the configuration with the filters
+                // Add namespace filters to the configuration
+                config.Filters.IncludeNamespaces.AddRange(settings.NamespaceFilters);
+
+                // If we have explicit includes, we're filtering to only those namespaces
+                if (config.Filters.IncludeNamespaces.Count > 0)
+                {
+                    logger.LogInformation("Filtering to only include specified namespaces");
+                }
+            }
+
+            // Apply type pattern filters if specified
+            if (settings.TypePatterns != null && settings.TypePatterns.Length > 0)
+            {
+                logger.LogInformation("Applying type pattern filters: {Patterns}", string.Join(", ", settings.TypePatterns));
+
+                // Add type pattern filters to the configuration
+                config.Filters.IncludeTypes.AddRange(settings.TypePatterns);
+
+                logger.LogInformation("Filtering to only include types matching specified patterns");
             }
 
             // Apply command-line exclusions if specified
@@ -151,7 +192,35 @@ public class CompareCommand : Command<CompareCommandSettings>
             {
                 logger.LogInformation("Applying exclusion patterns: {Patterns}", string.Join(", ", settings.ExcludePatterns));
 
-                // In a real implementation, we would update the configuration with the exclusions
+                // Add exclusion patterns to the configuration
+                foreach (var pattern in settings.ExcludePatterns)
+                {
+                    // Determine if this is a namespace or type pattern based on presence of dot
+                    if (pattern.Contains('.'))
+                    {
+                        // Assume it's a type pattern if it contains a dot
+                        config.Exclusions.ExcludedTypePatterns.Add(pattern);
+                    }
+                    else
+                    {
+                        // Otherwise assume it's a namespace pattern
+                        config.Filters.ExcludeNamespaces.Add(pattern);
+                    }
+                }
+            }
+
+            // Apply internal types inclusion if specified
+            if (settings.IncludeInternals)
+            {
+                logger.LogInformation("Including internal types in comparison");
+                config.Filters.IncludeInternals = true;
+            }
+
+            // Apply compiler-generated types inclusion if specified
+            if (settings.IncludeCompilerGenerated)
+            {
+                logger.LogInformation("Including compiler-generated types in comparison");
+                config.Filters.IncludeCompilerGenerated = true;
             }
 
             // Load assemblies
@@ -165,8 +234,10 @@ public class CompareCommand : Command<CompareCommandSettings>
             // Extract API information
             logger.LogInformation("Extracting API information from assemblies");
             var apiExtractor = _serviceProvider.GetRequiredService<IApiExtractor>();
-            var sourceApi = apiExtractor.ExtractApiMembers(sourceAssembly);
-            var targetApi = apiExtractor.ExtractApiMembers(targetAssembly);
+
+            // Pass the filter configuration to the API extractor
+            var sourceApi = apiExtractor.ExtractApiMembers(sourceAssembly, config.Filters);
+            var targetApi = apiExtractor.ExtractApiMembers(targetAssembly, config.Filters);
 
             // Compare APIs
             logger.LogInformation("Comparing APIs");

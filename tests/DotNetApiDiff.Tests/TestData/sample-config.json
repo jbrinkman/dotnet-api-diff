@@ -1,0 +1,44 @@
+{
+  "mappings": {
+    "namespaceMappings": {
+      "OldNamespace": ["NewNamespace"],
+      "Legacy.Api": ["Modern.Api", "Modern.Api.V2"]
+    },
+    "typeMappings": {
+      "OldNamespace.OldType": "NewNamespace.NewType",
+      "Legacy.Api.LegacyClass": "Modern.Api.ModernClass"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": true
+  },
+  "exclusions": {
+    "excludedTypes": ["System.Diagnostics.Debug", "System.Diagnostics.Trace"],
+    "excludedTypePatterns": ["*.Internal.*", "*.Private.*"],
+    "excludedMembers": [
+      "System.Object.Finalize",
+      "System.Object.MemberwiseClone"
+    ],
+    "excludedMemberPatterns": ["*.Obsolete*", "*.Debug*"]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "filters": {
+    "includeNamespaces": ["System.Text", "System.IO"],
+    "excludeNamespaces": [
+      "System.Diagnostics",
+      "System.Runtime.CompilerServices"
+    ],
+    "includeTypes": ["System.Text.*", "System.IO.File*"],
+    "excludeTypes": ["*.Internal*", "*.Debug*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "outputFormat": "Console",
+  "outputPath": null,
+  "failOnBreakingChanges": true
+}

@@ -30,8 +30,9 @@ public class ApiExtractor : IApiExtractor
     /// Extracts all public API members from the specified assembly
     /// </summary>
     /// <param name="assembly">Assembly to extract API members from</param>
+    /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public API members</returns>
-    public IEnumerable<ApiMember> ExtractApiMembers(Assembly assembly)
+    public IEnumerable<ApiMember> ExtractApiMembers(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null)
     {
         if (assembly == null)
         {
@@ -40,14 +41,21 @@ public class ApiExtractor : IApiExtractor
 
         _logger.LogInformation("Extracting API members from assembly: {AssemblyName}", assembly.GetName().Name);
 
+        if (filterConfig != null)
+        {
+            _logger.LogInformation("Applying filter configuration with {IncludeCount} includes and {ExcludeCount} excludes",
+                filterConfig.IncludeNamespaces.Count + filterConfig.IncludeTypes.Count,
+                filterConfig.ExcludeNamespaces.Count + filterConfig.ExcludeTypes.Count);
+        }
+
         var apiMembers = new List<ApiMember>();
 
         try
         {
-            // Get all public types from the assembly
-            var types = GetPublicTypes(assembly).ToList();
+            // Get all public types from the assembly, applying filters if provided
+            var types = GetPublicTypes(assembly, filterConfig).ToList();
             _logger.LogDebug(
-                "Found {TypeCount} public types in assembly {AssemblyName}",
+                "Found {TypeCount} public types in assembly {AssemblyName} after filtering",
                 types.Count,
                 assembly.GetName().Name);
 
@@ -158,8 +166,9 @@ public class ApiExtractor : IApiExtractor
     /// Gets all public types from the specified assembly
     /// </summary>
     /// <param name="assembly">Assembly to get types from</param>
+    /// <param name="filterConfig">Optional filter configuration to apply</param>
     /// <returns>Collection of public types</returns>
-    public virtual IEnumerable<Type> GetPublicTypes(Assembly assembly)
+    public virtual IEnumerable<Type> GetPublicTypes(Assembly assembly, Models.Configuration.FilterConfiguration? filterConfig = null)
     {
         if (assembly == null)
         {
@@ -169,9 +178,70 @@ public class ApiExtractor : IApiExtractor
         try
         {
             // Get all exported (public) types from the assembly
-            return assembly.GetExportedTypes()
-                .Where(t => !t.IsCompilerGenerated() && !t.IsSpecialName)
-                .OrderBy(t => t.FullName);
+            var types = assembly.GetExportedTypes()
+                .Where(t => !t.IsCompilerGenerated() && !t.IsSpecialName);
+
+            // Apply filtering if configuration is provided
+            if (filterConfig != null)
+            {
+                // Filter by namespace includes if specified
+                if (filterConfig.IncludeNamespaces.Count > 0)
+                {
+                    _logger.LogDebug("Filtering types to include only namespaces: {Namespaces}",
+                        string.Join(", ", filterConfig.IncludeNamespaces));
+
+                    types = types.Where(t =>
+                        filterConfig.IncludeNamespaces.Any(ns =>
+                            (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
+                }
+
+                // Filter by namespace excludes
+                if (filterConfig.ExcludeNamespaces.Count > 0)
+                {
+                    _logger.LogDebug("Filtering types to exclude namespaces: {Namespaces}",
+                        string.Join(", ", filterConfig.ExcludeNamespaces));
+
+                    types = types.Where(t =>
+                        !filterConfig.ExcludeNamespaces.Any(ns =>
+                            (t.Namespace ?? string.Empty).StartsWith(ns, StringComparison.OrdinalIgnoreCase)));
+                }
+
+                // Filter by type name includes if specified
+                if (filterConfig.IncludeTypes.Count > 0)
+                {
+                    _logger.LogDebug("Filtering types to include only types matching patterns: {Patterns}",
+                        string.Join(", ", filterConfig.IncludeTypes));
+
+                    types = types.Where(t =>
+                        filterConfig.IncludeTypes.Any(pattern =>
+                            IsTypeMatchingPattern(t, pattern)));
+                }
+
+                // Filter by type name excludes
+                if (filterConfig.ExcludeTypes.Count > 0)
+                {
+                    _logger.LogDebug("Filtering types to exclude types matching patterns: {Patterns}",
+                        string.Join(", ", filterConfig.ExcludeTypes));
+
+                    types = types.Where(t =>
+                        !filterConfig.ExcludeTypes.Any(pattern =>
+                            IsTypeMatchingPattern(t, pattern)));
+                }
+
+                // Filter internal types if not included
+                if (!filterConfig.IncludeInternals)
+                {
+                    types = types.Where(t => t.IsPublic || t.IsNestedPublic);
+                }
+
+                // Filter compiler-generated types if not included
+                if (!filterConfig.IncludeCompilerGenerated)
+                {
+                    types = types.Where(t => !IsCompilerGeneratedType(t));
+                }
+            }
+
+            return types.OrderBy(t => t.FullName);
         }
         catch (ReflectionTypeLoadException ex)
         {
@@ -191,6 +261,55 @@ public class ApiExtractor : IApiExtractor
                 assembly.GetName().Name);
             return Enumerable.Empty<Type>();
         }
+    }
+
+    /// <summary>
+    /// Checks if a type matches a wildcard pattern
+    /// </summary>
+    /// <param name="type">Type to check</param>
+    /// <param name="pattern">Pattern to match against</param>
+    /// <returns>True if the type matches the pattern, false otherwise</returns>
+    private bool IsTypeMatchingPattern(Type type, string pattern)
+    {
+        var typeName = type.FullName ?? type.Name;
+
+        // Convert wildcard pattern to regex
+        var regexPattern = "^" + System.Text.RegularExpressions.Regex.Escape(pattern)
+            .Replace("\\*", ".*")
+            .Replace("\\?", ".") + "$";
+
+        try
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(
+                typeName,
+                regexPattern,
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+        catch
+        {
+            // If regex fails, fall back to simple string comparison
+            return typeName.Equals(pattern, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    /// <summary>
+    /// Checks if a type is compiler-generated
+    /// </summary>
+    /// <param name="type">Type to check</param>
+    /// <returns>True if compiler-generated, false otherwise</returns>
+    private bool IsCompilerGeneratedType(Type type)
+    {
+        // Check for compiler-generated attributes
+        if (type.IsDefined(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), true))
+        {
+            return true;
+        }
+
+        // Check for compiler-generated naming patterns
+        return type.Name.Contains('<') ||
+               type.Name.StartsWith("__") ||
+               type.Name.Contains("AnonymousType") ||
+               type.Name.Contains("DisplayClass");
     }
 }
 
