@@ -69,7 +69,8 @@ public class Program
         // services.AddScoped<IDifferenceCalculator, DifferenceCalculator>();
 
         // Register the NameMapper
-        services.AddScoped<INameMapper>(provider => {
+        services.AddScoped<INameMapper>(provider =>
+        {
             var logger = provider.GetRequiredService<ILogger<ApiExtraction.NameMapper>>();
             // Create a default mapping configuration - in real usage this would be loaded from config
             var mappingConfig = Models.Configuration.MappingConfiguration.CreateDefault();
