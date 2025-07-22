@@ -1,5 +1,6 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using DotNetApiDiff.Commands;
+using DotNetApiDiff.ExitCodes;
 using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,9 @@ public class Program
         {
             logger.LogInformation("DotNet API Diff Tool started");
 
+            // Get the exit code manager
+            var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
+
             // Configure Spectre.Console command app
             var app = new CommandApp(new TypeRegistrar(serviceProvider));
 
@@ -44,7 +48,10 @@ public class Program
                 config.SetExceptionHandler(ex =>
                 {
                     logger.LogError(ex, "An unhandled exception occurred");
-                    return 1;
+                    int exitCode = exitCodeManager.GetExitCodeForException(ex);
+                    logger.LogInformation("Exiting with code {ExitCode}: {Description}",
+                        exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+                    return exitCode;
                 });
 
                 // Register the compare command
@@ -60,7 +67,15 @@ public class Program
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during execution");
-            return 1;
+
+            // Use the exit code manager to determine the appropriate exit code
+            var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
+            int exitCode = exitCodeManager.GetExitCodeForException(ex);
+
+            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
+                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+
+            return exitCode;
         }
     }
 
@@ -111,5 +126,8 @@ public class Program
 
         // Register the ReportGenerator
         services.AddScoped<IReportGenerator, Reporting.ReportGenerator>();
+
+        // Register the ExitCodeManager
+        services.AddSingleton<IExitCodeManager, ExitCodeManager>();
     }
 }

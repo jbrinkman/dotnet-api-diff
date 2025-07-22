@@ -75,6 +75,10 @@ public class CompareCommandFilteringTests
         services.AddSingleton(_mockApiExtractor.Object);
         services.AddSingleton(_mockApiComparer.Object);
         services.AddSingleton(_mockReportGenerator.Object);
+
+        // Add ExitCodeManager
+        services.AddSingleton<IExitCodeManager, DotNetApiDiff.ExitCodes.ExitCodeManager>();
+
         _serviceProvider = services.BuildServiceProvider();
     }
 
