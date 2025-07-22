@@ -206,6 +206,7 @@ public class CompareCommandTests
         var mockApiExtractor = new Mock<IApiExtractor>();
         var mockApiComparer = new Mock<IApiComparer>();
         var mockReportGenerator = new Mock<IReportGenerator>();
+        var mockExitCodeManager = new Mock<IExitCodeManager>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
@@ -218,6 +219,16 @@ public class CompareCommandTests
             .Returns(mockApiComparer.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IReportGenerator)))
             .Returns(mockReportGenerator.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
+            .Returns(mockExitCodeManager.Object);
+
+        // Set up exit code manager behavior
+        mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ComparisonResult>()))
+            .Returns((ComparisonResult result) => result.HasBreakingChanges ? 1 : 0);
+        mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ApiComparison>()))
+            .Returns((ApiComparison comparison) => comparison.HasBreakingChanges ? 1 : 0);
+        mockExitCodeManager.Setup(ec => ec.GetExitCodeDescription(0))
+            .Returns("Success");
 
         // Set up mock behavior
         var sourceAssembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -287,6 +298,7 @@ public class CompareCommandTests
         var mockApiExtractor = new Mock<IApiExtractor>();
         var mockApiComparer = new Mock<IApiComparer>();
         var mockReportGenerator = new Mock<IReportGenerator>();
+        var mockExitCodeManager = new Mock<IExitCodeManager>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
@@ -299,6 +311,18 @@ public class CompareCommandTests
             .Returns(mockApiComparer.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IReportGenerator)))
             .Returns(mockReportGenerator.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
+            .Returns(mockExitCodeManager.Object);
+
+        // Set up exit code manager behavior for breaking changes
+        mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ComparisonResult>()))
+            .Returns((ComparisonResult result) => result.HasBreakingChanges ? 1 : 0);
+        mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ApiComparison>()))
+            .Returns((ApiComparison comparison) => comparison.HasBreakingChanges ? 1 : 0);
+        mockExitCodeManager.Setup(ec => ec.GetExitCodeDescription(1))
+            .Returns("Breaking changes detected");
+        mockExitCodeManager.Setup(ec => ec.GetExitCodeDescription(0))
+            .Returns("Success");
 
         // Set up mock behavior with breaking changes
         var sourceAssembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -369,12 +393,21 @@ public class CompareCommandTests
         var mockServiceProvider = new Mock<IServiceProvider>();
         var mockLogger = new Mock<ILogger<CompareCommand>>();
         var mockAssemblyLoader = new Mock<IAssemblyLoader>();
+        var mockExitCodeManager = new Mock<IExitCodeManager>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
             .Returns(mockLogger.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IAssemblyLoader)))
             .Returns(mockAssemblyLoader.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
+            .Returns(mockExitCodeManager.Object);
+
+        // Set up exit code manager behavior for exceptions
+        mockExitCodeManager.Setup(ec => ec.GetExitCodeForException(It.IsAny<Exception>()))
+            .Returns(2); // Error exit code
+        mockExitCodeManager.Setup(ec => ec.GetExitCodeDescription(2))
+            .Returns("Error occurred");
 
         // Set up mock behavior to throw exception
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))

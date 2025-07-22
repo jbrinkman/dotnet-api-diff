@@ -152,7 +152,10 @@ public class CompareCommand : Command<CompareCommandSettings>
                 {
                     logger.LogError(ex, "Error loading configuration from {ConfigFile}", settings.ConfigFile);
                     AnsiConsole.MarkupLine($"[red]Error loading configuration:[/] {ex.Message}");
-                    return 2; // Error exit code
+
+                    // Use the ExitCodeManager to determine the appropriate exit code for errors
+                    var configErrorExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
+                    return configErrorExitCodeManager.GetExitCode(false, true);
                 }
             }
             else
@@ -301,24 +304,37 @@ public class CompareCommand : Command<CompareCommandSettings>
             // Output the formatted report to the console using the AnsiConsole library
             AnsiConsole.Write(report);
 
-            // Determine exit code based on breaking changes
-            bool hasBreakingChanges = comparison.Removals.Any(c => c.IsBreakingChange) ||
-                                     comparison.Modifications.Any(c => c.IsBreakingChange);
+            // Use the ExitCodeManager to determine the appropriate exit code
+            var exitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
+            int exitCode = exitCodeManager.GetExitCode(comparison);
 
-            if (hasBreakingChanges)
+            if (comparison.HasBreakingChanges)
             {
-                logger.LogWarning("Breaking changes detected");
-                return 1; // Non-zero exit code for breaking changes
+                logger.LogWarning("{Count} breaking changes detected", comparison.BreakingChangesCount);
+            }
+            else
+            {
+                logger.LogInformation("Comparison completed successfully with no breaking changes");
             }
 
-            logger.LogInformation("Comparison completed successfully with no breaking changes");
-            return 0; // Success
+            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
+                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+
+            return exitCode;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during comparison");
             AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}");
-            return 2; // Error exit code
+
+            // Use the ExitCodeManager to determine the appropriate exit code for errors
+            var exitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
+            int exitCode = exitCodeManager.GetExitCodeForException(ex);
+
+            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
+                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+
+            return exitCode;
         }
     }
 }
