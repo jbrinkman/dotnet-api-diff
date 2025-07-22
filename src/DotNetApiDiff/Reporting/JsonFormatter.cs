@@ -99,8 +99,6 @@ public class JsonFormatter : IReportFormatter
         };
     }
 
-    #region JSON Models
-
     /// <summary>
     /// JSON-specific representation of a comparison result
     /// </summary>
@@ -168,6 +166,4 @@ public class JsonFormatter : IReportFormatter
 
         public string? NewSignature { get; set; }
     }
-
-    #endregion
 }
