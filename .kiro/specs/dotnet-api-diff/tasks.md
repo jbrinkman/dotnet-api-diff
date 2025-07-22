@@ -123,7 +123,7 @@ Each task should follow this git workflow:
     - **Git Workflow**: Create branch `feature/task-6.2-json-formatter`, commit, push, and create PR
     - _Requirements: 4.1, 4.2_
 
-  - [ ] 6.3 Implement markdown output formatter
+  - [x] 6.3 Implement markdown output formatter
     - Create MarkdownFormatter generating human-readable documentation
     - Include tables, sections for different change types, and exclusions
     - Write unit tests for markdown formatting and structure

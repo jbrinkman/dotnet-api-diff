@@ -172,8 +172,6 @@ public class MarkdownFormatter : IReportFormatter
 
                     output.AppendLine("</details>");
                 }
-
-                output.AppendLine();
             }
 
             output.AppendLine();
