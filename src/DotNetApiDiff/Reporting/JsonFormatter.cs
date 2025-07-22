@@ -107,16 +107,27 @@ public class JsonFormatter : IReportFormatter
     private class JsonComparisonResult
     {
         public string OldAssemblyPath { get; set; } = string.Empty;
+
         public string NewAssemblyPath { get; set; } = string.Empty;
+
         public DateTime ComparisonTimestamp { get; set; }
+
         public bool HasBreakingChanges { get; set; }
+
         public int TotalDifferences { get; set; }
+
         public JsonComparisonSummary Summary { get; set; } = new();
+
         public List<JsonApiDifference> Added { get; set; } = new();
+
         public List<JsonApiDifference> Removed { get; set; } = new();
+
         public List<JsonApiDifference> Modified { get; set; } = new();
+
         public List<JsonApiDifference> Excluded { get; set; } = new();
+
         public List<JsonApiDifference> Moved { get; set; } = new();
+
         public List<JsonApiDifference> BreakingChanges { get; set; } = new();
     }
 
@@ -126,9 +137,13 @@ public class JsonFormatter : IReportFormatter
     private class JsonComparisonSummary
     {
         public int AddedCount { get; set; }
+
         public int RemovedCount { get; set; }
+
         public int ModifiedCount { get; set; }
+
         public int BreakingChangesCount { get; set; }
+
         public int TotalChanges { get; set; }
     }
 
@@ -138,12 +153,19 @@ public class JsonFormatter : IReportFormatter
     private class JsonApiDifference
     {
         public string ChangeType { get; set; } = string.Empty;
+
         public string ElementType { get; set; } = string.Empty;
+
         public string ElementName { get; set; } = string.Empty;
+
         public string Description { get; set; } = string.Empty;
+
         public bool IsBreakingChange { get; set; }
+
         public string Severity { get; set; } = string.Empty;
+
         public string? OldSignature { get; set; }
+
         public string? NewSignature { get; set; }
     }
 
