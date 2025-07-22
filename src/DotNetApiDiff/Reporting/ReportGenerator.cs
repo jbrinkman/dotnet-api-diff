@@ -30,11 +30,13 @@ public class ReportGenerator : IReportGenerator
         {
             _formatters = new Dictionary<ReportFormat, IReportFormatter>
             {
-                { ReportFormat.Console, new ConsoleFormatter() }
+                { ReportFormat.Console, new ConsoleFormatter() },
+                { ReportFormat.Json, new JsonFormatter() },
+                { ReportFormat.Markdown, new MarkdownFormatter() }
 
-                // Other formatters will be added in subsequent tasks
-                // { ReportFormat.Json, new JsonFormatter() }
-                // { ReportFormat.Markdown, new MarkdownFormatter() }
+                // Other formatters can be added in subsequent tasks
+                // { ReportFormat.Xml, new XmlFormatter() }
+                // { ReportFormat.Html, new HtmlFormatter() }
             };
         }
     }
