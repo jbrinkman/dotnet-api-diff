@@ -330,7 +330,7 @@ namespace DotNetApiDiff.Tests.ExitCodes
         public void GetExitCodeForException_ReflectionTypeLoadException_ReturnsAssemblyLoadError()
         {
             // Arrange
-            var exception = new ReflectionTypeLoadException(new Type[0], new Exception[0]);
+            var exception = new ReflectionTypeLoadException(Array.Empty<Type>(), Array.Empty<Exception>());
 
             // Act
             int exitCode = _exitCodeManager.GetExitCodeForException(exception);
