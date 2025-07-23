@@ -178,7 +178,7 @@ namespace DotNetApiDiff.ExitCodes
                 _ => UnexpectedError
             };
 
-            _logger?.LogWarning
+            _logger?.LogWarning(
                 "Exception of type {ExceptionType} occurred, returning {ExitCode} exit code",
                 exception.GetType().Name,
                 GetExitCodeDescription(exitCode));
