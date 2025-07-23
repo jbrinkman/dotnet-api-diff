@@ -341,7 +341,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the CLR header RVA and size
                 byte[] clrBuffer = new byte[8];
-                bytesRead = 0;
                 bytesRead = fileStream.Read(clrBuffer, 0, 8);
                 if (bytesRead < 8)
                 {
