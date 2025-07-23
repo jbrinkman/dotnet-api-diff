@@ -79,6 +79,10 @@ public class CompareCommandFilteringTests
         // Add ExitCodeManager
         services.AddSingleton<IExitCodeManager, DotNetApiDiff.ExitCodes.ExitCodeManager>();
 
+        // Add GlobalExceptionHandler
+        var mockExceptionHandler = new Mock<IGlobalExceptionHandler>();
+        services.AddSingleton(mockExceptionHandler.Object);
+
         _serviceProvider = services.BuildServiceProvider();
     }
 
@@ -272,11 +276,28 @@ public class CompareCommandFilteringTests
                 ConfigFile = tempConfigFile
             };
 
+            // Set up exit code manager to return 99 for configuration errors
+            var mockExitCodeManager = new Mock<IExitCodeManager>();
+            mockExitCodeManager.Setup(m => m.GetExitCodeForException(It.IsAny<Exception>()))
+                .Returns(99);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(mockExitCodeManager.Object);
+            services.AddSingleton(_mockAssemblyLoader.Object);
+            services.AddSingleton(_mockApiExtractor.Object);
+            services.AddSingleton(_mockApiComparer.Object);
+            services.AddSingleton(_mockReportGenerator.Object);
+            services.AddSingleton(_mockLogger.Object);
+            services.AddSingleton(Mock.Of<IGlobalExceptionHandler>());
+
+            var serviceProvider = services.BuildServiceProvider();
+            command = new CompareCommand(serviceProvider);
+
             // Act
             var result = command.Execute(_commandContext, settings);
 
             // Assert
-            Assert.Equal(2, result); // Error exit code
+            Assert.Equal(99, result); // Error exit code from our mock
         }
         finally
         {

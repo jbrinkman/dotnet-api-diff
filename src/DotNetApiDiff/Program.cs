@@ -4,7 +4,9 @@ using DotNetApiDiff.ExitCodes;
 using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Diagnostics;
 
 namespace DotNetApiDiff;
 
@@ -26,10 +28,29 @@ public class Program
 
         var serviceProvider = services.BuildServiceProvider();
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        var exceptionHandler = serviceProvider.GetRequiredService<IGlobalExceptionHandler>();
+
+        // Set up global exception handling
+        exceptionHandler.SetupGlobalExceptionHandling();
 
         try
         {
-            logger.LogInformation("DotNet API Diff Tool started");
+            // Log application start with version information
+            var version = typeof(Program).Assembly.GetName().Version;
+            var buildTime = GetBuildTime();
+
+            logger.LogInformation(
+                "DotNet API Diff Tool v{Version} started at {Time} (Build: {BuildTime})",
+                version,
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                buildTime);
+
+            // Log environment information
+            logger.LogDebug(
+                "Environment: OS={OS}, Framework={Framework}, ProcessorCount={ProcessorCount}",
+                Environment.OSVersion,
+                Environment.Version,
+                Environment.ProcessorCount);
 
             // Get the exit code manager
             var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
@@ -40,6 +61,7 @@ public class Program
             app.Configure(config =>
             {
                 config.SetApplicationName("dotnet-api-diff");
+                config.PropagateExceptions();
 
                 config.AddExample(new[] { "compare", "source.dll", "target.dll" });
                 config.AddExample(new[] { "compare", "source.dll", "target.dll", "--output", "json" });
@@ -47,13 +69,8 @@ public class Program
 
                 config.SetExceptionHandler(ex =>
                 {
-                    logger.LogError(ex, "An unhandled exception occurred");
-                    int exitCode = exitCodeManager.GetExitCodeForException(ex);
-                    logger.LogInformation(
-                        "Exiting with code {ExitCode}: {Description}",
-                        exitCode,
-                        exitCodeManager.GetExitCodeDescription(exitCode));
-                    return exitCode;
+                    // Use our centralized exception handler
+                    return exceptionHandler.HandleException(ex, "Command execution");
                 });
 
                 // Register the compare command
@@ -64,23 +81,38 @@ public class Program
                     .WithExample(new[] { "compare", "source.dll", "target.dll", "--filter", "System.Collections" });
             });
 
+            // Run the command and return the exit code
             return app.Run(args);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during execution");
-
-            // Use the exit code manager to determine the appropriate exit code
-            var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
-            int exitCode = exitCodeManager.GetExitCodeForException(ex);
-
-            logger.LogInformation(
-                "Exiting with code {ExitCode}: {Description}",
-                exitCode,
-                exitCodeManager.GetExitCodeDescription(exitCode));
-
-            return exitCode;
+            // Use our centralized exception handler for any unhandled exceptions
+            return exceptionHandler.HandleException(ex, "Application startup");
         }
+    }
+
+    /// <summary>
+    /// Gets the build time of the assembly from the file timestamp
+    /// </summary>
+    /// <returns>Build time as a string</returns>
+    private static string GetBuildTime()
+    {
+        try
+        {
+            var assembly = typeof(Program).Assembly;
+            var assemblyLocation = assembly.Location;
+            if (!string.IsNullOrEmpty(assemblyLocation))
+            {
+                var buildTime = File.GetLastWriteTime(assemblyLocation);
+                return buildTime.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore errors getting build time
+        }
+
+        return "Unknown";
     }
 
     /// <summary>
@@ -89,19 +121,43 @@ public class Program
     /// <param name="services">Service collection to configure</param>
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Configure logging
+        // Configure logging with structured logging support
         services.AddLogging(builder =>
         {
-            builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddConsole(options =>
+            {
+                // Use ConsoleFormatterOptions instead of deprecated ConsoleLoggerOptions
+                options.FormatterName = "simple";
+            });
+
+            // Configure the simple console formatter
+            builder.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
+                options.SingleLine = false;
+                options.UseUtcTimestamp = false;
+            });
+
+            // Set minimum level based on environment variable if present
+            var logLevelEnv = Environment.GetEnvironmentVariable("DOTNET_API_DIFF_LOG_LEVEL");
+            var logLevel = LogLevel.Information; // Default level
+
+            if (!string.IsNullOrEmpty(logLevelEnv) &&
+                Enum.TryParse<LogLevel>(logLevelEnv, true, out var parsedLevel))
+            {
+                logLevel = parsedLevel;
+            }
+
+            builder.SetMinimumLevel(logLevel);
         });
 
-        // Register interfaces - implementations will be added in subsequent tasks
-        // services.AddScoped<IAssemblyLoader, AssemblyLoader>();
-        // services.AddScoped<IApiExtractor, ApiExtractor>();
-        // services.AddScoped<ITypeAnalyzer, TypeAnalyzer>();
-        // services.AddScoped<IMemberSignatureBuilder, MemberSignatureBuilder>();
-        // services.AddScoped<IDifferenceCalculator, DifferenceCalculator>();
+        // Register core services
+        services.AddScoped<IAssemblyLoader, AssemblyLoading.AssemblyLoader>();
+        services.AddScoped<IApiExtractor, ApiExtraction.ApiExtractor>();
+        services.AddScoped<ITypeAnalyzer, ApiExtraction.TypeAnalyzer>();
+        services.AddScoped<IMemberSignatureBuilder, ApiExtraction.MemberSignatureBuilder>();
+        services.AddScoped<IDifferenceCalculator, ApiExtraction.DifferenceCalculator>();
 
         // Register the NameMapper
         services.AddScoped<INameMapper>(provider =>
@@ -126,12 +182,15 @@ public class Program
         });
 
         // Register the ApiComparer with NameMapper
-        // services.AddScoped<IApiComparer, ApiComparer>();
+        services.AddScoped<IApiComparer, ApiExtraction.ApiComparer>();
 
         // Register the ReportGenerator
         services.AddScoped<IReportGenerator, Reporting.ReportGenerator>();
 
         // Register the ExitCodeManager
         services.AddSingleton<IExitCodeManager, ExitCodeManager>();
+
+        // Register the GlobalExceptionHandler
+        services.AddSingleton<IGlobalExceptionHandler, GlobalExceptionHandler>();
     }
 }
