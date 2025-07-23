@@ -292,7 +292,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the PE signature
                 byte[] peBuffer = new byte[4];
-                bytesRead = 0;
                 bytesRead = fileStream.Read(peBuffer, 0, 4);
                 if (bytesRead < 4)
                 {
