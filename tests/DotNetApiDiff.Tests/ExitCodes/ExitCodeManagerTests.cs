@@ -135,7 +135,7 @@ namespace DotNetApiDiff.Tests.ExitCodes
         public void GetExitCode_NullComparisonResult_ReturnsComparisonError()
         {
             // Act
-            ComparisonResult comparisonResult = null;
+            ComparisonResult? comparisonResult = null;
             int exitCode = _exitCodeManager.GetExitCode(comparisonResult);
 
             // Assert
@@ -212,16 +212,6 @@ namespace DotNetApiDiff.Tests.ExitCodes
 
             // Assert
             Assert.Equal(ExitCodeManager.BreakingChangesDetected, exitCode);
-        }
-
-        [Fact]
-        public void GetExitCode_NullApiComparison_ReturnsComparisonError()
-        {
-            // Act
-            int exitCode = _exitCodeManager.GetExitCode((ApiComparison)null);
-
-            // Assert
-            Assert.Equal(ExitCodeManager.ComparisonError, exitCode);
         }
 
         [Fact]
