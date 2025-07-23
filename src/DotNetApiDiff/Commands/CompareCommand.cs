@@ -1,6 +1,4 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
-using System.Reflection;
-using DotNetApiDiff.ExitCodes;
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models;
 using DotNetApiDiff.Models.Configuration;
@@ -10,6 +8,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace DotNetApiDiff.Commands;
 

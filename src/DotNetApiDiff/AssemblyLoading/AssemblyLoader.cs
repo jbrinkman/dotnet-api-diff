@@ -262,7 +262,11 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 }
 
                 byte[] buffer = new byte[2];
-                fileStream.Read(buffer, 0, 2);
+                int bytesRead = fileStream.Read(buffer, 0, 2);
+                if (bytesRead < 2)
+                {
+                    return false; // Not enough bytes to determine if it's a DLL
+                }
 
                 // Check for the MZ header (0x4D, 0x5A)
                 if (buffer[0] != 0x4D || buffer[1] != 0x5A)
@@ -275,7 +279,12 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the PE header offset
                 byte[] offsetBuffer = new byte[4];
-                fileStream.Read(offsetBuffer, 0, 4);
+                bytesRead = 0;
+                bytesRead = fileStream.Read(offsetBuffer, 0, 4);
+                if (bytesRead < 4)
+                {
+                    return false; // Not enough bytes to determine if it's a DLL
+                }
                 int peOffset = BitConverter.ToInt32(offsetBuffer, 0);
 
                 // Seek to the PE header
@@ -283,7 +292,12 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the PE signature
                 byte[] peBuffer = new byte[4];
-                fileStream.Read(peBuffer, 0, 4);
+                bytesRead = 0;
+                bytesRead = fileStream.Read(peBuffer, 0, 4);
+                if (bytesRead < 4)
+                {
+                    return false; // Not enough bytes to determine if it's a DLL
+                }
 
                 // Check for PE signature "PE\0\0"
                 if (peBuffer[0] != 0x50 || peBuffer[1] != 0x45 || peBuffer[2] != 0 || peBuffer[3] != 0)
