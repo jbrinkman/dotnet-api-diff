@@ -218,7 +218,7 @@ namespace DotNetApiDiff.Tests.ExitCodes
         public void GetExitCode_NullApiComparison_ReturnsComparisonError()
         {
             // Act
-            int exitCode = _exitCodeManager.GetExitCode((ApiComparison)null!);
+            int exitCode = _exitCodeManager.GetExitCode((ApiComparison)null);
 
             // Assert
             Assert.Equal(ExitCodeManager.ComparisonError, exitCode);
