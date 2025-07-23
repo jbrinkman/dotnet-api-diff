@@ -310,7 +310,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the Optional Header magic value
                 byte[] magicBuffer = new byte[2];
-                bytesRead = 0;
                 bytesRead = fileStream.Read(magicBuffer, 0, 2);
                 if (bytesRead < 2)
                 {
