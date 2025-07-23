@@ -434,7 +434,7 @@ namespace DotNetApiDiff.Tests.ExitCodes
         public void GetExitCodeForException_NullException_ReturnsUnexpectedError()
         {
             // Act
-            int exitCode = _exitCodeManager.GetExitCodeForException(null!);
+            int exitCode = _exitCodeManager.GetExitCodeForException(null);
 
             // Assert
             Assert.Equal(ExitCodeManager.UnexpectedError, exitCode);
