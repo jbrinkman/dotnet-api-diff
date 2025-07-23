@@ -45,7 +45,25 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
         }
 
         // Normalize the path to ensure consistent dictionary keys
-        assemblyPath = Path.GetFullPath(assemblyPath);
+        try
+        {
+            assemblyPath = Path.GetFullPath(assemblyPath);
+        }
+        catch (PathTooLongException ex)
+        {
+            this.logger.LogError(ex, "Path too long for assembly: {Path}", assemblyPath);
+            throw;
+        }
+        catch (SecurityException ex)
+        {
+            this.logger.LogError(ex, "Security exception accessing path: {Path}", assemblyPath);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            this.logger.LogError(ex, "Error normalizing assembly path: {Path}", assemblyPath);
+            throw new ArgumentException($"Invalid assembly path: {assemblyPath}", nameof(assemblyPath), ex);
+        }
 
         // Check if we've already loaded this assembly
         if (this.loadedAssemblies.TryGetValue(assemblyPath, out var loadedAssembly))
@@ -54,83 +72,270 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
             return loadedAssembly;
         }
 
-        this.logger.LogInformation("Loading assembly from {Path}", assemblyPath);
-
-        try
+        using (this.logger.BeginScope("Loading assembly {Path}", assemblyPath))
         {
-            // Verify the file exists
-            if (!File.Exists(assemblyPath))
+            this.logger.LogInformation("Loading assembly from {Path}", assemblyPath);
+
+            try
             {
-                this.logger.LogError("Assembly file not found: {Path}", assemblyPath);
-                throw new FileNotFoundException($"Assembly file not found: {assemblyPath}", assemblyPath);
-            }
-
-            // Create a new isolated load context for this assembly
-            var loadContext = new IsolatedAssemblyLoadContext(assemblyPath, this.logger);
-
-            // Add the directory of the assembly as a search path
-            var assemblyDirectory = Path.GetDirectoryName(assemblyPath);
-            if (!string.IsNullOrEmpty(assemblyDirectory))
-            {
-                loadContext.AddSearchPath(assemblyDirectory);
-            }
-
-            // Load the assembly in the isolated context
-            var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
-
-            // Store the assembly and load context for later use
-            this.loadedAssemblies[assemblyPath] = assembly;
-            this.loadContexts[assemblyPath] = loadContext;
-
-            this.logger.LogInformation(
-                "Successfully loaded assembly: {AssemblyName} from {Path}",
-                assembly.GetName().Name,
-                assemblyPath);
-
-            return assembly;
-        }
-        catch (FileNotFoundException ex)
-        {
-            this.logger.LogError(ex, "Assembly file not found: {Path}", assemblyPath);
-            throw;
-        }
-        catch (BadImageFormatException ex)
-        {
-            this.logger.LogError(ex, "Invalid assembly format: {Path}", assemblyPath);
-            throw;
-        }
-        catch (SecurityException ex)
-        {
-            this.logger.LogError(ex, "Security exception loading assembly: {Path}", assemblyPath);
-            throw;
-        }
-        catch (PathTooLongException ex)
-        {
-            this.logger.LogError(ex, "Path too long for assembly: {Path}", assemblyPath);
-            throw;
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            this.logger.LogError(ex, "Failed to load types from assembly: {Path}", assemblyPath);
-
-            // Log the loader exceptions for more detailed diagnostics
-            if (ex.LoaderExceptions != null)
-            {
-                foreach (var loaderEx in ex.LoaderExceptions)
+                // Verify the file exists
+                if (!File.Exists(assemblyPath))
                 {
-                    if (loaderEx != null)
+                    this.logger.LogError("Assembly file not found: {Path}", assemblyPath);
+                    throw new FileNotFoundException($"Assembly file not found: {assemblyPath}", assemblyPath);
+                }
+
+                // Verify the file is accessible
+                try
+                {
+                    using (var fileStream = File.OpenRead(assemblyPath))
                     {
-                        this.logger.LogError(loaderEx, "Loader exception: {Message}", loaderEx.Message);
+                        // Just testing if we can open the file
                     }
                 }
-            }
+                catch (IOException ex)
+                {
+                    this.logger.LogError(ex, "Cannot access assembly file: {Path}", assemblyPath);
+                    throw new IOException($"Cannot access assembly file: {assemblyPath}", ex);
+                }
 
-            throw;
+                // Create a new isolated load context for this assembly
+                var loadContext = new IsolatedAssemblyLoadContext(assemblyPath, this.logger);
+
+                // Add the directory of the assembly as a search path
+                var assemblyDirectory = Path.GetDirectoryName(assemblyPath);
+                if (!string.IsNullOrEmpty(assemblyDirectory))
+                {
+                    loadContext.AddSearchPath(assemblyDirectory);
+
+                    // Also add any subdirectories that might contain dependencies
+                    try
+                    {
+                        foreach (var subDir in Directory.GetDirectories(assemblyDirectory, "*", SearchOption.TopDirectoryOnly))
+                        {
+                            loadContext.AddSearchPath(subDir);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log but don't fail if we can't access subdirectories
+                        this.logger.LogWarning(ex, "Could not access subdirectories of {Directory}", assemblyDirectory);
+                    }
+                }
+
+                // Load the assembly in the isolated context
+                Assembly assembly;
+                try
+                {
+                    assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
+                }
+                catch (BadImageFormatException ex)
+                {
+                    this.logger.LogError(ex, "Invalid assembly format: {Path}", assemblyPath);
+
+                    // Try to determine if this is a native DLL or other non-.NET assembly
+                    if (IsProbablyNativeDll(assemblyPath))
+                    {
+                        this.logger.LogError("The file appears to be a native DLL, not a .NET assembly: {Path}", assemblyPath);
+                        throw new BadImageFormatException($"The file appears to be a native DLL, not a .NET assembly: {assemblyPath}", ex);
+                    }
+
+                    throw;
+                }
+                catch (FileLoadException ex)
+                {
+                    this.logger.LogError(ex, "Failed to load assembly file: {Path}, FileName: {FileName}", assemblyPath, ex.FileName);
+                    throw;
+                }
+
+                // Store the assembly and load context for later use
+                this.loadedAssemblies[assemblyPath] = assembly;
+                this.loadContexts[assemblyPath] = loadContext;
+
+                // Log assembly details
+                var assemblyName = assembly.GetName();
+                this.logger.LogInformation(
+                    "Successfully loaded assembly: {AssemblyName} v{Version} from {Path}",
+                    assemblyName.Name,
+                    assemblyName.Version,
+                    assemblyPath);
+
+                // Log referenced assemblies at debug level
+                if (this.logger.IsEnabled(LogLevel.Debug))
+                {
+                    try
+                    {
+                        var referencedAssemblies = assembly.GetReferencedAssemblies();
+                        this.logger.LogDebug(
+                            "Assembly {AssemblyName} references {Count} assemblies",
+                            assemblyName.Name,
+                            referencedAssemblies.Length);
+
+                        foreach (var reference in referencedAssemblies)
+                        {
+                            this.logger.LogDebug(
+                                "Referenced assembly: {Name} v{Version}",
+                                reference.Name,
+                                reference.Version);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.logger.LogDebug(ex, "Error getting referenced assemblies for {AssemblyName}", assemblyName.Name);
+                    }
+                }
+
+                return assembly;
+            }
+            catch (FileNotFoundException ex)
+            {
+                this.logger.LogError(ex, "Assembly file not found: {Path}", assemblyPath);
+                throw;
+            }
+            catch (BadImageFormatException ex)
+            {
+                this.logger.LogError(ex, "Invalid assembly format: {Path}", assemblyPath);
+                throw;
+            }
+            catch (SecurityException ex)
+            {
+                this.logger.LogError(ex, "Security exception loading assembly: {Path}", assemblyPath);
+                throw;
+            }
+            catch (PathTooLongException ex)
+            {
+                this.logger.LogError(ex, "Path too long for assembly: {Path}", assemblyPath);
+                throw;
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                this.logger.LogError(ex, "Failed to load types from assembly: {Path}", assemblyPath);
+
+                // Log the loader exceptions for more detailed diagnostics
+                if (ex.LoaderExceptions != null)
+                {
+                    int loaderExceptionCount = ex.LoaderExceptions.Length;
+                    this.logger.LogError("Loader exceptions count: {Count}", loaderExceptionCount);
+
+                    // Log up to 5 loader exceptions to avoid excessive logging
+                    int logCount = Math.Min(loaderExceptionCount, 5);
+                    for (int i = 0; i < logCount; i++)
+                    {
+                        var loaderEx = ex.LoaderExceptions[i];
+                        if (loaderEx != null)
+                        {
+                            this.logger.LogError(loaderEx, "Loader exception {Index}: {Message}", i + 1, loaderEx.Message);
+                        }
+                    }
+
+                    if (loaderExceptionCount > logCount)
+                    {
+                        this.logger.LogError("... and {Count} more loader exceptions", loaderExceptionCount - logCount);
+                    }
+                }
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Unexpected error loading assembly: {Path}", assemblyPath);
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Attempts to determine if a file is likely a native DLL rather than a .NET assembly
+    /// </summary>
+    /// <param name="filePath">Path to the file to check</param>
+    /// <returns>True if the file appears to be a native DLL, false otherwise</returns>
+    private bool IsProbablyNativeDll(string filePath)
+    {
+        try
+        {
+            // Read the first few bytes to check for the PE header
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                if (fileStream.Length < 64)
+                {
+                    return false; // Too small to be a valid DLL
+                }
+
+                byte[] buffer = new byte[2];
+                fileStream.Read(buffer, 0, 2);
+
+                // Check for the MZ header (0x4D, 0x5A)
+                if (buffer[0] != 0x4D || buffer[1] != 0x5A)
+                {
+                    return false; // Not a valid PE file
+                }
+
+                // Skip to the PE header offset location
+                fileStream.Seek(0x3C, SeekOrigin.Begin);
+
+                // Read the PE header offset
+                byte[] offsetBuffer = new byte[4];
+                fileStream.Read(offsetBuffer, 0, 4);
+                int peOffset = BitConverter.ToInt32(offsetBuffer, 0);
+
+                // Seek to the PE header
+                fileStream.Seek(peOffset, SeekOrigin.Begin);
+
+                // Read the PE signature
+                byte[] peBuffer = new byte[4];
+                fileStream.Read(peBuffer, 0, 4);
+
+                // Check for PE signature "PE\0\0"
+                if (peBuffer[0] != 0x50 || peBuffer[1] != 0x45 || peBuffer[2] != 0 || peBuffer[3] != 0)
+                {
+                    return false; // Not a valid PE file
+                }
+
+                // It's a valid PE file, but we need more checks to determine if it's a .NET assembly
+                // Skip the COFF header (20 bytes)
+                fileStream.Seek(peOffset + 4 + 20, SeekOrigin.Begin);
+
+                // Read the Optional Header magic value
+                byte[] magicBuffer = new byte[2];
+                fileStream.Read(magicBuffer, 0, 2);
+
+                // PE32 (0x10B) or PE32+ (0x20B)
+                ushort magic = BitConverter.ToUInt16(magicBuffer, 0);
+                if (magic != 0x10B && magic != 0x20B)
+                {
+                    return false; // Not a valid PE optional header
+                }
+
+                // Skip to the data directories
+                int dataDirectoryOffset;
+                if (magic == 0x10B)
+                {
+                    dataDirectoryOffset = 96; // PE32
+                }
+                else
+                {
+                    dataDirectoryOffset = 112; // PE32+
+                }
+
+                fileStream.Seek(peOffset + 4 + 20 + dataDirectoryOffset, SeekOrigin.Begin);
+
+                // The 15th data directory is the CLR header (14 zero-based index)
+                fileStream.Seek(14 * 8, SeekOrigin.Current);
+
+                // Read the CLR header RVA and size
+                byte[] clrBuffer = new byte[8];
+                fileStream.Read(clrBuffer, 0, 8);
+                uint clrRva = BitConverter.ToUInt32(clrBuffer, 0);
+                uint clrSize = BitConverter.ToUInt32(clrBuffer, 4);
+
+                // If the CLR header RVA is 0, it's not a .NET assembly
+                return clrRva == 0;
+            }
         }
         catch (Exception ex)
         {
-            this.logger.LogError(ex, "Unexpected error loading assembly: {Path}", assemblyPath);
-            throw;
+            this.logger.LogDebug(ex, "Error checking if file is a native DLL: {Path}", filePath);
+            return false; // Assume it's not a native DLL if we can't check
         }
     }
 

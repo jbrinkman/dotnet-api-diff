@@ -207,6 +207,7 @@ public class CompareCommandTests
         var mockApiComparer = new Mock<IApiComparer>();
         var mockReportGenerator = new Mock<IReportGenerator>();
         var mockExitCodeManager = new Mock<IExitCodeManager>();
+        var mockExceptionHandler = new Mock<IGlobalExceptionHandler>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
@@ -221,6 +222,8 @@ public class CompareCommandTests
             .Returns(mockReportGenerator.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
             .Returns(mockExitCodeManager.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IGlobalExceptionHandler)))
+            .Returns(mockExceptionHandler.Object);
 
         // Set up exit code manager behavior
         mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ComparisonResult>()))
@@ -299,6 +302,7 @@ public class CompareCommandTests
         var mockApiComparer = new Mock<IApiComparer>();
         var mockReportGenerator = new Mock<IReportGenerator>();
         var mockExitCodeManager = new Mock<IExitCodeManager>();
+        var mockExceptionHandler = new Mock<IGlobalExceptionHandler>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
@@ -313,6 +317,8 @@ public class CompareCommandTests
             .Returns(mockReportGenerator.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
             .Returns(mockExitCodeManager.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IGlobalExceptionHandler)))
+            .Returns(mockExceptionHandler.Object);
 
         // Set up exit code manager behavior for breaking changes
         mockExitCodeManager.Setup(ec => ec.GetExitCode(It.IsAny<ComparisonResult>()))
@@ -394,6 +400,7 @@ public class CompareCommandTests
         var mockLogger = new Mock<ILogger<CompareCommand>>();
         var mockAssemblyLoader = new Mock<IAssemblyLoader>();
         var mockExitCodeManager = new Mock<IExitCodeManager>();
+        var mockExceptionHandler = new Mock<IGlobalExceptionHandler>();
 
         // Set up mock services
         mockServiceProvider.Setup(sp => sp.GetService(typeof(ILogger<CompareCommand>)))
@@ -402,6 +409,8 @@ public class CompareCommandTests
             .Returns(mockAssemblyLoader.Object);
         mockServiceProvider.Setup(sp => sp.GetService(typeof(IExitCodeManager)))
             .Returns(mockExitCodeManager.Object);
+        mockServiceProvider.Setup(sp => sp.GetService(typeof(IGlobalExceptionHandler)))
+            .Returns(mockExceptionHandler.Object);
 
         // Set up exit code manager behavior for exceptions
         mockExitCodeManager.Setup(ec => ec.GetExitCodeForException(It.IsAny<Exception>()))
