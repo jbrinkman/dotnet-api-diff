@@ -251,10 +251,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
     /// <returns>True if the file appears to be a native DLL, false otherwise</returns>
     private bool IsProbablyNativeDll(string filePath)
     {
-        if (nativeDllCache.TryGetValue(filePath, out bool cachedResult))
-        {
-            return cachedResult; // Return cached result if available
-        }
         try
         {
             // Read the first few bytes to check for the PE header
