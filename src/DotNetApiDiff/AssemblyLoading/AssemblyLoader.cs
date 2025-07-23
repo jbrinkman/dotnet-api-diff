@@ -279,7 +279,6 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the PE header offset
                 byte[] offsetBuffer = new byte[4];
-                bytesRead = 0;
                 bytesRead = fileStream.Read(offsetBuffer, 0, 4);
                 if (bytesRead < 4)
                 {
