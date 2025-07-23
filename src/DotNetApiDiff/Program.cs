@@ -49,8 +49,10 @@ public class Program
                 {
                     logger.LogError(ex, "An unhandled exception occurred");
                     int exitCode = exitCodeManager.GetExitCodeForException(ex);
-                    logger.LogInformation("Exiting with code {ExitCode}: {Description}",
-                        exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+                    logger.LogInformation(
+                        "Exiting with code {ExitCode}: {Description}",
+                        exitCode,
+                        exitCodeManager.GetExitCodeDescription(exitCode));
                     return exitCode;
                 });
 
@@ -72,8 +74,10 @@ public class Program
             var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
             int exitCode = exitCodeManager.GetExitCodeForException(ex);
 
-            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
-                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+            logger.LogInformation(
+                "Exiting with code {ExitCode}: {Description}",
+                exitCode,
+                exitCodeManager.GetExitCodeDescription(exitCode));
 
             return exitCode;
         }

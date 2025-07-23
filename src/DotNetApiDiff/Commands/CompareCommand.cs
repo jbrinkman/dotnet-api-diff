@@ -317,8 +317,10 @@ public class CompareCommand : Command<CompareCommandSettings>
                 logger.LogInformation("Comparison completed successfully with no breaking changes");
             }
 
-            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
-                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+            logger.LogInformation(
+                "Exiting with code {ExitCode}: {Description}",
+                exitCode,
+                exitCodeManager.GetExitCodeDescription(exitCode));
 
             return exitCode;
         }
@@ -331,8 +333,10 @@ public class CompareCommand : Command<CompareCommandSettings>
             var exitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
             int exitCode = exitCodeManager.GetExitCodeForException(ex);
 
-            logger.LogInformation("Exiting with code {ExitCode}: {Description}",
-                exitCode, exitCodeManager.GetExitCodeDescription(exitCode));
+            logger.LogInformation(
+                "Exiting with code {ExitCode}: {Description}",
+                exitCode,
+                exitCodeManager.GetExitCodeDescription(exitCode));
 
             return exitCode;
         }
