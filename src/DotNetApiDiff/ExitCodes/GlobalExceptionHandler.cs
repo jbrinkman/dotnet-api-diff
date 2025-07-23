@@ -181,6 +181,7 @@ namespace DotNetApiDiff.ExitCodes
             // Handle first-chance exceptions (useful for debugging)
             if (_logger.IsEnabled(LogLevel.Debug))
             {
+                // Register for FirstChanceException events only when debug logging is enabled
                 AppDomain.CurrentDomain.FirstChanceException += (sender, e) =>
                 {
                     // Only log first-chance exceptions at debug level to avoid noise
