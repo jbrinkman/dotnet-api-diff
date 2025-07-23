@@ -285,6 +285,7 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
                 {
                     return false; // Not enough bytes to determine if it's a DLL
                 }
+
                 int peOffset = BitConverter.ToInt32(offsetBuffer, 0);
 
                 // Seek to the PE header
@@ -311,7 +312,12 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the Optional Header magic value
                 byte[] magicBuffer = new byte[2];
-                fileStream.Read(magicBuffer, 0, 2);
+                bytesRead = 0;
+                bytesRead = fileStream.Read(magicBuffer, 0, 2);
+                if (bytesRead < 2)
+                {
+                    return false; // Not enough bytes to determine if it's a DLL
+                }
 
                 // PE32 (0x10B) or PE32+ (0x20B)
                 ushort magic = BitConverter.ToUInt16(magicBuffer, 0);
@@ -338,7 +344,13 @@ public class AssemblyLoader : IAssemblyLoader, IDisposable
 
                 // Read the CLR header RVA and size
                 byte[] clrBuffer = new byte[8];
-                fileStream.Read(clrBuffer, 0, 8);
+                bytesRead = 0;
+                bytesRead = fileStream.Read(clrBuffer, 0, 8);
+                if (bytesRead < 8)
+                {
+                    return false; // Not enough bytes to determine if it's a DLL
+                }
+
                 uint clrRva = BitConverter.ToUInt32(clrBuffer, 0);
                 uint clrSize = BitConverter.ToUInt32(clrBuffer, 4);
 
