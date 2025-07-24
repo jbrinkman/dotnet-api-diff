@@ -7,6 +7,7 @@ vars:
   SOLUTION: DotNetApiDiff.sln
   PROJECT: src/DotNetApiDiff/DotNetApiDiff.csproj
   TEST_PROJECT: tests/DotNetApiDiff.Tests/DotNetApiDiff.Tests.csproj
+  TEST_ASSEMBLIES_DIR: tests/TestAssemblies
   COVERAGE_DIR: coverage-report
   TEST_REPORT_DIR: test-report
 
@@ -21,11 +22,25 @@ tasks:
     cmds:
       - dotnet build {{.SOLUTION}} --configuration Release
 
+  build:test-assemblies:
+    desc: Build test assemblies and copy to TestData
+    cmds:
+      - cd {{.TEST_ASSEMBLIES_DIR}} && ./build-test-assemblies.sh
+
+  clean:test-assemblies:
+    desc: Clean test assemblies build outputs
+    cmds:
+      - dotnet clean {{.TEST_ASSEMBLIES_DIR}}/TestAssemblyV1.csproj
+      - dotnet clean {{.TEST_ASSEMBLIES_DIR}}/TestAssemblyV2.csproj
+      - rm -f tests/DotNetApiDiff.Tests/TestData/TestAssemblyV1.dll
+      - rm -f tests/DotNetApiDiff.Tests/TestData/TestAssemblyV2.dll
+
   clean:
     desc: Clean build outputs
     cmds:
       - dotnet clean {{.SOLUTION}}
       - task: clean:coverage
+      - task: clean:test-assemblies
 
   clean:coverage:
     desc: Clean coverage reports
@@ -49,6 +64,7 @@ tasks:
 
   test:integration:
     desc: Run integration tests only
+    deps: [build:test-assemblies]
     cmds:
       - dotnet test {{.TEST_PROJECT}} --filter "Category=Integration" --configuration Release
 
@@ -213,5 +229,6 @@ tasks:
       - task: restore
       - task: code:quality
       - task: build
+      - task: build:test-assemblies
       - task: test
       - task: coverage
