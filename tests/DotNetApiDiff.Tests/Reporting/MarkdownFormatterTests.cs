@@ -250,22 +250,24 @@ public class MarkdownFormatterTests
         var markdown = formatter.Format(result);
 
         // Assert
+        // Normalize line endings for cross-platform compatibility
+        var normalizedMarkdown = markdown.Replace("\r\n", "\n").Replace("\r", "\n");
+
         // Check for valid markdown structure
         // Headers should start with #
-        Assert.Matches(new Regex(@"^# .*$", RegexOptions.Multiline), markdown);
-        Assert.Matches(new Regex(@"^## .*$", RegexOptions.Multiline), markdown);
+        Assert.Matches(new Regex(@"^# .*$", RegexOptions.Multiline), normalizedMarkdown);
+        Assert.Matches(new Regex(@"^## .*$", RegexOptions.Multiline), normalizedMarkdown);
 
-        // Tables should have header row and separator row (normalize line endings for cross-platform compatibility)
-        var normalizedMarkdown = markdown.Replace("\r\n", "\n").Replace("\r", "\n");
+        // Tables should have header row and separator row
         Assert.Matches(new Regex(@"^\| .* \|$", RegexOptions.Multiline), normalizedMarkdown);
         Assert.Matches(new Regex(@"^\|\-+\|\-+\|", RegexOptions.Multiline), normalizedMarkdown);
 
         // Code blocks should be properly formatted
-        Assert.Matches(new Regex(@"```csharp\s.*\s```", RegexOptions.Singleline), markdown);
+        Assert.Matches(new Regex(@"```csharp\s.*\s```", RegexOptions.Singleline), normalizedMarkdown);
 
         // Details tags should be properly closed
-        var detailsOpenCount = Regex.Matches(markdown, @"<details>").Count;
-        var detailsCloseCount = Regex.Matches(markdown, @"</details>").Count;
+        var detailsOpenCount = Regex.Matches(normalizedMarkdown, @"<details>").Count;
+        var detailsCloseCount = Regex.Matches(normalizedMarkdown, @"</details>").Count;
         Assert.Equal(detailsOpenCount, detailsCloseCount);
     }
 }
