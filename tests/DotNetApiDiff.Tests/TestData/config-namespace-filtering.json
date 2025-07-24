@@ -1,0 +1,32 @@
+{
+  "filters": {
+    "includeNamespaces": ["System.Text", "System.IO"],
+    "excludeNamespaces": ["System.Text.Json.Serialization"],
+    "includeTypes": ["System.Text.*", "System.IO.File*"],
+    "excludeTypes": ["*.Internal*", "*.Helper*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {},
+    "typeMappings": {},
+    "autoMapSameNameTypes": true,
+    "ignoreCase": false
+  },
+  "exclusions": {
+    "excludedTypes": [],
+    "excludedMembers": [],
+    "excludedTypePatterns": [],
+    "excludedMemberPatterns": []
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "outputFormat": "markdown",
+  "outputPath": null,
+  "failOnBreakingChanges": true
+}

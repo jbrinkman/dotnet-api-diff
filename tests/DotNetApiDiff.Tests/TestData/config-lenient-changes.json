@@ -1,0 +1,41 @@
+{
+  "filters": {
+    "includeNamespaces": [],
+    "excludeNamespaces": [],
+    "includeTypes": [],
+    "excludeTypes": [],
+    "includeInternals": true,
+    "includeCompilerGenerated": true
+  },
+  "mappings": {
+    "namespaceMappings": {
+      "OldNamespace": ["NewNamespace"],
+      "Legacy.Api": ["Modern.Api"]
+    },
+    "typeMappings": {
+      "OldClass": "NewClass",
+      "DeprecatedType": "ReplacementType"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": true
+  },
+  "exclusions": {
+    "excludedTypes": ["ObsoleteClass", "TemporaryClass"],
+    "excludedMembers": [
+      "SomeClass.ObsoleteMethod",
+      "AnotherClass.DeprecatedProperty"
+    ],
+    "excludedTypePatterns": ["*.Test*", "*.Temp*"],
+    "excludedMemberPatterns": ["*.get_Obsolete*", "*.set_Obsolete*"]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": false,
+    "treatMemberRemovalAsBreaking": false,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": false
+  },
+  "outputFormat": "json",
+  "outputPath": null,
+  "failOnBreakingChanges": false
+}
