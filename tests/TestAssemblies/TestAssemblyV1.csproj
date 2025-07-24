@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>TestAssemblyV1</AssemblyName>
+        <RootNamespace>TestAssembly</RootNamespace>
+        <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</OutputPath>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <!-- Suppress warnings for unused events in test assemblies -->
+        <NoWarn>CS0067</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="V1\**\*.cs" />
+    </ItemGroup>
+
+</Project>

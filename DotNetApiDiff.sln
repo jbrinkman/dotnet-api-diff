@@ -1,10 +1,16 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApiDiff", "src\DotNetApiDiff\DotNetApiDiff.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApiDiff.Tests", "tests\DotNetApiDiff.Tests\DotNetApiDiff.Tests.csproj", "{B2C3D4E5-F6G7-8901-BCDE-F23456789012}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9E9A40DF-93D7-4C97-A4B2-EFD48382576D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAssemblyV1", "tests\TestAssemblies\TestAssemblyV1.csproj", "{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAssemblyV2", "tests\TestAssemblies\TestAssemblyV2.csproj", "{4EAC9034-1137-4E2A-A70B-D8CEB248F107}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,5 +26,17 @@ Global
 		{B2C3D4E5-F6G7-8901-BCDE-F23456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2C3D4E5-F6G7-8901-BCDE-F23456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2C3D4E5-F6G7-8901-BCDE-F23456789012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EAC9034-1137-4E2A-A70B-D8CEB248F107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EAC9034-1137-4E2A-A70B-D8CEB248F107}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EAC9034-1137-4E2A-A70B-D8CEB248F107}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EAC9034-1137-4E2A-A70B-D8CEB248F107}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5E8D074B-6E7B-4730-BBBE-4E81841DA8D2} = {9E9A40DF-93D7-4C97-A4B2-EFD48382576D}
+		{4EAC9034-1137-4E2A-A70B-D8CEB248F107} = {9E9A40DF-93D7-4C97-A4B2-EFD48382576D}
 	EndGlobalSection
 EndGlobal
