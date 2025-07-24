@@ -1,26 +1,35 @@
 {
-  "namespaceMappings": {
-    "TestAssembly.NamespaceToBeRenamed": ["TestAssembly.RenamedNamespace"]
-  },
-  "typeMappings": {
-    "TestAssembly.OldTypeName": "TestAssembly.NewTypeName"
-  },
-  "excludedTypes": ["TestAssembly.ExcludedType"],
-  "excludedMembers": [
-    "TestAssembly.PublicClass.RemovedMethod",
-    "TestAssembly.PublicClass.RemovedProperty",
-    "TestAssembly.IPublicInterface.RemovedMethod"
-  ],
-  "breakingChangeRules": {
-    "treatMemberRemovalAsBreaking": true,
-    "treatSignatureChangeAsBreaking": true,
-    "treatVisibilityDecreaseAsBreaking": true,
-    "treatPropertyTypeChangeAsBreaking": true
-  },
   "filters": {
-    "includeNamespaces": ["TestAssembly"],
-    "excludeNamespaces": ["TestAssembly.Internal"],
-    "includeTypes": ["TestAssembly.*Class"],
-    "excludeTypes": ["TestAssembly.*Helper"]
+    "includeNamespaces": ["System.Text", "System.IO"],
+    "excludeNamespaces": ["System.Diagnostics", "System.Internal"],
+    "includeTypes": ["System.Text.*", "System.IO.*"],
+    "excludeTypes": ["*.Internal*", "*.Helper*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {
+      "OldNamespace": ["NewNamespace"],
+      "AnotherOldNamespace": ["AnotherNewNamespace"]
+    },
+    "typeMappings": {
+      "OldType": "NewType",
+      "AnotherOldType": "AnotherNewType"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": true
+  },
+  "exclusions": {
+    "excludedTypes": ["ExcludedType", "AnotherExcludedType"],
+    "excludedMembers": ["SomeClass.RemovedMethod", "SomeClass.RemovedProperty"],
+    "excludedTypePatterns": ["*.Internal*", "*.Helper*"],
+    "excludedMemberPatterns": ["*.get_*", "*.set_*"]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
   }
 }

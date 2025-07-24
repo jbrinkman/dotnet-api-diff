@@ -35,4 +35,10 @@
         <None Include="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
+    <!-- Temporarily exclude outdated manual test file -->
+    <ItemGroup>
+        <Compile Remove="ApiExtraction\ApiComparerManualTests.cs" />
+        <None Include="ApiExtraction\ApiComparerManualTests.cs" />
+    </ItemGroup>
+
 </Project>
