@@ -146,14 +146,14 @@ Each task should follow this git workflow:
     - _Requirements: 1.4, 3.4, 6.6_
 
 - [ ] 8. Create integration tests and end-to-end scenarios
-  - [ ] 8.1 Build test assembly pairs for integration testing
+  - [x] 8.1 Build test assembly pairs for integration testing
     - Create sample assemblies with known API differences for testing
     - Include scenarios with namespace mappings, exclusions, and breaking changes
     - Write integration tests using these test assemblies
     - **Git Workflow**: Create branch `feature/task-8.1-integration-tests`, commit, push, and create PR
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 8.2 Test complete workflows with configuration files
+  - [x] 8.2 Test complete workflows with configuration files
     - Create sample configuration files for different use cases
     - Test end-to-end workflows from CLI input to formatted output
     - Validate exit codes and error handling in realistic scenarios
