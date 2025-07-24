@@ -255,9 +255,10 @@ public class MarkdownFormatterTests
         Assert.Matches(new Regex(@"^# .*$", RegexOptions.Multiline), markdown);
         Assert.Matches(new Regex(@"^## .*$", RegexOptions.Multiline), markdown);
 
-        // Tables should have header row and separator row
-        Assert.Matches(new Regex(@"^\| .* \|$", RegexOptions.Multiline), markdown);
-        Assert.Matches(new Regex(@"^\|\-+\|\-+\|", RegexOptions.Multiline), markdown);
+        // Tables should have header row and separator row (normalize line endings for cross-platform compatibility)
+        var normalizedMarkdown = markdown.Replace("\r\n", "\n").Replace("\r", "\n");
+        Assert.Matches(new Regex(@"^\| .* \|$", RegexOptions.Multiline), normalizedMarkdown);
+        Assert.Matches(new Regex(@"^\|\-+\|\-+\|", RegexOptions.Multiline), normalizedMarkdown);
 
         // Code blocks should be properly formatted
         Assert.Matches(new Regex(@"```csharp\s.*\s```", RegexOptions.Singleline), markdown);
