@@ -2,7 +2,7 @@
 
 [![Main Branch Build](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/main-build.yml/badge.svg)](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/main-build.yml)
 [![PR Build and Test](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/pr-build.yml/badge.svg)](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/pr-build.yml)
-[![Code Coverage](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/code-coverage.yml/badge.svg)](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/code-coverage.yml)
+[![Code Coverage](https://github.com/jbrinkman/dotnet-api-diff/actions/workflows/code-coverage.yml/badge.svg)](https://joe.brinkman.me/dotnet-api-diff)
 
 A powerful command-line tool for comparing public APIs between different versions of .NET assemblies. Designed to help library maintainers and development teams identify breaking changes, track API evolution, and enforce semantic versioning practices.
 
