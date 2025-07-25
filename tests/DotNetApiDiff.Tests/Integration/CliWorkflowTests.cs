@@ -10,6 +10,7 @@ namespace DotNetApiDiff.Tests.Integration;
 /// <summary>
 /// Integration tests for CLI workflows using the actual executable
 /// </summary>
+[Trait("Category", "Integration")]
 public class CliWorkflowTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
@@ -30,41 +31,39 @@ public class CliWorkflowTests : IDisposable
 
     private string? FindExecutablePath()
     {
+        var currentDir = Directory.GetCurrentDirectory();
+
         // Look for the built executable in common locations
         var possiblePaths = new[]
         {
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Debug", "net8.0", "DotNetApiDiff.exe"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Debug", "net8.0", "DotNetApiDiff"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Release", "net8.0", "DotNetApiDiff.exe"),
-            Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Release", "net8.0", "DotNetApiDiff")
+            Path.Combine(currentDir, "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Debug", "net8.0", "DotNetApiDiff.exe"),
+            Path.Combine(currentDir, "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Debug", "net8.0", "DotNetApiDiff"),
+            Path.Combine(currentDir, "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Release", "net8.0", "DotNetApiDiff.exe"),
+            Path.Combine(currentDir, "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "bin", "Release", "net8.0", "DotNetApiDiff")
         };
 
         foreach (var path in possiblePaths)
         {
-            if (File.Exists(path))
+            var fullPath = Path.GetFullPath(path);
+            if (File.Exists(fullPath))
             {
-                return path;
+                return fullPath;
             }
         }
 
         // Check if the project file exists for dotnet run
-        var projectPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "DotNetApiDiff.csproj");
-        if (File.Exists(projectPath))
+        var projectPath = Path.Combine(currentDir, "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "DotNetApiDiff.csproj");
+        var fullProjectPath = Path.GetFullPath(projectPath);
+        if (File.Exists(fullProjectPath))
         {
             return "dotnet";
         }
 
-        // Return null if neither executable nor project file found
         return null;
     }
 
     private ProcessResult RunCliCommand(string arguments, int expectedExitCode = -1)
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            return new ProcessResult { ExitCode = -1, StandardOutput = "SKIPPED", StandardError = "CLI executable not found" };
-        }
 
         var processInfo = new ProcessStartInfo
         {
@@ -142,25 +141,16 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithValidAssemblies_ShouldSucceed()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if test assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --output console";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --output console";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -173,26 +163,18 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithConfigFile_ShouldApplyConfiguration()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
         var configFile = Path.Combine(_testDataPath, "config-lenient-changes.json");
 
-        // Skip test if files don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly) || !File.Exists(configFile))
-        {
-            _output.WriteLine("Skipping test - required files not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+        Assert.True(File.Exists(configFile), $"Config file not found: {configFile}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\" --output json";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\" --output json";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -209,14 +191,11 @@ public class CliWorkflowTests : IDisposable
         var sourceAssembly = Path.Combine(_testDataPath, "non-existent.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if target assembly doesn't exist
-        if (!File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - target assembly not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\"";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\"";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -234,14 +213,11 @@ public class CliWorkflowTests : IDisposable
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "non-existent.dll");
 
-        // Skip test if source assembly doesn't exist
-        if (!File.Exists(sourceAssembly))
-        {
-            _output.WriteLine("Skipping test - source assembly not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\"";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\"";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -260,14 +236,12 @@ public class CliWorkflowTests : IDisposable
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
         var configFile = Path.Combine(_testDataPath, "non-existent-config.json");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\"";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\"";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -281,26 +255,18 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithMalformedConfigFile_ShouldFail()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
         var configFile = Path.Combine(_testDataPath, "config-malformed.json");
 
-        // Skip test if files don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly) || !File.Exists(configFile))
-        {
-            _output.WriteLine("Skipping test - required files not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+        Assert.True(File.Exists(configFile), $"Malformed config file not found: {configFile}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\"";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\"";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -318,25 +284,16 @@ public class CliWorkflowTests : IDisposable
     [InlineData("markdown")]
     public void CliWorkflow_WithDifferentOutputFormats_ShouldSucceed(string outputFormat)
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --output {outputFormat}";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --output {outputFormat}";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -349,25 +306,16 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithInvalidOutputFormat_ShouldFail()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --output invalid_format";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --output invalid_format";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -381,25 +329,16 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithNamespaceFiltering_ShouldApplyFilters()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --filter System.Text --output console";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --filter System.Text --output console";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -412,25 +351,16 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithVerboseOutput_ShouldProduceDetailedLogs()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --verbose --output console";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --verbose --output console";
 
         // Act
         var result = RunCliCommand(arguments);
@@ -443,25 +373,16 @@ public class CliWorkflowTests : IDisposable
     [Fact]
     public void CliWorkflow_WithNoColorOption_ShouldDisableColors()
     {
-        // Skip test if executable/project not found
-        if (_executablePath == null)
-        {
-            _output.WriteLine("Skipping test - CLI executable or project file not found");
-            return;
-        }
-
         // Arrange
         var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
         var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
 
-        // Skip test if assemblies don't exist
-        if (!File.Exists(sourceAssembly) || !File.Exists(targetAssembly))
-        {
-            _output.WriteLine("Skipping test - test assemblies not found");
-            return;
-        }
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
 
-        var arguments = $"\"{sourceAssembly}\" \"{targetAssembly}\" --no-color --output console";
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --no-color --output console";
 
         // Act
         var result = RunCliCommand(arguments);

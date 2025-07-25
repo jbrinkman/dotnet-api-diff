@@ -19,11 +19,11 @@ public class CompareCommandSettings : CommandSettings
 {
     [CommandArgument(0, "<sourceAssembly>")]
     [Description("Path to the source/baseline assembly")]
-    required public string SourceAssemblyPath { get; init; }
+    public string? SourceAssemblyPath { get; init; }
 
     [CommandArgument(1, "<targetAssembly>")]
     [Description("Path to the target/current assembly")]
-    required public string TargetAssemblyPath { get; init; }
+    public string? TargetAssemblyPath { get; init; }
 
     [CommandOption("-c|--config <configFile>")]
     [Description("Path to configuration file")]
@@ -95,12 +95,22 @@ public class CompareCommand : Command<CompareCommandSettings>
     public override ValidationResult Validate([NotNull] CommandContext context, [NotNull] CompareCommandSettings settings)
     {
         // Validate source assembly path
+        if (string.IsNullOrEmpty(settings.SourceAssemblyPath))
+        {
+            return ValidationResult.Error("Source assembly path is required");
+        }
+
         if (!File.Exists(settings.SourceAssemblyPath))
         {
             return ValidationResult.Error($"Source assembly file not found: {settings.SourceAssemblyPath}");
         }
 
         // Validate target assembly path
+        if (string.IsNullOrEmpty(settings.TargetAssemblyPath))
+        {
+            return ValidationResult.Error("Target assembly path is required");
+        }
+
         if (!File.Exists(settings.TargetAssemblyPath))
         {
             return ValidationResult.Error($"Target assembly file not found: {settings.TargetAssemblyPath}");
@@ -203,7 +213,7 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                     try
                     {
-                        sourceAssembly = assemblyLoader.LoadAssembly(settings.SourceAssemblyPath);
+                        sourceAssembly = assemblyLoader.LoadAssembly(settings.SourceAssemblyPath!);
                     }
                     catch (Exception ex)
                     {
@@ -216,7 +226,7 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                     try
                     {
-                        targetAssembly = assemblyLoader.LoadAssembly(settings.TargetAssemblyPath);
+                        targetAssembly = assemblyLoader.LoadAssembly(settings.TargetAssemblyPath!);
                     }
                     catch (Exception ex)
                     {
