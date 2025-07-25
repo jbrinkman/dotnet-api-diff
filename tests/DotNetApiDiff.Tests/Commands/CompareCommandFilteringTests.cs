@@ -90,7 +90,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithNamespaceFilters_AppliesFiltersToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",
@@ -116,7 +116,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithTypePatterns_AppliesFiltersToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",
@@ -142,7 +142,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithExcludePatterns_AppliesExclusionsToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",
@@ -173,7 +173,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithIncludeInternals_AppliesOptionToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",
@@ -197,7 +197,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithIncludeCompilerGenerated_AppliesOptionToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",
@@ -229,7 +229,7 @@ public class CompareCommandFilteringTests
             config.Filters.IncludeNamespaces.Add("TestNamespace");
             config.SaveToJsonFile(tempConfigFile);
 
-            var command = new CompareCommand(_serviceProvider);
+            var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
             var settings = new CompareCommandSettings
             {
                 SourceAssemblyPath = "source.dll",
@@ -268,7 +268,7 @@ public class CompareCommandFilteringTests
             // Create an invalid JSON file
             File.WriteAllText(tempConfigFile, "{ invalid json }");
 
-            var command = new CompareCommand(_serviceProvider);
+            var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
             var settings = new CompareCommandSettings
             {
                 SourceAssemblyPath = "source.dll",
@@ -291,7 +291,7 @@ public class CompareCommandFilteringTests
             services.AddSingleton(Mock.Of<IGlobalExceptionHandler>());
 
             var serviceProvider = services.BuildServiceProvider();
-            command = new CompareCommand(serviceProvider);
+            command = new CompareCommand(serviceProvider, _mockLogger.Object);
 
             // Act
             var result = command.Execute(_commandContext, settings);
@@ -313,7 +313,7 @@ public class CompareCommandFilteringTests
     public void Execute_WithCombinedFilters_AppliesAllFiltersToConfiguration()
     {
         // Arrange
-        var command = new CompareCommand(_serviceProvider);
+        var command = new CompareCommand(_serviceProvider, _mockLogger.Object);
         var settings = new CompareCommandSettings
         {
             SourceAssemblyPath = "source.dll",

@@ -18,7 +18,7 @@ public class CompareCommandTests
     public void Validate_WithValidPaths_ReturnsSuccess()
     {
         // Arrange
-        var command = new CompareCommand(Mock.Of<IServiceProvider>());
+        var command = new CompareCommand(Mock.Of<IServiceProvider>(), Mock.Of<ILogger<CompareCommand>>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
@@ -55,7 +55,7 @@ public class CompareCommandTests
     public void Validate_WithInvalidSourceAssemblyPath_ReturnsError()
     {
         // Arrange
-        var command = new CompareCommand(Mock.Of<IServiceProvider>());
+        var command = new CompareCommand(Mock.Of<IServiceProvider>(), Mock.Of<ILogger<CompareCommand>>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary file for target assembly
@@ -89,7 +89,7 @@ public class CompareCommandTests
     public void Validate_WithInvalidTargetAssemblyPath_ReturnsError()
     {
         // Arrange
-        var command = new CompareCommand(Mock.Of<IServiceProvider>());
+        var command = new CompareCommand(Mock.Of<IServiceProvider>(), Mock.Of<ILogger<CompareCommand>>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary file for source assembly
@@ -123,7 +123,7 @@ public class CompareCommandTests
     public void Validate_WithInvalidConfigFile_ReturnsError()
     {
         // Arrange
-        var command = new CompareCommand(Mock.Of<IServiceProvider>());
+        var command = new CompareCommand(Mock.Of<IServiceProvider>(), Mock.Of<ILogger<CompareCommand>>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for assemblies
@@ -162,7 +162,7 @@ public class CompareCommandTests
     public void Validate_WithInvalidOutputFormat_ReturnsError()
     {
         // Arrange
-        var command = new CompareCommand(Mock.Of<IServiceProvider>());
+        var command = new CompareCommand(Mock.Of<IServiceProvider>(), Mock.Of<ILogger<CompareCommand>>());
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for assemblies
@@ -252,7 +252,7 @@ public class CompareCommandTests
         mockReportGenerator.Setup(rg => rg.GenerateReport(It.IsAny<ComparisonResult>(), It.IsAny<ReportFormat>()))
             .Returns("Test Report");
 
-        var command = new CompareCommand(mockServiceProvider.Object);
+        var command = new CompareCommand(mockServiceProvider.Object, mockLogger.Object);
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
@@ -359,7 +359,7 @@ public class CompareCommandTests
         mockReportGenerator.Setup(rg => rg.GenerateReport(It.IsAny<ComparisonResult>(), It.IsAny<ReportFormat>()))
             .Returns("Test Report");
 
-        var command = new CompareCommand(mockServiceProvider.Object);
+        var command = new CompareCommand(mockServiceProvider.Object, mockLogger.Object);
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing
@@ -422,7 +422,7 @@ public class CompareCommandTests
         mockAssemblyLoader.Setup(al => al.LoadAssembly(It.IsAny<string>()))
             .Throws(new InvalidOperationException("Test exception"));
 
-        var command = new CompareCommand(mockServiceProvider.Object);
+        var command = new CompareCommand(mockServiceProvider.Object, mockLogger.Object);
         var context = new CommandContext(Mock.Of<IRemainingArguments>(), "compare", null);
 
         // Create temporary files for testing

@@ -1,0 +1,147 @@
+name: API Compatibility Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "src/**"
+      - "*.csproj"
+      - "*.sln"
+
+jobs:
+  api-compatibility:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build current version
+        run: |
+          dotnet build --configuration Release --no-restore
+          mkdir -p ./artifacts/current
+          cp src/*/bin/Release/*/*.dll ./artifacts/current/
+
+      - name: Checkout baseline (main branch)
+        run: |
+          git fetch origin main
+          git checkout origin/main
+
+      - name: Build baseline version
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+          mkdir -p ./artifacts/baseline
+          cp src/*/bin/Release/*/*.dll ./artifacts/baseline/
+
+      - name: Checkout PR again
+        run: git checkout ${{ github.sha }}
+
+      - name: Setup API Diff Tool
+        run: |
+          git clone https://github.com/jbrinkman/dotnet-api-diff.git tools/api-diff
+          cd tools/api-diff
+          dotnet build --configuration Release
+
+      - name: Run API Compatibility Check
+        id: api-diff
+        run: |
+          cd tools/api-diff
+
+          # Find the main assembly (adjust pattern as needed)
+          BASELINE_DLL=$(find ../../artifacts/baseline -name "*.dll" | grep -v ".Tests." | head -1)
+          CURRENT_DLL=$(find ../../artifacts/current -name "*.dll" | grep -v ".Tests." | head -1)
+
+          echo "Comparing: $BASELINE_DLL -> $CURRENT_DLL"
+
+          # Run the comparison
+          dotnet run --project src/DotNetApiDiff -- compare \
+            "$BASELINE_DLL" \
+            "$CURRENT_DLL" \
+            --config ../../.github/api-diff-config.json \
+            --output markdown \
+            --no-color > ../../api-changes.md
+
+          # Capture exit code
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Read API Changes
+        id: api-changes
+        run: |
+          if [ -f api-changes.md ]; then
+            echo "changes<<EOF" >> $GITHUB_OUTPUT
+            cat api-changes.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "changes=No API changes report generated" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const exitCode = '${{ steps.api-diff.outputs.exit_code }}';
+            const changes = `${{ steps.api-changes.outputs.changes }}`;
+
+            let emoji = '✅';
+            let status = 'No breaking changes detected';
+
+            if (exitCode === '1') {
+              emoji = '⚠️';
+              status = 'Non-breaking changes detected';
+            } else if (exitCode === '2') {
+              emoji = '❌';
+              status = 'Breaking changes detected';
+            } else if (exitCode !== '0') {
+              emoji = '💥';
+              status = 'API comparison failed';
+            }
+
+            const body = `## ${emoji} API Compatibility Check
+
+            **Status:** ${status}
+            **Exit Code:** ${exitCode}
+
+            ### Changes Detected
+
+            ${changes}
+
+            ---
+
+            ${exitCode === '2' ? '⚠️ **This PR introduces breaking changes and may require a major version bump.**' : ''}
+            ${exitCode === '1' ? 'ℹ️ This PR introduces non-breaking changes and may require a minor version bump.' : ''}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail on breaking changes
+        if: steps.api-diff.outputs.exit_code == '2'
+        run: |
+          echo "❌ Breaking changes detected. Please review the API changes above."
+          exit 1
+
+      - name: Upload API diff report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-compatibility-report
+          path: |
+            api-changes.md
+            artifacts/
+          retention-days: 30

@@ -46,7 +46,7 @@ namespace DotNetApiDiff.Tests.Commands
             services.AddSingleton(_loggerMock.Object);
 
             _serviceProvider = services.BuildServiceProvider();
-            _command = new CompareCommand(_serviceProvider);
+            _command = new CompareCommand(_serviceProvider, _loggerMock.Object);
 
             // Create temp directory for test files
             _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
