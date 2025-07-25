@@ -9,6 +9,10 @@ on:
 jobs:
   code-coverage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -47,10 +51,17 @@ jobs:
           name: code-coverage-report
           path: ./CodeCoverage
 
-      - name: Publish coverage report to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        if: github.ref == 'refs/heads/main'
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
-          folder: ./CodeCoverage
-          branch: gh-pages
-          target-folder: coverage
+          path: ./CodeCoverage
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: github.ref == 'refs/heads/main'
