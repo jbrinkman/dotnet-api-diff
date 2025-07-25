@@ -676,14 +676,6 @@ task coverage
 5. **Ensure all tests pass** including code coverage requirements
 6. **Submit a pull request** with a clear description
 
-### Project Structure
-
-- `src/DotNetApiDiff/` - Main application code
-- `tests/DotNetApiDiff.Tests/` - Unit and integration tests
-- `samples/` - Sample configuration files
-- `docs/` - Additional documentation
-- `.github/workflows/` - CI/CD pipeline definitions
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
