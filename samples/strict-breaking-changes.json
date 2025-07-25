@@ -1,0 +1,32 @@
+{
+  "filters": {
+    "includeNamespaces": [],
+    "excludeNamespaces": [],
+    "includeTypes": [],
+    "excludeTypes": ["*.Internal*", "*.Test*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {},
+    "typeMappings": {},
+    "autoMapSameNameTypes": false,
+    "ignoreCase": false
+  },
+  "exclusions": {
+    "excludedTypes": [],
+    "excludedMembers": [],
+    "excludedTypePatterns": ["*.Test*"],
+    "excludedMemberPatterns": []
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": true,
+    "treatAddedMemberAsBreaking": true,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "outputFormat": "Markdown",
+  "outputPath": "breaking-changes-report.md",
+  "failOnBreakingChanges": true
+}

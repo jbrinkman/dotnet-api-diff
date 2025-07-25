@@ -185,7 +185,15 @@ public class ConsoleFormatter : IReportFormatter
             table.AddRow("[bold red]Breaking Changes[/]", $"[bold red]{result.Differences.Count(d => d.IsBreakingChange)}[/]");
         }
 
-        return table.ToString() ?? string.Empty;
+        // Render the table to a string using AnsiConsole
+        using var writer = new StringWriter();
+        var console = AnsiConsole.Create(new AnsiConsoleSettings
+        {
+            Out = new AnsiConsoleOutput(writer),
+            ColorSystem = ColorSystemSupport.Standard
+        });
+        console.Write(table);
+        return writer.ToString();
     }
 
     private string FormatSummary(ComparisonResult result)
@@ -205,7 +213,15 @@ public class ConsoleFormatter : IReportFormatter
             Expand = true
         };
 
-        return panel.ToString() ?? string.Empty;
+        // Render the panel to a string using AnsiConsole
+        using var writer = new StringWriter();
+        var console = AnsiConsole.Create(new AnsiConsoleSettings
+        {
+            Out = new AnsiConsoleOutput(writer),
+            ColorSystem = ColorSystemSupport.Standard
+        });
+        console.Write(panel);
+        return writer.ToString();
     }
 
     private string FormatBreakingChanges(ComparisonResult result)
@@ -243,7 +259,15 @@ public class ConsoleFormatter : IReportFormatter
                 severityText);
         }
 
-        return table.ToString() ?? string.Empty;
+        // Render the table to a string using AnsiConsole
+        using var writer = new StringWriter();
+        var console = AnsiConsole.Create(new AnsiConsoleSettings
+        {
+            Out = new AnsiConsoleOutput(writer),
+            ColorSystem = ColorSystemSupport.Standard
+        });
+        console.Write(table);
+        return writer.ToString();
     }
 
     private string FormatDetailedChanges(ComparisonResult result)
@@ -331,7 +355,15 @@ public class ConsoleFormatter : IReportFormatter
             }
         }
 
-        return table.ToString() ?? string.Empty;
+        // Render the table to a string using AnsiConsole
+        using var writer = new StringWriter();
+        var console = AnsiConsole.Create(new AnsiConsoleSettings
+        {
+            Out = new AnsiConsoleOutput(writer),
+            ColorSystem = ColorSystemSupport.Standard
+        });
+        console.Write(table);
+        return writer.ToString();
     }
 
     private string FormatChangeDetails(ApiDifference change)

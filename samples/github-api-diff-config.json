@@ -1,0 +1,44 @@
+{
+  "filters": {
+    "includeNamespaces": [],
+    "excludeNamespaces": ["System.Diagnostics", "Microsoft.Extensions.Logging"],
+    "includeTypes": [],
+    "excludeTypes": ["*.Internal*", "*.Test*", "*.Benchmark*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {},
+    "typeMappings": {},
+    "autoMapSameNameTypes": true,
+    "ignoreCase": false
+  },
+  "exclusions": {
+    "excludedTypes": [],
+    "excludedMembers": [],
+    "excludedTypePatterns": [
+      "*.Test*",
+      "*.Helper*",
+      "*.Utility*",
+      "*Mock*",
+      "*Fake*"
+    ],
+    "excludedMemberPatterns": [
+      "*.get_Debug*",
+      "*.set_Debug*",
+      "*.ToString",
+      "*.GetHashCode",
+      "*.Equals"
+    ]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "outputFormat": "Markdown",
+  "outputPath": null,
+  "failOnBreakingChanges": true
+}

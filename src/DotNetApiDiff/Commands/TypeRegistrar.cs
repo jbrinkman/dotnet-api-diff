@@ -1,5 +1,7 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
+using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
 namespace DotNetApiDiff.Commands;
@@ -28,8 +30,36 @@ internal sealed class TypeRegistrar : ITypeRegistrar
     {
         _services = new ServiceCollection();
 
-        // Add the service provider itself
+        // Add the service provider itself so commands can access it
         _services.AddSingleton(serviceProvider);
+
+        // Add logging services from the original provider
+        _services.AddSingleton<ILoggerFactory>(provider =>
+            serviceProvider.GetRequiredService<ILoggerFactory>());
+        _services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+        // Add other required services from the original provider
+        _services.AddSingleton<IGlobalExceptionHandler>(provider =>
+            serviceProvider.GetRequiredService<IGlobalExceptionHandler>());
+        _services.AddSingleton<IExitCodeManager>(provider =>
+            serviceProvider.GetRequiredService<IExitCodeManager>());
+
+        // Add core API services from the original provider
+        _services.AddScoped<IAssemblyLoader>(provider =>
+            serviceProvider.GetRequiredService<IAssemblyLoader>());
+        _services.AddScoped<IApiExtractor>(provider =>
+            serviceProvider.GetRequiredService<IApiExtractor>());
+        _services.AddScoped<IApiComparer>(provider =>
+            serviceProvider.GetRequiredService<IApiComparer>());
+        _services.AddScoped<IReportGenerator>(provider =>
+            serviceProvider.GetRequiredService<IReportGenerator>());
+
+        // Register the CompareCommand to be resolved from the original service provider
+        _services.AddTransient<CompareCommand>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<CompareCommand>>();
+            return new CompareCommand(serviceProvider, logger);
+        });
     }
 
     /// <summary>

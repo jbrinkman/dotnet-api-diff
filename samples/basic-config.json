@@ -1,0 +1,32 @@
+{
+  "filters": {
+    "includeNamespaces": [],
+    "excludeNamespaces": ["System.Diagnostics"],
+    "includeTypes": [],
+    "excludeTypes": ["*.Internal*"],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {},
+    "typeMappings": {},
+    "autoMapSameNameTypes": true,
+    "ignoreCase": false
+  },
+  "exclusions": {
+    "excludedTypes": [],
+    "excludedMembers": [],
+    "excludedTypePatterns": ["*.Test*", "*.Helper*"],
+    "excludedMemberPatterns": ["*.get_Debug*", "*.set_Debug*"]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "outputFormat": "Console",
+  "outputPath": null,
+  "failOnBreakingChanges": true
+}

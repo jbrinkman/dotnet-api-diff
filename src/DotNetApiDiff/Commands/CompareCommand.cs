@@ -73,14 +73,17 @@ public class CompareCommandSettings : CommandSettings
 public class CompareCommand : Command<CompareCommandSettings>
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<CompareCommand> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompareCommand"/> class.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
-    public CompareCommand(IServiceProvider serviceProvider)
+    /// <param name="logger">The logger.</param>
+    public CompareCommand(IServiceProvider serviceProvider, ILogger<CompareCommand> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     /// <summary>
@@ -127,24 +130,23 @@ public class CompareCommand : Command<CompareCommandSettings>
     /// <returns>Exit code (0 for success, non-zero for failure)</returns>
     public override int Execute([NotNull] CommandContext context, [NotNull] CompareCommandSettings settings)
     {
-        var logger = _serviceProvider.GetRequiredService<ILogger<CompareCommand>>();
         var exceptionHandler = _serviceProvider.GetRequiredService<IGlobalExceptionHandler>();
 
         try
         {
             // Create a logging scope for this command execution
-            using (logger.BeginScope("Compare command execution"))
+            using (_logger.BeginScope("Compare command execution"))
             {
                 // Set up logging level based on verbose flag
                 if (settings.Verbose)
                 {
-                    logger.LogInformation("Verbose logging enabled");
+                    _logger.LogInformation("Verbose logging enabled");
                 }
 
                 // Configure console output
                 if (settings.NoColor)
                 {
-                    logger.LogDebug("Disabling colored output");
+                    _logger.LogDebug("Disabling colored output");
                     AnsiConsole.Profile.Capabilities.ColorSystem = ColorSystem.NoColors;
                 }
 
@@ -152,9 +154,9 @@ public class CompareCommand : Command<CompareCommandSettings>
                 ComparisonConfiguration config;
                 if (!string.IsNullOrEmpty(settings.ConfigFile))
                 {
-                    using (logger.BeginScope("Configuration loading"))
+                    using (_logger.BeginScope("Configuration loading"))
                     {
-                        logger.LogInformation("Loading configuration from {ConfigFile}", settings.ConfigFile);
+                        _logger.LogInformation("Loading configuration from {ConfigFile}", settings.ConfigFile);
 
                         try
                         {
@@ -166,11 +168,11 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                             // Try to load the configuration
                             config = ComparisonConfiguration.LoadFromJsonFile(settings.ConfigFile);
-                            logger.LogInformation("Configuration loaded successfully");
+                            _logger.LogInformation("Configuration loaded successfully");
                         }
                         catch (Exception ex)
                         {
-                            logger.LogError(ex, "Error loading configuration from {ConfigFile}", settings.ConfigFile);
+                            _logger.LogError(ex, "Error loading configuration from {ConfigFile}", settings.ConfigFile);
                             AnsiConsole.MarkupLine($"[red]Error loading configuration:[/] {ex.Message}");
 
                             // Use the ExitCodeManager to determine the appropriate exit code for errors
@@ -181,21 +183,21 @@ public class CompareCommand : Command<CompareCommandSettings>
                 }
                 else
                 {
-                    logger.LogInformation("Using default configuration");
+                    _logger.LogInformation("Using default configuration");
                     config = ComparisonConfiguration.CreateDefault();
                 }
 
                 // Apply command-line filters and options
-                ApplyCommandLineOptions(settings, config, logger);
+                ApplyCommandLineOptions(settings, config);
 
                 // Load assemblies
                 Assembly sourceAssembly;
                 Assembly targetAssembly;
 
-                using (logger.BeginScope("Assembly loading"))
+                using (_logger.BeginScope("Assembly loading"))
                 {
-                    logger.LogInformation("Loading source assembly: {Path}", settings.SourceAssemblyPath);
-                    logger.LogInformation("Loading target assembly: {Path}", settings.TargetAssemblyPath);
+                    _logger.LogInformation("Loading source assembly: {Path}", settings.SourceAssemblyPath);
+                    _logger.LogInformation("Loading target assembly: {Path}", settings.TargetAssemblyPath);
 
                     var assemblyLoader = _serviceProvider.GetRequiredService<IAssemblyLoader>();
 
@@ -205,7 +207,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to load source assembly: {Path}", settings.SourceAssemblyPath);
+                        _logger.LogError(ex, "Failed to load source assembly: {Path}", settings.SourceAssemblyPath);
                         AnsiConsole.MarkupLine($"[red]Error loading source assembly:[/] {ex.Message}");
 
                         var sourceAssemblyExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
@@ -218,7 +220,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to load target assembly: {Path}", settings.TargetAssemblyPath);
+                        _logger.LogError(ex, "Failed to load target assembly: {Path}", settings.TargetAssemblyPath);
                         AnsiConsole.MarkupLine($"[red]Error loading target assembly:[/] {ex.Message}");
 
                         var targetAssemblyExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
@@ -227,9 +229,9 @@ public class CompareCommand : Command<CompareCommandSettings>
                 }
 
                 // Extract API information
-                using (logger.BeginScope("API extraction"))
+                using (_logger.BeginScope("API extraction"))
                 {
-                    logger.LogInformation("Extracting API information from assemblies");
+                    _logger.LogInformation("Extracting API information from assemblies");
                     var apiExtractor = _serviceProvider.GetRequiredService<IApiExtractor>();
 
                     // Pass the filter configuration to the API extractor
@@ -237,7 +239,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                     var targetApi = apiExtractor.ExtractApiMembers(targetAssembly, config.Filters);
 
                     // Log the number of API members extracted
-                    logger.LogInformation(
+                    _logger.LogInformation(
                         "Extracted {SourceCount} API members from source and {TargetCount} API members from target",
                         sourceApi.Count(),
                         targetApi.Count());
@@ -245,9 +247,9 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                 // Compare APIs
                 Models.ComparisonResult comparisonResult;
-                using (logger.BeginScope("API comparison"))
+                using (_logger.BeginScope("API comparison"))
                 {
-                    logger.LogInformation("Comparing APIs");
+                    _logger.LogInformation("Comparing APIs");
                     var apiComparer = _serviceProvider.GetRequiredService<IApiComparer>();
 
                     try
@@ -256,7 +258,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Error comparing assemblies");
+                        _logger.LogError(ex, "Error comparing assemblies");
                         AnsiConsole.MarkupLine($"[red]Error comparing assemblies:[/] {ex.Message}");
 
                         var comparisonExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
@@ -268,9 +270,9 @@ public class CompareCommand : Command<CompareCommandSettings>
                 var comparison = CreateApiComparisonFromResult(comparisonResult);
 
                 // Generate report
-                using (logger.BeginScope("Report generation"))
+                using (_logger.BeginScope("Report generation"))
                 {
-                    logger.LogInformation("Generating {Format} report", settings.OutputFormat);
+                    _logger.LogInformation("Generating {Format} report", settings.OutputFormat);
                     var reportGenerator = _serviceProvider.GetRequiredService<IReportGenerator>();
 
                     // Convert string format to ReportFormat enum
@@ -290,15 +292,16 @@ public class CompareCommand : Command<CompareCommandSettings>
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Error generating {Format} report", format);
+                        _logger.LogError(ex, "Error generating {Format} report", format);
                         AnsiConsole.MarkupLine($"[red]Error generating report:[/] {ex.Message}");
 
                         var reportExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
                         return reportExitCodeManager.GetExitCodeForException(ex);
                     }
 
-                    // Output the formatted report to the console using the AnsiConsole library
-                    AnsiConsole.Write(report);
+                    // Output the formatted report to the console
+                    // Use Console.Write to avoid format string interpretation issues
+                    Console.Write(report);
                 }
 
                 // Use the ExitCodeManager to determine the appropriate exit code
@@ -307,14 +310,14 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                 if (comparison.HasBreakingChanges)
                 {
-                    logger.LogWarning("{Count} breaking changes detected", comparison.BreakingChangesCount);
+                    _logger.LogWarning("{Count} breaking changes detected", comparison.BreakingChangesCount);
                 }
                 else
                 {
-                    logger.LogInformation("Comparison completed successfully with no breaking changes");
+                    _logger.LogInformation("Comparison completed successfully with no breaking changes");
                 }
 
-                logger.LogInformation(
+                _logger.LogInformation(
                     "Exiting with code {ExitCode}: {Description}",
                     exitCode,
                     exitCodeManager.GetExitCodeDescription(exitCode));
@@ -335,14 +338,14 @@ public class CompareCommand : Command<CompareCommandSettings>
     /// <param name="settings">Command settings</param>
     /// <param name="config">Configuration to update</param>
     /// <param name="logger">Logger for diagnostic information</param>
-    private void ApplyCommandLineOptions(CompareCommandSettings settings, Models.Configuration.ComparisonConfiguration config, ILogger logger)
+    private void ApplyCommandLineOptions(CompareCommandSettings settings, Models.Configuration.ComparisonConfiguration config)
     {
-        using (logger.BeginScope("Applying command-line options"))
+        using (_logger.BeginScope("Applying command-line options"))
         {
             // Apply namespace filters if specified
             if (settings.NamespaceFilters != null && settings.NamespaceFilters.Length > 0)
             {
-                logger.LogInformation("Applying namespace filters: {Filters}", string.Join(", ", settings.NamespaceFilters));
+                _logger.LogInformation("Applying namespace filters: {Filters}", string.Join(", ", settings.NamespaceFilters));
 
                 // Add namespace filters to the configuration
                 config.Filters.IncludeNamespaces.AddRange(settings.NamespaceFilters);
@@ -350,25 +353,25 @@ public class CompareCommand : Command<CompareCommandSettings>
                 // If we have explicit includes, we're filtering to only those namespaces
                 if (config.Filters.IncludeNamespaces.Count > 0)
                 {
-                    logger.LogInformation("Filtering to only include specified namespaces");
+                    _logger.LogInformation("Filtering to only include specified namespaces");
                 }
             }
 
             // Apply type pattern filters if specified
             if (settings.TypePatterns != null && settings.TypePatterns.Length > 0)
             {
-                logger.LogInformation("Applying type pattern filters: {Patterns}", string.Join(", ", settings.TypePatterns));
+                _logger.LogInformation("Applying type pattern filters: {Patterns}", string.Join(", ", settings.TypePatterns));
 
                 // Add type pattern filters to the configuration
                 config.Filters.IncludeTypes.AddRange(settings.TypePatterns);
 
-                logger.LogInformation("Filtering to only include types matching specified patterns");
+                _logger.LogInformation("Filtering to only include types matching specified patterns");
             }
 
             // Apply command-line exclusions if specified
             if (settings.ExcludePatterns != null && settings.ExcludePatterns.Length > 0)
             {
-                logger.LogInformation("Applying exclusion patterns: {Patterns}", string.Join(", ", settings.ExcludePatterns));
+                _logger.LogInformation("Applying exclusion patterns: {Patterns}", string.Join(", ", settings.ExcludePatterns));
 
                 // Add exclusion patterns to the configuration
                 foreach (var pattern in settings.ExcludePatterns)
@@ -390,14 +393,14 @@ public class CompareCommand : Command<CompareCommandSettings>
             // Apply internal types inclusion if specified
             if (settings.IncludeInternals)
             {
-                logger.LogInformation("Including internal types in comparison");
+                _logger.LogInformation("Including internal types in comparison");
                 config.Filters.IncludeInternals = true;
             }
 
             // Apply compiler-generated types inclusion if specified
             if (settings.IncludeCompilerGenerated)
             {
-                logger.LogInformation("Including compiler-generated types in comparison");
+                _logger.LogInformation("Including compiler-generated types in comparison");
                 config.Filters.IncludeCompilerGenerated = true;
             }
         }

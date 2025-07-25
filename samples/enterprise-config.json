@@ -1,0 +1,85 @@
+{
+  "filters": {
+    "includeNamespaces": [
+      "MyCompany.Core",
+      "MyCompany.Extensions",
+      "MyCompany.Models",
+      "MyCompany.Services"
+    ],
+    "excludeNamespaces": [
+      "MyCompany.Internal",
+      "MyCompany.Tests",
+      "MyCompany.Benchmarks",
+      "System.Diagnostics"
+    ],
+    "includeTypes": [
+      "MyCompany.Core.*",
+      "MyCompany.Models.*",
+      "MyCompany.Services.I*"
+    ],
+    "excludeTypes": [
+      "*.Internal*",
+      "*.Helper*",
+      "*.Utility*",
+      "*Test*",
+      "*Mock*"
+    ],
+    "includeInternals": false,
+    "includeCompilerGenerated": false
+  },
+  "mappings": {
+    "namespaceMappings": {
+      "MyCompany.Legacy": ["MyCompany.Core"],
+      "MyCompany.V1.Services": [
+        "MyCompany.Services",
+        "MyCompany.Core.Services"
+      ],
+      "MyCompany.Utils": ["MyCompany.Extensions"]
+    },
+    "typeMappings": {
+      "MyCompany.Legacy.UserManager": "MyCompany.Services.UserService",
+      "MyCompany.V1.ConfigHelper": "MyCompany.Core.Configuration",
+      "MyCompany.Utils.StringHelper": "MyCompany.Extensions.StringExtensions"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": true
+  },
+  "exclusions": {
+    "excludedTypes": [
+      "MyCompany.Internal.DebugHelper",
+      "MyCompany.Legacy.ObsoleteClass"
+    ],
+    "excludedMembers": [
+      "MyCompany.BaseService.InternalLog",
+      "MyCompany.Core.BaseClass.DebugMethod"
+    ],
+    "excludedTypePatterns": [
+      "*.Internal.*",
+      "*.Private.*",
+      "*.Tests.*",
+      "*Helper",
+      "*Utility",
+      "*Mock*",
+      "*Fake*"
+    ],
+    "excludedMemberPatterns": [
+      "*.Obsolete*",
+      "*.Debug*",
+      "*.Internal*",
+      "get_Debug*",
+      "set_Debug*",
+      "get_Internal*",
+      "set_Internal*"
+    ]
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatAddedTypeAsBreaking": false,
+    "treatAddedMemberAsBreaking": false,
+    "treatSignatureChangeAsBreaking": true
+  },
+  "outputFormat": "Json",
+  "outputPath": "api-changes-report.json",
+  "failOnBreakingChanges": true
+}
