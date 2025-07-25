@@ -11,6 +11,7 @@ namespace DotNetApiDiff.Tests.Integration;
 /// <summary>
 /// Integration tests for configuration file workflows
 /// </summary>
+[Trait("Category", "Integration")]
 public class ConfigurationWorkflowTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
