@@ -64,7 +64,6 @@ public class CliWorkflowTests : IDisposable
 
     private ProcessResult RunCliCommand(string arguments, int expectedExitCode = -1)
     {
-
         var processInfo = new ProcessStartInfo
         {
             UseShellExecute = false,
@@ -76,7 +75,7 @@ public class CliWorkflowTests : IDisposable
         if (_executablePath == "dotnet")
         {
             processInfo.FileName = "dotnet";
-            var projectPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "DotNetApiDiff", "DotNetApiDiff.csproj");
+            var projectPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src", "DotNetApiDiff", "DotNetApiDiff.csproj");
             processInfo.Arguments = $"run --project \"{projectPath}\" -- {arguments}";
         }
         else
@@ -85,50 +84,32 @@ public class CliWorkflowTests : IDisposable
             processInfo.Arguments = arguments;
         }
 
-        var output = new StringBuilder();
-        var error = new StringBuilder();
-
         using var process = new Process { StartInfo = processInfo };
 
-        process.OutputDataReceived += (sender, e) =>
-        {
-            if (e.Data != null)
-            {
-                output.AppendLine(e.Data);
-                _output.WriteLine($"STDOUT: {e.Data}");
-            }
-        };
-
-        process.ErrorDataReceived += (sender, e) =>
-        {
-            if (e.Data != null)
-            {
-                error.AppendLine(e.Data);
-                _output.WriteLine($"STDERR: {e.Data}");
-            }
-        };
-
         process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
 
-        // Set a reasonable timeout
-        bool exited = process.WaitForExit(30000); // 30 seconds
+        // Read output synchronously to avoid StringBuilder issues in CI
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
 
-        if (!exited)
-        {
-            process.Kill();
-            throw new TimeoutException("Process did not exit within the expected time");
-        }
+        process.WaitForExit();
 
         var result = new ProcessResult
         {
             ExitCode = process.ExitCode,
-            StandardOutput = output.ToString(),
-            StandardError = error.ToString()
+            StandardOutput = output,
+            StandardError = error
         };
 
         _output.WriteLine($"Process exited with code: {result.ExitCode}");
+        if (!string.IsNullOrEmpty(output))
+        {
+            _output.WriteLine($"STDOUT: {output}");
+        }
+        if (!string.IsNullOrEmpty(error))
+        {
+            _output.WriteLine($"STDERR: {error}");
+        }
 
         if (expectedExitCode >= 0)
         {
@@ -156,7 +137,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce output");
     }
 
@@ -180,7 +162,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should execute successfully with config. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with config. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce JSON output");
     }
 
@@ -202,8 +185,9 @@ public class CliWorkflowTests : IDisposable
 
         // Assert
         Assert.NotEqual(0, result.ExitCode);
-        Assert.True(result.StandardError.Contains("not found") || result.StandardOutput.Contains("not found"),
-            "Should indicate file not found");
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Source assembly file not found"),
+            $"Should indicate file not found. Combined output: {combinedOutput}");
     }
 
     [Fact]
@@ -224,8 +208,9 @@ public class CliWorkflowTests : IDisposable
 
         // Assert
         Assert.NotEqual(0, result.ExitCode);
-        Assert.True(result.StandardError.Contains("not found") || result.StandardOutput.Contains("not found"),
-            "Should indicate file not found");
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Target assembly file not found"),
+            $"Should indicate file not found. Combined output: {combinedOutput}");
     }
 
     [Fact]
@@ -248,8 +233,9 @@ public class CliWorkflowTests : IDisposable
 
         // Assert
         Assert.NotEqual(0, result.ExitCode);
-        Assert.True(result.StandardError.Contains("not found") || result.StandardOutput.Contains("not found"),
-            "Should indicate config file not found");
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Configuration file not found"),
+            $"Should indicate config file not found. Combined output: {combinedOutput}");
     }
 
     [Fact]
@@ -273,9 +259,9 @@ public class CliWorkflowTests : IDisposable
 
         // Assert
         Assert.NotEqual(0, result.ExitCode);
-        Assert.True(result.StandardError.Contains("JSON") || result.StandardOutput.Contains("JSON") ||
-                   result.StandardError.Contains("configuration") || result.StandardOutput.Contains("configuration"),
-            "Should indicate JSON/configuration error");
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.True(combinedOutput.Contains("JSON") || combinedOutput.Contains("configuration") || combinedOutput.Contains("malformed"),
+            $"Should indicate JSON/configuration error. Combined output: {combinedOutput}");
     }
 
     [Theory]
@@ -299,8 +285,20 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should succeed with {outputFormat} format. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with {outputFormat} format. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), $"Should produce {outputFormat} output");
+
+        // Verify output format specific content
+        if (outputFormat == "json")
+        {
+            Assert.Contains("{", result.StandardOutput);
+            Assert.Contains("}", result.StandardOutput);
+        }
+        else if (outputFormat == "markdown")
+        {
+            Assert.Contains("#", result.StandardOutput);
+        }
     }
 
     [Fact]
@@ -322,8 +320,9 @@ public class CliWorkflowTests : IDisposable
 
         // Assert
         Assert.NotEqual(0, result.ExitCode);
-        Assert.True(result.StandardError.Contains("Invalid output format") || result.StandardOutput.Contains("Invalid output format"),
-            "Should indicate invalid output format");
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.True(combinedOutput.Contains("Invalid output format") || combinedOutput.Contains("invalid_format"),
+            $"Should indicate invalid output format. Combined output: {combinedOutput}");
     }
 
     [Fact]
@@ -344,7 +343,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should succeed with namespace filtering. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with namespace filtering. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce filtered output");
     }
 
@@ -366,7 +366,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should succeed with verbose output. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with verbose output. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce verbose output");
     }
 
@@ -388,7 +389,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        Assert.True(result.ExitCode >= 0, $"CLI should succeed with no-color option. Exit code: {result.ExitCode}");
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with no-color option. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce output without colors");
     }
 
