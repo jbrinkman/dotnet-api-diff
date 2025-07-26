@@ -1,0 +1,88 @@
+<div class="config-grid">
+    <!-- Filters Section -->
+    <div class="config-section">
+        <h3>🔍 Filters</h3>
+        <div class="config-item">
+            <span class="config-label">Include Internals:</span>
+            <span class="config-value">{{ config.filters.include_internals | format_boolean }}</span>
+        </div>
+        <div class="config-item">
+            <span class="config-label">Include Compiler Generated:</span>
+            <span class="config-value">{{ config.filters.include_compiler_generated | format_boolean }}</span>
+        </div>
+        {{ include "config-string-list" config.filters.include_namespaces "Include Namespaces" }}
+        {{ include "config-string-list" config.filters.exclude_namespaces "Exclude Namespaces" }}
+        {{ include "config-string-list" config.filters.include_types "Include Types" }}
+        {{ include "config-string-list" config.filters.exclude_types "Exclude Types" }}
+    </div>
+
+    <!-- Mappings Section -->
+    <div class="config-section">
+        <h3>🔗 Mappings</h3>
+        <div class="config-item">
+            <span class="config-label">Auto Map Same Name Types:</span>
+            <span class="config-value">{{ config.mappings.auto_map_same_name_types | format_boolean }}</span>
+        </div>
+        <div class="config-item">
+            <span class="config-label">Ignore Case:</span>
+            <span class="config-value">{{ config.mappings.ignore_case | format_boolean }}</span>
+        </div>
+        {{ include "config-mappings" config.mappings.type_mappings "Type Mappings" }}
+        {{ include "config-namespace-mappings" config.mappings.namespace_mappings "Namespace Mappings" }}
+    </div>
+
+    <!-- Exclusions Section -->
+    <div class="config-section">
+        <h3>❌ Exclusions</h3>
+        {{ include "config-string-list" config.exclusions.excluded_types "Excluded Types" }}
+        {{ include "config-string-list" config.exclusions.excluded_members "Excluded Members" }}
+        {{ include "config-string-list" config.exclusions.excluded_type_patterns "Excluded Type Patterns" }}
+        {{ include "config-string-list" config.exclusions.excluded_member_patterns "Excluded Member Patterns" }}
+    </div>
+
+    <!-- Breaking Change Rules Section -->
+    <div class="config-section breaking-rules">
+        <h3>⚠️ Breaking Change Rules</h3>
+        <div class="config-grid-inner">
+            <div>
+                <div class="config-item">
+                    <span class="config-label">Treat Type Removal as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_type_removal_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Member Removal as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_member_removal_as_breaking | format_boolean }}</span>
+                </div>
+            </div>
+            <div>
+                <div class="config-item">
+                    <span class="config-label">Treat Signature Change as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_signature_change_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Reduced Accessibility as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_reduced_accessibility_as_breaking | format_boolean }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Settings Section -->
+    <div class="config-section">
+        <h3>⚙️ General Settings</h3>
+        <div class="config-item">
+            <span class="config-label">Output Format:</span>
+            <span class="config-value">{{ config.output_format }}</span>
+        </div>
+        <div class="config-item">
+            <span class="config-label">Fail On Breaking Changes:</span>
+            <span class="config-value">{{ config.fail_on_breaking_changes | format_boolean }}</span>
+        </div>
+        {{if config.output_path}}
+        <div class="config-item">
+            <span class="config-label">Output Path:</span>
+            <span class="config-value config-path">{{ config.output_path }}</span>
+        </div>
+        {{end}}
+    </div>
+</div>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Comparison Report</title>
+    <style>
+        {{ css_styles }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 API Comparison Report</h1>
+            <div class="report-info">
+                Generated on {{ result.comparison_timestamp | date.to_string "%Y-%m-%d %H:%M:%S" }}
+            </div>
+        </header>
+
+        <!-- Metadata section -->
+        <section class="metadata">
+            <h2>📊 Metadata</h2>
+            <div class="metadata-content">
+                <div class="assembly-info">
+                    <div class="assembly-card source">
+                        <div class="assembly-label">Source Assembly</div>
+                        <div class="assembly-name">{{ result.old_assembly_name }}</div>
+                        <div class="assembly-path">{{ result.old_assembly_path }}</div>
+                    </div>
+                    <div class="assembly-card target">
+                        <div class="assembly-label">Target Assembly</div>
+                        <div class="assembly-name">{{ result.new_assembly_name }}</div>
+                        <div class="assembly-path">{{ result.new_assembly_path }}</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ result.total_differences }}</div>
+                        <div class="stat-label">Total Differences</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ result.comparison_timestamp | date.to_string "%Y-%m-%d" }}</div>
+                        <div class="stat-label">Comparison Date</div>
+                    </div>
+                    {{if result.has_breaking_changes}}
+                    <div class="stat-item breaking">
+                        <div class="stat-value">{{ result.breaking_changes_count }}</div>
+                        <div class="stat-label">Breaking Changes</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary section -->
+        <section class="summary">
+            <h2>📈 Summary</h2>
+            <div class="summary-cards">
+                <div class="summary-card added">
+                    <div class="card-number">{{ result.summary.added_count }}</div>
+                    <div class="card-label">Added</div>
+                </div>
+                <div class="summary-card removed">
+                    <div class="card-number">{{ result.summary.removed_count }}</div>
+                    <div class="card-label">Removed</div>
+                </div>
+                <div class="summary-card modified">
+                    <div class="card-number">{{ result.summary.modified_count }}</div>
+                    <div class="card-label">Modified</div>
+                </div>
+                <div class="summary-card breaking">
+                    <div class="card-number">{{ result.summary.breaking_changes_count }}</div>
+                    <div class="card-label">Breaking</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration section -->
+        <section class="configuration">
+            <h2>⚙️ Configuration</h2>
+            <div class="config-toggle">
+                <button onclick="toggleConfig()" class="toggle-button">
+                    <span class="toggle-icon">▶</span>
+                    <span class="toggle-text">Show Configuration Details</span>
+                </button>
+            </div>
+            <div id="config-details" class="config-details" style="display: none;">
+                {{ include "configuration" result.configuration }}
+            </div>
+        </section>
+
+        <!-- Breaking changes section -->
+        {{if result.has_breaking_changes}}
+        <section class="breaking-changes">
+            <h2>⚠️ Breaking Changes</h2>
+            <div class="alert alert-danger">
+                <strong>Warning:</strong> The following changes may break compatibility with existing code.
+            </div>
+            {{ include "breaking-changes" result.breaking_changes }}
+        </section>
+        {{end}}
+
+        <!-- Change sections -->
+        {{for section in change_sections}}
+        <section class="changes-section">
+            <h2>{{ section.icon }} {{ section.title }} ({{ section.count }})</h2>
+            {{if section.description}}
+            <p class="section-description">{{ section.description }}</p>
+            {{end}}
+            {{ include "change-group" section }}
+        </section>
+        {{end}}
+    </div>
+
+    <script>
+        {{ javascript_code }}
+    </script>
+</body>
+</html>
