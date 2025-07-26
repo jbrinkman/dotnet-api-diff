@@ -1,0 +1,20 @@
+<div class="config-item">
+    <span class="config-label">{{ label }}:</span>
+    {{if mappings && mappings.size > 0}}
+    <div class="config-mappings">
+        {{for mapping in mappings}}
+        <div class="config-mapping">
+            <span class="mapping-from">{{ mapping.key }}</span>
+            <span class="mapping-arrow">→</span>
+            <div class="mapping-to-list">
+                {{for target in mapping.value}}
+                <span class="mapping-to">{{ target }}</span>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <span class="config-value config-empty">(None)</span>
+    {{end}}
+</div>
