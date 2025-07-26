@@ -35,10 +35,7 @@ public class HtmlFormatterScriban : IReportFormatter
         }
         catch (Exception ex)
         {
-            // Fallback to basic template if templates can't be loaded
-            Console.WriteLine($"Warning: Could not load templates, using fallback: {ex.Message}");
-            _mainTemplate = Template.Parse(GetFallbackTemplate());
-            _partialTemplates = new Dictionary<string, Template>();
+            throw new InvalidOperationException("Failed to initialize Scriban HTML formatter templates. Ensure template resources are properly embedded.", ex);
         }
     }
 
@@ -72,7 +69,7 @@ public class HtmlFormatterScriban : IReportFormatter
         context.PushGlobal(scriptObject);
 
         // Set up template loader for includes
-        context.TemplateLoader = new CustomTemplateLoader(_partialTemplates);
+        context.TemplateLoader = new CustomTemplateLoader();
 
         return _mainTemplate.Render(context);
     }
@@ -137,7 +134,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 modified_count = result.Summary.ModifiedCount,
                 breaking_changes_count = result.Summary.BreakingChangesCount
             },
-            configuration = PrepareConfigurationData(result.Configuration),
+            configuration = PrepareConfigData(result.Configuration),
             breaking_changes = PrepareBreakingChangesData(result.Differences.Where(d => d.IsBreakingChange))
         };
     }
@@ -251,46 +248,6 @@ public class HtmlFormatterScriban : IReportFormatter
             }).ToArray();
     }
 
-    private object PrepareConfigurationData(DotNetApiDiff.Models.Configuration.ComparisonConfiguration config)
-    {
-        return new
-        {
-            filters = new
-            {
-                include_internals = config.Filters.IncludeInternals,
-                include_compiler_generated = config.Filters.IncludeCompilerGenerated,
-                include_namespaces = config.Filters.IncludeNamespaces,
-                exclude_namespaces = config.Filters.ExcludeNamespaces,
-                include_types = config.Filters.IncludeTypes,
-                exclude_types = config.Filters.ExcludeTypes
-            },
-            mappings = new
-            {
-                auto_map_same_name_types = config.Mappings.AutoMapSameNameTypes,
-                ignore_case = config.Mappings.IgnoreCase,
-                type_mappings = config.Mappings.TypeMappings.Select(kvp => new { key = kvp.Key, value = kvp.Value }),
-                namespace_mappings = config.Mappings.NamespaceMappings.Select(kvp => new { key = kvp.Key, value = kvp.Value })
-            },
-            exclusions = new
-            {
-                excluded_types = config.Exclusions.ExcludedTypes,
-                excluded_members = config.Exclusions.ExcludedMembers,
-                excluded_type_patterns = config.Exclusions.ExcludedTypePatterns,
-                excluded_member_patterns = config.Exclusions.ExcludedMemberPatterns
-            },
-            breaking_change_rules = new
-            {
-                treat_type_removal_as_breaking = config.BreakingChangeRules.TreatTypeRemovalAsBreaking,
-                treat_member_removal_as_breaking = config.BreakingChangeRules.TreatMemberRemovalAsBreaking,
-                treat_signature_change_as_breaking = config.BreakingChangeRules.TreatSignatureChangeAsBreaking,
-                treat_reduced_accessibility_as_breaking = config.BreakingChangeRules.TreatReducedAccessibilityAsBreaking
-            },
-            output_format = config.OutputFormat,
-            fail_on_breaking_changes = config.FailOnBreakingChanges,
-            output_path = config.OutputPath
-        };
-    }
-
     private string RenderPartial(string templateName, object data)
     {
         if (_partialTemplates.TryGetValue(templateName, out var template))
@@ -313,8 +270,9 @@ public class HtmlFormatterScriban : IReportFormatter
         {
             return EmbeddedTemplateLoader.LoadStyles();
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Warning: Could not load CSS styles, using fallback: {ex.Message}");
             return GetFallbackStyles();
         }
     }
@@ -325,8 +283,9 @@ public class HtmlFormatterScriban : IReportFormatter
         {
             return EmbeddedTemplateLoader.LoadScripts();
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Warning: Could not load JavaScript, using fallback: {ex.Message}");
             return GetFallbackJavaScript();
         }
     }

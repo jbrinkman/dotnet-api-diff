@@ -5,17 +5,10 @@ using Scriban.Runtime;
 namespace DotNetApiDiff.Reporting;
 
 /// <summary>
-/// Custom template loader for Scriban that loads templates from a dictionary
+/// Custom template loader for Scriban that loads templates from embedded resources
 /// </summary>
 public class CustomTemplateLoader : ITemplateLoader
 {
-    private readonly Dictionary<string, Template> _templates;
-
-    public CustomTemplateLoader(Dictionary<string, Template> templates)
-    {
-        _templates = templates;
-    }
-
     public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
     {
         return templateName;
@@ -23,20 +16,14 @@ public class CustomTemplateLoader : ITemplateLoader
 
     public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
     {
-        if (_templates.TryGetValue(templatePath, out var template))
-        {
-            // Get the source code of the template
-            return template.Page.Body.ToString();
-        }
-
-        // Try loading from embedded resources directly
         try
         {
+            // Load template source directly from embedded resources
             return EmbeddedTemplateLoader.LoadTemplate($"{templatePath}.scriban");
         }
-        catch
+        catch (Exception ex)
         {
-            throw new InvalidOperationException($"Template '{templatePath}' not found");
+            throw new InvalidOperationException($"Template '{templatePath}' not found: {ex.Message}", ex);
         }
     }
 
