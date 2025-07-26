@@ -305,6 +305,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                         {
                             comparisonResult.Configuration.OutputFormat = outputFormat;
                         }
+
                         if (!string.IsNullOrEmpty(settings.OutputFile))
                         {
                             comparisonResult.Configuration.OutputPath = settings.OutputFile;
