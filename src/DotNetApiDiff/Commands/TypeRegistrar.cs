@@ -3,6 +3,7 @@ using DotNetApiDiff.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DotNetApiDiff.Commands;
 
@@ -123,14 +124,45 @@ internal sealed class TypeResolver : ITypeResolver, IDisposable
     /// </summary>
     /// <param name="type">The type to resolve</param>
     /// <returns>The resolved instance</returns>
-    public object? Resolve(Type? type)
+    public object? Resolve([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type? type)
     {
         if (type == null)
         {
             return null;
         }
 
-        return _provider.GetService(type);
+        // Settings classes should be created directly by Spectre.Console, not through DI
+        // Check both by type name and inheritance to be absolutely sure
+        if (typeof(CommandSettings).IsAssignableFrom(type) ||
+            type.Name.EndsWith("CommandSettings") ||
+            type.BaseType?.Name == "CommandSettings")
+        {
+            try
+            {
+                return Activator.CreateInstance(type);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to create instance of {type.FullName}. Ensure it has a parameterless constructor.", ex);
+            }
+        }
+
+        // Try to resolve through DI first, then fallback to Activator for other types
+        var service = _provider.GetService(type);
+        if (service != null)
+        {
+            return service;
+        }
+
+        // Fallback to Activator for types not registered in DI
+        try
+        {
+            return Activator.CreateInstance(type);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Could not resolve type '{type.FullName}'. Type is not registered in DI and could not be created via Activator.", ex);
+        }
     }
 
     /// <summary>
