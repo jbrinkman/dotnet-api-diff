@@ -114,7 +114,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 treat_reduced_accessibility_as_breaking = config.BreakingChangeRules.TreatReducedAccessibilityAsBreaking
             },
             output_format = config.OutputFormat.ToString(),
-            output_path = config.OutputPath ?? ""
+            output_path = config.OutputPath ?? string.Empty
         };
     }
 
