@@ -243,6 +243,7 @@ public class HtmlFormatter : IReportFormatter
                 {
                     output.AppendLine($"                                <span class=\"breaking-badge\">BREAKING</span>");
                 }
+
                 output.AppendLine($"                            </div>");
                 output.AppendLine($"                            <div class=\"change-description\">{change.Description}</div>");
                 output.AppendLine($"                        </div>");
@@ -943,6 +944,7 @@ public class HtmlFormatter : IReportFormatter
             output.AppendLine($"                            <span class=\"config-label\">Output Path:</span> <span class=\"config-value config-path\">{config.OutputPath}</span>");
             output.AppendLine("                        </div>");
         }
+
         output.AppendLine("                    </div>");
 
         output.AppendLine("                </div>");
@@ -975,8 +977,10 @@ public class HtmlFormatter : IReportFormatter
             {
                 output.AppendLine($"                                <span class=\"config-list-item\">{item}</span>");
             }
+
             output.AppendLine("                            </div>");
         }
+
         output.AppendLine("                        </div>");
     }
 
@@ -1003,8 +1007,10 @@ public class HtmlFormatter : IReportFormatter
                 output.AppendLine($"                                    <span class=\"mapping-to\">{mapping.Value}</span>");
                 output.AppendLine($"                                </div>");
             }
+
             output.AppendLine("                            </div>");
         }
+
         output.AppendLine("                        </div>");
     }
 
@@ -1033,11 +1039,14 @@ public class HtmlFormatter : IReportFormatter
                 {
                     output.AppendLine($"                                        <span class=\"mapping-to\">{target}</span>");
                 }
+
                 output.AppendLine($"                                    </div>");
                 output.AppendLine($"                                </div>");
             }
+
             output.AppendLine("                            </div>");
         }
+
         output.AppendLine("                        </div>");
     }
 }
