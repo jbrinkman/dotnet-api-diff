@@ -17,6 +17,10 @@ namespace DotNetApiDiff.Commands;
 /// </summary>
 public class CompareCommandSettings : CommandSettings
 {
+    public CompareCommandSettings()
+    {
+    }
+
     [CommandArgument(0, "<sourceAssembly>")]
     [Description("Path to the source/baseline assembly")]
     public string? SourceAssemblyPath { get; init; }
