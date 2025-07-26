@@ -135,8 +135,9 @@ public class CompareCommand : Command<CompareCommandSettings>
         }
 
         // Validate output file requirements
-        if (format != "console")
+        if (format == "html")
         {
+            // HTML format requires an output file
             if (string.IsNullOrEmpty(settings.OutputFile))
             {
                 return ValidationResult.Error($"Output file is required for {settings.OutputFormat} format. Use --output-file to specify the output file path.");
@@ -151,7 +152,12 @@ public class CompareCommand : Command<CompareCommandSettings>
         }
         else if (!string.IsNullOrEmpty(settings.OutputFile))
         {
-            return ValidationResult.Error("Output file parameter is not supported for console format.");
+            // If output file is specified for non-HTML formats, validate the directory exists
+            var outputDir = Path.GetDirectoryName(settings.OutputFile);
+            if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+            {
+                return ValidationResult.Error($"Output directory does not exist: {outputDir}");
+            }
         }
 
         return ValidationResult.Success();
@@ -336,9 +342,9 @@ public class CompareCommand : Command<CompareCommandSettings>
                     string report;
                     try
                     {
-                        if (format == ReportFormat.Console)
+                        if (string.IsNullOrEmpty(settings.OutputFile))
                         {
-                            // For console format, generate and output directly
+                            // No output file specified - output to console regardless of format
                             report = reportGenerator.GenerateReport(comparisonResult, format);
 
                             // Output the formatted report to the console
@@ -347,8 +353,8 @@ public class CompareCommand : Command<CompareCommandSettings>
                         }
                         else
                         {
-                            // For file formats, save to the specified file
-                            reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile!).GetAwaiter().GetResult();
+                            // Output file specified - save to the specified file
+                            reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile).GetAwaiter().GetResult();
                             _logger.LogInformation("Report saved to {OutputFile}", settings.OutputFile);
                         }
                     }
