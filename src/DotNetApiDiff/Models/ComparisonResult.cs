@@ -1,4 +1,6 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
+using DotNetApiDiff.Models.Configuration;
+
 namespace DotNetApiDiff.Models;
 
 /// <summary>
@@ -30,6 +32,11 @@ public class ComparisonResult
     /// Summary statistics of the comparison
     /// </summary>
     public ComparisonSummary Summary { get; set; } = new ComparisonSummary();
+
+    /// <summary>
+    /// Configuration used for the comparison
+    /// </summary>
+    public ComparisonConfiguration Configuration { get; set; } = ComparisonConfiguration.CreateDefault();
 
     /// <summary>
     /// Gets whether any breaking changes were detected

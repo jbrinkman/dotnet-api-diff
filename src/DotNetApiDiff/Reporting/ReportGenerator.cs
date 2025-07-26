@@ -32,11 +32,11 @@ public class ReportGenerator : IReportGenerator
             {
                 { ReportFormat.Console, new ConsoleFormatter() },
                 { ReportFormat.Json, new JsonFormatter() },
+                { ReportFormat.Html, new HtmlFormatter() },
                 { ReportFormat.Markdown, new MarkdownFormatter() }
 
                 // Other formatters can be added in subsequent tasks
                 // { ReportFormat.Xml, new XmlFormatter() }
-                // { ReportFormat.Html, new HtmlFormatter() }
             };
         }
     }

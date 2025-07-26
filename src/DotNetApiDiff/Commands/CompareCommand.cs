@@ -15,60 +15,61 @@ namespace DotNetApiDiff.Commands;
 /// <summary>
 /// Settings for the compare command
 /// </summary>
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
 public class CompareCommandSettings : CommandSettings
 {
-    public CompareCommandSettings()
-    {
-    }
-
     [CommandArgument(0, "<sourceAssembly>")]
     [Description("Path to the source/baseline assembly")]
-    public string? SourceAssemblyPath { get; init; }
+    public string? SourceAssemblyPath { get; set; }
 
     [CommandArgument(1, "<targetAssembly>")]
     [Description("Path to the target/current assembly")]
-    public string? TargetAssemblyPath { get; init; }
+    public string? TargetAssemblyPath { get; set; }
 
     [CommandOption("-c|--config <configFile>")]
     [Description("Path to configuration file")]
-    public string? ConfigFile { get; init; }
+    public string? ConfigFile { get; set; }
 
     [CommandOption("-o|--output <format>")]
-    [Description("Output format (console, json, markdown)")]
+    [Description("Output format (console, json, html, markdown)")]
     [DefaultValue("console")]
-    public string OutputFormat { get; init; } = "console";
+    public string OutputFormat { get; set; } = "console";
+
+    [CommandOption("--output-file <path>")]
+    [Description("Output file path (required for json, html, markdown formats)")]
+    public string? OutputFile { get; set; }
 
     [CommandOption("-f|--filter <namespace>")]
     [Description("Filter to specific namespaces (can be specified multiple times)")]
-    public string[]? NamespaceFilters { get; init; }
+    public string[]? NamespaceFilters { get; set; }
 
     [CommandOption("-e|--exclude <pattern>")]
     [Description("Exclude types matching pattern (can be specified multiple times)")]
-    public string[]? ExcludePatterns { get; init; }
+    public string[]? ExcludePatterns { get; set; }
 
     [CommandOption("-t|--type <pattern>")]
     [Description("Filter to specific type patterns (can be specified multiple times)")]
-    public string[]? TypePatterns { get; init; }
+    public string[]? TypePatterns { get; set; }
 
     [CommandOption("--include-internals")]
     [Description("Include internal types in the comparison")]
     [DefaultValue(false)]
-    public bool IncludeInternals { get; init; }
+    public bool IncludeInternals { get; set; }
 
     [CommandOption("--include-compiler-generated")]
     [Description("Include compiler-generated types in the comparison")]
     [DefaultValue(false)]
-    public bool IncludeCompilerGenerated { get; init; }
+    public bool IncludeCompilerGenerated { get; set; }
 
     [CommandOption("--no-color")]
     [Description("Disable colored output")]
     [DefaultValue(false)]
-    public bool NoColor { get; init; }
+    public bool NoColor { get; set; }
 
     [CommandOption("-v|--verbose")]
     [Description("Enable verbose output")]
     [DefaultValue(false)]
-    public bool Verbose { get; init; }
+    public bool Verbose { get; set; }
 }
 
 /// <summary>
@@ -128,9 +129,29 @@ public class CompareCommand : Command<CompareCommandSettings>
 
         // Validate output format
         string format = settings.OutputFormat.ToLowerInvariant();
-        if (format != "console" && format != "json" && format != "markdown")
+        if (format != "console" && format != "json" && format != "html" && format != "markdown")
         {
-            return ValidationResult.Error($"Invalid output format: {settings.OutputFormat}. Valid formats are: console, json, markdown");
+            return ValidationResult.Error($"Invalid output format: {settings.OutputFormat}. Valid formats are: console, json, html, markdown");
+        }
+
+        // Validate output file requirements
+        if (format != "console")
+        {
+            if (string.IsNullOrEmpty(settings.OutputFile))
+            {
+                return ValidationResult.Error($"Output file is required for {settings.OutputFormat} format. Use --output-file to specify the output file path.");
+            }
+
+            // Validate output directory exists
+            var outputDir = Path.GetDirectoryName(settings.OutputFile);
+            if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+            {
+                return ValidationResult.Error($"Output directory does not exist: {outputDir}");
+            }
+        }
+        else if (!string.IsNullOrEmpty(settings.OutputFile))
+        {
+            return ValidationResult.Error("Output file parameter is not supported for console format.");
         }
 
         return ValidationResult.Success();
@@ -269,6 +290,19 @@ public class CompareCommand : Command<CompareCommandSettings>
                     try
                     {
                         comparisonResult = apiComparer.CompareAssemblies(sourceAssembly, targetAssembly);
+
+                        // Include the configuration in the result for reporting, updating it with actual runtime values
+                        comparisonResult.Configuration = config;
+
+                        // Update configuration with actual command-line values used for this comparison
+                        if (Enum.TryParse<ReportFormat>(settings.OutputFormat, true, out var outputFormat))
+                        {
+                            comparisonResult.Configuration.OutputFormat = outputFormat;
+                        }
+                        if (!string.IsNullOrEmpty(settings.OutputFile))
+                        {
+                            comparisonResult.Configuration.OutputPath = settings.OutputFile;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -302,7 +336,21 @@ public class CompareCommand : Command<CompareCommandSettings>
                     string report;
                     try
                     {
-                        report = reportGenerator.GenerateReport(comparisonResult, format);
+                        if (format == ReportFormat.Console)
+                        {
+                            // For console format, generate and output directly
+                            report = reportGenerator.GenerateReport(comparisonResult, format);
+
+                            // Output the formatted report to the console
+                            // Use Console.Write to avoid format string interpretation issues
+                            Console.Write(report);
+                        }
+                        else
+                        {
+                            // For file formats, save to the specified file
+                            reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile!).GetAwaiter().GetResult();
+                            _logger.LogInformation("Report saved to {OutputFile}", settings.OutputFile);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -312,10 +360,6 @@ public class CompareCommand : Command<CompareCommandSettings>
                         var reportExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
                         return reportExitCodeManager.GetExitCodeForException(ex);
                     }
-
-                    // Output the formatted report to the console
-                    // Use Console.Write to avoid format string interpretation issues
-                    Console.Write(report);
                 }
 
                 // Use the ExitCodeManager to determine the appropriate exit code
