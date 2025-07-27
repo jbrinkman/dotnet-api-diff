@@ -2,7 +2,6 @@
 using System.Reflection;
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models;
-using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetApiDiff.ApiExtraction;

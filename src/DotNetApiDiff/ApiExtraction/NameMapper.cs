@@ -3,7 +3,6 @@
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace DotNetApiDiff.ApiExtraction;
 
