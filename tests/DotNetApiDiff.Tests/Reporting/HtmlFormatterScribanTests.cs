@@ -90,7 +90,7 @@ public class HtmlFormatterScribanTests
                 {
                     ChangeType = ChangeType.Removed,
                     ElementType = ApiElementType.Method,
-                    ElementName = "OldMethod", 
+                    ElementName = "OldMethod",
                     Description = "Removed method",
                     Severity = SeverityLevel.Info
                 }
@@ -149,7 +149,7 @@ public class HtmlFormatterScribanTests
         // Arrange
         var result = new ComparisonResult
         {
-            OldAssemblyPath = "source.dll", 
+            OldAssemblyPath = "source.dll",
             NewAssemblyPath = "target.dll",
             ComparisonTimestamp = new DateTime(2023, 1, 1, 12, 0, 0, DateTimeKind.Utc),
             Configuration = CreateDefaultConfiguration(),

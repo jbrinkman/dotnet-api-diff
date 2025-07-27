@@ -4,7 +4,6 @@ using DotNetApiDiff.Models;
 using DotNetApiDiff.Models.Configuration;
 using Scriban;
 using Scriban.Runtime;
-using System.Text;
 
 namespace DotNetApiDiff.Reporting;
 
@@ -250,11 +249,11 @@ public class HtmlFormatterScriban : IReportFormatter
             // Load and parse the change-group template
             var templateContent = EmbeddedTemplateLoader.LoadTemplate("change-group.scriban");
             var template = Template.Parse(templateContent);
-            
+
             // Create a new context for the template with the section data as root
             var context = new TemplateContext();
             var scriptObject = new ScriptObject();
-            
+
             // Add the section data properties to the script object
             if (sectionData != null)
             {
@@ -262,12 +261,12 @@ public class HtmlFormatterScriban : IReportFormatter
                 foreach (var property in sectionType.GetProperties())
                 {
                     var value = property.GetValue(sectionData);
-                    scriptObject.SetValue(property.Name.ToLowerInvariant().Replace("_", "_"), value, true);  
+                    scriptObject.SetValue(property.Name.ToLowerInvariant().Replace("_", "_"), value, true);
                 }
             }
-            
+
             context.PushGlobal(scriptObject);
-            
+
             return template.Render(context);
         }
         catch (Exception ex)
