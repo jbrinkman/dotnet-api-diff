@@ -14,24 +14,13 @@ namespace DotNetApiDiff.Reporting;
 public class HtmlFormatterScriban : IReportFormatter
 {
     private readonly Template _mainTemplate;
-    private readonly Dictionary<string, Template> _partialTemplates;
 
     public HtmlFormatterScriban()
     {
-        // Initialize templates from embedded resources
+        // Initialize main template from embedded resources
         try
         {
             _mainTemplate = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("main-layout.scriban"));
-
-            _partialTemplates = new Dictionary<string, Template>();
-
-            // Load all partial templates
-            _partialTemplates["change-group"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("change-group.scriban"));
-            _partialTemplates["breaking-changes"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("breaking-changes.scriban"));
-            _partialTemplates["configuration"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("configuration.scriban"));
-            _partialTemplates["config-string-list"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("config-string-list.scriban"));
-            _partialTemplates["config-mappings"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("config-mappings.scriban"));
-            _partialTemplates["config-namespace-mappings"] = Template.Parse(EmbeddedTemplateLoader.LoadTemplate("config-namespace-mappings.scriban"));
         }
         catch (Exception ex)
         {
@@ -52,6 +41,7 @@ public class HtmlFormatterScriban : IReportFormatter
 
         // Add custom functions
         scriptObject.Import("format_boolean", new Func<bool, string>(FormatBooleanValue));
+        scriptObject.Import("render_change_group", new Func<object, string>(RenderChangeGroup));
 
         // Prepare data for the main template
         var resultData = PrepareResultData(result);
@@ -248,20 +238,42 @@ public class HtmlFormatterScriban : IReportFormatter
             }).ToArray();
     }
 
-    private string RenderPartial(string templateName, object data)
-    {
-        if (_partialTemplates.TryGetValue(templateName, out var template))
-        {
-            return template.Render(data, member => member.Name);
-        }
-
-        // Fallback for missing templates
-        return $"<!-- Template '{templateName}' not found -->";
-    }
-
     private string FormatBooleanValue(bool value)
     {
         return value ? "<span class=\"boolean-true\">✓ True</span>" : "<span class=\"boolean-false\">✗ False</span>";
+    }
+
+    private string RenderChangeGroup(object sectionData)
+    {
+        try
+        {
+            // Load and parse the change-group template
+            var templateContent = EmbeddedTemplateLoader.LoadTemplate("change-group.scriban");
+            var template = Template.Parse(templateContent);
+            
+            // Create a new context for the template with the section data as root
+            var context = new TemplateContext();
+            var scriptObject = new ScriptObject();
+            
+            // Add the section data properties to the script object
+            if (sectionData != null)
+            {
+                var sectionType = sectionData.GetType();
+                foreach (var property in sectionType.GetProperties())
+                {
+                    var value = property.GetValue(sectionData);
+                    scriptObject.SetValue(property.Name.ToLowerInvariant().Replace("_", "_"), value, true);  
+                }
+            }
+            
+            context.PushGlobal(scriptObject);
+            
+            return template.Render(context);
+        }
+        catch (Exception ex)
+        {
+            return $"<!-- Error rendering change group: {ex.Message} -->";
+        }
     }
 
     private string GetCssStyles()
@@ -288,24 +300,6 @@ public class HtmlFormatterScriban : IReportFormatter
             System.Diagnostics.Debug.WriteLine($"Warning: Could not load JavaScript, using fallback: {ex.Message}");
             return GetFallbackJavaScript();
         }
-    }
-
-    private string GetFallbackTemplate()
-    {
-        return @"<!DOCTYPE html>
-<html>
-<head>
-    <title>API Comparison Report</title>
-    <style>{{ css_styles }}</style>
-</head>
-<body>
-    <h1>API Comparison Report</h1>
-    <p>Generated on {{ result.comparison_timestamp }}</p>
-    <p>Total Differences: {{ result.total_differences }}</p>
-    <!-- Fallback template - source generator not available -->
-    <script>{{ javascript_code }}</script>
-</body>
-</html>";
     }
 
     private string GetFallbackStyles()

@@ -107,7 +107,7 @@
             {{if section.description}}
             <p class="section-description">{{ section.description }}</p>
             {{end}}
-            {{ include "change-group" section }}
+            {{ render_change_group section }}
         </section>
         {{end}}
     </div>
