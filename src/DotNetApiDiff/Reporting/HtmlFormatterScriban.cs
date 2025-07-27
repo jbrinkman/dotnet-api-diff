@@ -261,7 +261,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 foreach (var property in sectionType.GetProperties())
                 {
                     var value = property.GetValue(sectionData);
-                    scriptObject.SetValue(property.Name.ToLowerInvariant().Replace("_", "_"), value, true);
+                    scriptObject.SetValue(property.Name.ToLowerInvariant(), value, true);
                 }
             }
 
