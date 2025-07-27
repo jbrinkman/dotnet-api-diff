@@ -35,7 +35,7 @@ public class CompareCommandSettings : CommandSettings
     [DefaultValue("console")]
     public string OutputFormat { get; set; } = "console";
 
-    [CommandOption("--output-file <path>")]
+    [CommandOption("-p|--output-file <path>")]
     [Description("Output file path (required for json, html, markdown formats)")]
     public string? OutputFile { get; set; }
 
