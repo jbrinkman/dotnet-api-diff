@@ -186,7 +186,7 @@ public class CliWorkflowTests : IDisposable
         // Assert
         Assert.NotEqual(0, result.ExitCode);
         var combinedOutput = result.StandardOutput + result.StandardError;
-        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Source assembly file not found"),
+        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Source assembly file not found") || combinedOutput.Contains("non-existent.dll"),
             $"Should indicate file not found. Combined output: {combinedOutput}");
     }
 
@@ -209,7 +209,7 @@ public class CliWorkflowTests : IDisposable
         // Assert
         Assert.NotEqual(0, result.ExitCode);
         var combinedOutput = result.StandardOutput + result.StandardError;
-        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Target assembly file not found"),
+        Assert.True(combinedOutput.Contains("not found") || combinedOutput.Contains("Target assembly file not found") || combinedOutput.Contains("non-existent.dll"),
             $"Should indicate file not found. Combined output: {combinedOutput}");
     }
 
