@@ -541,9 +541,9 @@ public class TypeAnalyzer : ITypeAnalyzer
     {
         try
         {
-            return type.GetCustomAttributes(true)
+            return type.GetCustomAttributesData()
                 .Where(a => !IsCompilerGeneratedAttribute(a))
-                .Select(a => a.GetType().Name)
+                .Select(a => a.AttributeType.Name)
                 .ToList();
         }
         catch (Exception ex)
@@ -562,9 +562,9 @@ public class TypeAnalyzer : ITypeAnalyzer
     {
         try
         {
-            return member.GetCustomAttributes(true)
+            return member.GetCustomAttributesData()
                 .Where(a => !IsCompilerGeneratedAttribute(a))
-                .Select(a => a.GetType().Name)
+                .Select(a => a.AttributeType.Name)
                 .ToList();
         }
         catch (Exception ex)
@@ -582,6 +582,19 @@ public class TypeAnalyzer : ITypeAnalyzer
     private bool IsCompilerGeneratedAttribute(object attribute)
     {
         var typeName = attribute.GetType().Name;
+        return typeName == "CompilerGeneratedAttribute" ||
+               typeName == "DebuggerHiddenAttribute" ||
+               typeName == "DebuggerNonUserCodeAttribute";
+    }
+
+    /// <summary>
+    /// Checks if an attribute is compiler-generated
+    /// </summary>
+    /// <param name="attributeData">Attribute data to check</param>
+    /// <returns>True if compiler-generated, false otherwise</returns>
+    private bool IsCompilerGeneratedAttribute(CustomAttributeData attributeData)
+    {
+        var typeName = attributeData.AttributeType.Name;
         return typeName == "CompilerGeneratedAttribute" ||
                typeName == "DebuggerHiddenAttribute" ||
                typeName == "DebuggerNonUserCodeAttribute";
