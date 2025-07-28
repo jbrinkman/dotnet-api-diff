@@ -117,7 +117,7 @@ public class Program
     /// Configures dependency injection services
     /// </summary>
     /// <param name="services">Service collection to configure</param>
-    private static void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         // Configure logging with structured logging support
         services.AddLogging(builder =>
@@ -153,8 +153,8 @@ public class Program
         // Register core services
         services.AddScoped<IAssemblyLoader, AssemblyLoading.AssemblyLoader>();
         services.AddScoped<IApiExtractor, ApiExtraction.ApiExtractor>();
-        services.AddScoped<ITypeAnalyzer, ApiExtraction.TypeAnalyzer>();
         services.AddScoped<IMemberSignatureBuilder, ApiExtraction.MemberSignatureBuilder>();
+        services.AddScoped<ITypeAnalyzer, ApiExtraction.TypeAnalyzer>();
         services.AddScoped<IDifferenceCalculator, ApiExtraction.DifferenceCalculator>();
 
         // Register the NameMapper
