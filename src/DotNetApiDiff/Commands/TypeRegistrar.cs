@@ -59,7 +59,9 @@ internal sealed class TypeRegistrar : ITypeRegistrar
         _services.AddTransient<CompareCommand>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<CompareCommand>>();
-            return new CompareCommand(serviceProvider, logger);
+            var exitCodeManager = serviceProvider.GetRequiredService<IExitCodeManager>();
+            var exceptionHandler = serviceProvider.GetRequiredService<IGlobalExceptionHandler>();
+            return new CompareCommand(serviceProvider, logger, exitCodeManager, exceptionHandler);
         });
     }
 

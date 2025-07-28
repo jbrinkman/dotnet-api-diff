@@ -79,16 +79,26 @@ public class CompareCommand : Command<CompareCommandSettings>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CompareCommand> _logger;
+    private readonly IExitCodeManager _exitCodeManager;
+    private readonly IGlobalExceptionHandler _exceptionHandler;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompareCommand"/> class.
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="logger">The logger.</param>
-    public CompareCommand(IServiceProvider serviceProvider, ILogger<CompareCommand> logger)
+    /// <param name="exitCodeManager">The exit code manager.</param>
+    /// <param name="exceptionHandler">The global exception handler.</param>
+    public CompareCommand(
+        IServiceProvider serviceProvider,
+        ILogger<CompareCommand> logger,
+        IExitCodeManager exitCodeManager,
+        IGlobalExceptionHandler exceptionHandler)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _exitCodeManager = exitCodeManager;
+        _exceptionHandler = exceptionHandler;
     }
 
     /// <summary>
@@ -171,8 +181,6 @@ public class CompareCommand : Command<CompareCommandSettings>
     /// <returns>Exit code (0 for success, non-zero for failure)</returns>
     public override int Execute([NotNull] CommandContext context, [NotNull] CompareCommandSettings settings)
     {
-        var exceptionHandler = _serviceProvider.GetRequiredService<IGlobalExceptionHandler>();
-
         try
         {
             // Create a logging scope for this command execution
@@ -217,8 +225,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                             AnsiConsole.MarkupLine($"[red]Error loading configuration:[/] {ex.Message}");
 
                             // Use the ExitCodeManager to determine the appropriate exit code for errors
-                            var configErrorExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                            return configErrorExitCodeManager.GetExitCodeForException(ex);
+                            return _exitCodeManager.GetExitCodeForException(ex);
                         }
                     }
                 }
@@ -251,8 +258,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                         _logger.LogError(ex, "Failed to load source assembly: {Path}", settings.SourceAssemblyPath);
                         AnsiConsole.MarkupLine($"[red]Error loading source assembly:[/] {ex.Message}");
 
-                        var sourceAssemblyExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                        return sourceAssemblyExitCodeManager.GetExitCodeForException(ex);
+                        return _exitCodeManager.GetExitCodeForException(ex);
                     }
 
                     try
@@ -264,8 +270,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                         _logger.LogError(ex, "Failed to load target assembly: {Path}", settings.TargetAssemblyPath);
                         AnsiConsole.MarkupLine($"[red]Error loading target assembly:[/] {ex.Message}");
 
-                        var targetAssemblyExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                        return targetAssemblyExitCodeManager.GetExitCodeForException(ex);
+                        return _exitCodeManager.GetExitCodeForException(ex);
                     }
                 }
 
@@ -316,8 +321,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                         _logger.LogError(ex, "Error comparing assemblies");
                         AnsiConsole.MarkupLine($"[red]Error comparing assemblies:[/] {ex.Message}");
 
-                        var comparisonExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                        return comparisonExitCodeManager.GetExitCodeForException(ex);
+                        return _exitCodeManager.GetExitCodeForException(ex);
                     }
                 }
 
@@ -364,14 +368,12 @@ public class CompareCommand : Command<CompareCommandSettings>
                         _logger.LogError(ex, "Error generating {Format} report", format);
                         AnsiConsole.MarkupLine($"[red]Error generating report:[/] {ex.Message}");
 
-                        var reportExitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                        return reportExitCodeManager.GetExitCodeForException(ex);
+                        return _exitCodeManager.GetExitCodeForException(ex);
                     }
                 }
 
                 // Use the ExitCodeManager to determine the appropriate exit code
-                var exitCodeManager = _serviceProvider.GetRequiredService<IExitCodeManager>();
-                int exitCode = exitCodeManager.GetExitCode(comparison);
+                int exitCode = _exitCodeManager.GetExitCode(comparison);
 
                 if (comparison.HasBreakingChanges)
                 {
@@ -385,7 +387,7 @@ public class CompareCommand : Command<CompareCommandSettings>
                 _logger.LogInformation(
                     "Exiting with code {ExitCode}: {Description}",
                     exitCode,
-                    exitCodeManager.GetExitCodeDescription(exitCode));
+                    _exitCodeManager.GetExitCodeDescription(exitCode));
 
                 return exitCode;
             }
@@ -393,7 +395,7 @@ public class CompareCommand : Command<CompareCommandSettings>
         catch (Exception ex)
         {
             // Use our centralized exception handler for any unhandled exceptions
-            return exceptionHandler.HandleException(ex, "Compare command execution");
+            return _exceptionHandler.HandleException(ex, "Compare command execution");
         }
     }
 
