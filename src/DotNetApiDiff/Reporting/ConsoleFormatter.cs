@@ -400,7 +400,9 @@ public class ConsoleFormatter : IReportFormatter
     private string EscapeMarkup(string text)
     {
         if (string.IsNullOrEmpty(text))
+        {
             return text;
+        }
 
         // Escape square brackets which are used for markup
         return text.Replace("[", "[[").Replace("]", "]]");

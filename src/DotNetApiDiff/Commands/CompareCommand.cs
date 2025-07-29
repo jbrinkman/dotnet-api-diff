@@ -260,13 +260,18 @@ public class CompareCommand : Command<CompareCommandSettings>
                 // Add configuration-specific services
                 commandServices.AddScoped<INameMapper>(provider =>
                 {
-                    _logger.LogInformation("Creating NameMapper with {MappingCount} namespace mappings",
+                    _logger.LogInformation(
+                        "Creating NameMapper with {MappingCount} namespace mappings",
                         config.Mappings.NamespaceMappings.Count);
-                    return new ApiExtraction.NameMapper(config.Mappings, loggerFactory.CreateLogger<ApiExtraction.NameMapper>());
+                    return new ApiExtraction.NameMapper(
+                        config.Mappings,
+                        loggerFactory.CreateLogger<ApiExtraction.NameMapper>());
                 });
 
                 commandServices.AddScoped<IChangeClassifier>(provider =>
-                    new ApiExtraction.ChangeClassifier(config.BreakingChangeRules, config.Exclusions,
+                    new ApiExtraction.ChangeClassifier(
+                        config.BreakingChangeRules,
+                        config.Exclusions,
                         loggerFactory.CreateLogger<ApiExtraction.ChangeClassifier>()));
 
                 // Add the main comparison service that depends on configured services
