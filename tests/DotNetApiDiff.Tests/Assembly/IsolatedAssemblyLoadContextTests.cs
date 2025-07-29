@@ -117,6 +117,122 @@ public class IsolatedAssemblyLoadContextTests : IDisposable
         Assert.Contains(searchPath, context.AdditionalSearchPaths);
     }
 
+    [Fact]
+    public void AddSearchPath_WithLogger_LogsDebugMessage()
+    {
+        // Arrange
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath, _loggerMock.Object);
+        var searchPath = Path.GetDirectoryName(_validAssemblyPath);
+
+        // Act
+        context.AddSearchPath(searchPath);
+
+        // Assert - Verify logger was called (simplified verification)
+        _loggerMock.Verify(logger => logger.Log(
+            LogLevel.Debug,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Added search path")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+    }
+
+    [Fact]
+    public void LoadFromAssemblyPath_WithNonExistentPath_ThrowsFileNotFoundException()
+    {
+        // Arrange
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath);
+        var nonExistentPath = Path.Combine(Path.GetTempPath(), "NonExistent.dll");
+
+        // Act & Assert
+        Assert.Throws<FileNotFoundException>(() => context.LoadFromAssemblyPath(nonExistentPath));
+    }
+
+    [Fact]
+    public void LoadFromAssemblyName_WithValidAssemblyName_LoadsAssembly()
+    {
+        // Arrange
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath);
+        var currentAssembly = typeof(IsolatedAssemblyLoadContextTests).Assembly;
+        var assemblyName = currentAssembly.GetName();
+
+        // Copy the assembly to the test directory to simulate dependency resolution
+        var testDir = Path.GetDirectoryName(_validAssemblyPath);
+        var testAssemblyPath = Path.Combine(testDir, $"{assemblyName.Name}.dll");
+
+        if (!File.Exists(testAssemblyPath))
+        {
+            File.Copy(currentAssembly.Location, testAssemblyPath, overwrite: true);
+        }
+
+        try
+        {
+            // Act
+            var loadedAssembly = context.LoadFromAssemblyName(assemblyName);
+
+            // Assert
+            Assert.NotNull(loadedAssembly);
+            Assert.Equal(assemblyName.Name, loadedAssembly.GetName().Name);
+        }
+        finally
+        {
+            // Cleanup
+            if (File.Exists(testAssemblyPath) && testAssemblyPath != currentAssembly.Location)
+            {
+                try { File.Delete(testAssemblyPath); } catch { /* ignore cleanup errors */ }
+            }
+        }
+    }
+
+    [Fact]
+    public void LoadFromAssemblyName_WithInvalidAssemblyName_ThrowsFileNotFoundException()
+    {
+        // Arrange
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath);
+        var invalidAssemblyName = new AssemblyName("NonExistentAssembly");
+
+        // Act & Assert
+        // When LoadFromAssemblyName calls the base implementation after our Load returns null,
+        // it will throw FileNotFoundException for non-existent assemblies
+        Assert.Throws<FileNotFoundException>(() => context.LoadFromAssemblyName(invalidAssemblyName));
+    }
+
+    [Fact]
+    public void Context_WithLogger_LogsAssemblyResolutionAttempts()
+    {
+        // Arrange
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath, _loggerMock.Object);
+        var invalidAssemblyName = new AssemblyName("NonExistentAssembly");
+
+        // Act & Assert
+        // This will throw FileNotFoundException, but we catch it to verify logging
+        try
+        {
+            context.LoadFromAssemblyName(invalidAssemblyName);
+        }
+        catch (FileNotFoundException)
+        {
+            // Expected - ignore the exception, we just want to verify logging
+        }
+
+        // Assert - Verify debug logging occurred with the actual log message
+        _loggerMock.Verify(logger => logger.Log(
+            LogLevel.Debug,
+            It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Attempting to resolve assembly")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public void Context_IsCollectible_ReturnsTrue()
+    {
+        // Arrange & Act
+        var context = new IsolatedAssemblyLoadContext(_validAssemblyPath);
+
+        // Assert
+        Assert.True(context.IsCollectible);
+    }
+
     public void Dispose()
     {
         // Clean up the temporary file

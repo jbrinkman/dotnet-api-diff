@@ -238,158 +238,45 @@ public class CompareCommand : Command<CompareCommandSettings>
                 // Apply command-line filters and options
                 ApplyCommandLineOptions(settings, config);
 
-                // Load assemblies
-                Assembly sourceAssembly;
-                Assembly targetAssembly;
+                // NOW CREATE THE COMMAND-SPECIFIC CONTAINER
+                _logger.LogInformation("Creating command-specific service container with loaded configuration");
 
-                using (_logger.BeginScope("Assembly loading"))
+                var commandServices = new ServiceCollection();
+
+                // Reuse shared services from root container
+                var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+                commandServices.AddSingleton(loggerFactory);
+                commandServices.AddLogging(); // This adds ILogger<T> services
+
+                // Add the loaded configuration
+                commandServices.AddSingleton(config);                // Add all business logic services with configuration-aware instances
+                commandServices.AddScoped<IAssemblyLoader, AssemblyLoading.AssemblyLoader>();
+                commandServices.AddScoped<IApiExtractor, ApiExtraction.ApiExtractor>();
+                commandServices.AddScoped<IMemberSignatureBuilder, ApiExtraction.MemberSignatureBuilder>();
+                commandServices.AddScoped<ITypeAnalyzer, ApiExtraction.TypeAnalyzer>();
+                commandServices.AddScoped<IDifferenceCalculator, ApiExtraction.DifferenceCalculator>();
+                commandServices.AddScoped<IReportGenerator, Reporting.ReportGenerator>();
+
+                // Add configuration-specific services
+                commandServices.AddScoped<INameMapper>(provider =>
                 {
-                    _logger.LogInformation("Loading source assembly: {Path}", settings.SourceAssemblyPath);
-                    _logger.LogInformation("Loading target assembly: {Path}", settings.TargetAssemblyPath);
+                    _logger.LogInformation("Creating NameMapper with {MappingCount} namespace mappings",
+                        config.Mappings.NamespaceMappings.Count);
+                    return new ApiExtraction.NameMapper(config.Mappings, loggerFactory.CreateLogger<ApiExtraction.NameMapper>());
+                });
 
-                    var assemblyLoader = _serviceProvider.GetRequiredService<IAssemblyLoader>();
+                commandServices.AddScoped<IChangeClassifier>(provider =>
+                    new ApiExtraction.ChangeClassifier(config.BreakingChangeRules, config.Exclusions,
+                        loggerFactory.CreateLogger<ApiExtraction.ChangeClassifier>()));
 
-                    try
-                    {
-                        sourceAssembly = assemblyLoader.LoadAssembly(settings.SourceAssemblyPath!);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to load source assembly: {Path}", settings.SourceAssemblyPath);
-                        AnsiConsole.MarkupLine($"[red]Error loading source assembly:[/] {ex.Message}");
+                // Add the main comparison service that depends on configured services
+                commandServices.AddScoped<IApiComparer, ApiExtraction.ApiComparer>();
 
-                        return _exitCodeManager.GetExitCodeForException(ex);
-                    }
-
-                    try
-                    {
-                        targetAssembly = assemblyLoader.LoadAssembly(settings.TargetAssemblyPath!);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to load target assembly: {Path}", settings.TargetAssemblyPath);
-                        AnsiConsole.MarkupLine($"[red]Error loading target assembly:[/] {ex.Message}");
-
-                        return _exitCodeManager.GetExitCodeForException(ex);
-                    }
-                }
-
-                // Extract API information
-                using (_logger.BeginScope("API extraction"))
+                // Execute the command with the configured services
+                using (var commandProvider = commandServices.BuildServiceProvider())
                 {
-                    _logger.LogInformation("Extracting API information from assemblies");
-                    var apiExtractor = _serviceProvider.GetRequiredService<IApiExtractor>();
-
-                    // Pass the filter configuration to the API extractor
-                    var sourceApi = apiExtractor.ExtractApiMembers(sourceAssembly, config.Filters);
-                    var targetApi = apiExtractor.ExtractApiMembers(targetAssembly, config.Filters);
-
-                    // Log the number of API members extracted
-                    _logger.LogInformation(
-                        "Extracted {SourceCount} API members from source and {TargetCount} API members from target",
-                        sourceApi.Count(),
-                        targetApi.Count());
+                    return ExecuteWithConfiguredServices(settings, config, commandProvider);
                 }
-
-                // Compare APIs
-                Models.ComparisonResult comparisonResult;
-                using (_logger.BeginScope("API comparison"))
-                {
-                    _logger.LogInformation("Comparing APIs");
-                    var apiComparer = _serviceProvider.GetRequiredService<IApiComparer>();
-
-                    try
-                    {
-                        comparisonResult = apiComparer.CompareAssemblies(sourceAssembly, targetAssembly);
-
-                        // Include the configuration in the result for reporting, updating it with actual runtime values
-                        comparisonResult.Configuration = config;
-
-                        // Update configuration with actual command-line values used for this comparison
-                        if (Enum.TryParse<ReportFormat>(settings.OutputFormat, true, out var outputFormat))
-                        {
-                            comparisonResult.Configuration.OutputFormat = outputFormat;
-                        }
-
-                        if (!string.IsNullOrEmpty(settings.OutputFile))
-                        {
-                            comparisonResult.Configuration.OutputPath = settings.OutputFile;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error comparing assemblies");
-                        AnsiConsole.MarkupLine($"[red]Error comparing assemblies:[/] {ex.Message}");
-
-                        return _exitCodeManager.GetExitCodeForException(ex);
-                    }
-                }
-
-                // Create ApiComparison from ComparisonResult
-                var comparison = CreateApiComparisonFromResult(comparisonResult);
-
-                // Generate report
-                using (_logger.BeginScope("Report generation"))
-                {
-                    _logger.LogInformation("Generating {Format} report", settings.OutputFormat);
-                    var reportGenerator = _serviceProvider.GetRequiredService<IReportGenerator>();
-
-                    // Convert string format to ReportFormat enum
-                    ReportFormat format = settings.OutputFormat.ToLowerInvariant() switch
-                    {
-                        "json" => ReportFormat.Json,
-                        "xml" => ReportFormat.Xml,
-                        "html" => ReportFormat.Html,
-                        "markdown" => ReportFormat.Markdown,
-                        _ => ReportFormat.Console
-                    };
-
-                    string report;
-                    try
-                    {
-                        if (string.IsNullOrEmpty(settings.OutputFile))
-                        {
-                            // No output file specified - output to console regardless of format
-                            report = reportGenerator.GenerateReport(comparisonResult, format);
-
-                            // Output the formatted report to the console
-                            // Use Console.Write to avoid format string interpretation issues
-                            Console.Write(report);
-                        }
-                        else
-                        {
-                            // Output file specified - save to the specified file
-                            reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile).GetAwaiter().GetResult();
-                            _logger.LogInformation("Report saved to {OutputFile}", settings.OutputFile);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error generating {Format} report", format);
-                        AnsiConsole.MarkupLine($"[red]Error generating report:[/] {ex.Message}");
-
-                        return _exitCodeManager.GetExitCodeForException(ex);
-                    }
-                }
-
-                // Use the ExitCodeManager to determine the appropriate exit code
-                int exitCode = _exitCodeManager.GetExitCode(comparison);
-
-                if (comparison.HasBreakingChanges)
-                {
-                    _logger.LogWarning("{Count} breaking changes detected", comparison.BreakingChangesCount);
-                }
-                else
-                {
-                    _logger.LogInformation("Comparison completed successfully with no breaking changes");
-                }
-
-                _logger.LogInformation(
-                    "Exiting with code {ExitCode}: {Description}",
-                    exitCode,
-                    _exitCodeManager.GetExitCodeDescription(exitCode));
-
-                return exitCode;
             }
         }
         catch (Exception ex)
@@ -397,6 +284,167 @@ public class CompareCommand : Command<CompareCommandSettings>
             // Use our centralized exception handler for any unhandled exceptions
             return _exceptionHandler.HandleException(ex, "Compare command execution");
         }
+    }
+
+    /// <summary>
+    /// Executes the comparison logic using the configured services
+    /// </summary>
+    /// <param name="settings">Command settings</param>
+    /// <param name="config">Loaded configuration</param>
+    /// <param name="serviceProvider">Command-specific service provider</param>
+    /// <returns>Exit code</returns>
+    private int ExecuteWithConfiguredServices(CompareCommandSettings settings, ComparisonConfiguration config, IServiceProvider serviceProvider)
+    {
+        // Load assemblies
+        Assembly sourceAssembly;
+        Assembly targetAssembly;
+
+        using (_logger.BeginScope("Assembly loading"))
+        {
+            _logger.LogInformation("Loading source assembly: {Path}", settings.SourceAssemblyPath);
+            _logger.LogInformation("Loading target assembly: {Path}", settings.TargetAssemblyPath);
+
+            var assemblyLoader = serviceProvider.GetRequiredService<IAssemblyLoader>();
+
+            try
+            {
+                sourceAssembly = assemblyLoader.LoadAssembly(settings.SourceAssemblyPath!);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load source assembly: {Path}", settings.SourceAssemblyPath);
+                AnsiConsole.MarkupLine($"[red]Error loading source assembly:[/] {ex.Message}");
+
+                return _exitCodeManager.GetExitCodeForException(ex);
+            }
+
+            try
+            {
+                targetAssembly = assemblyLoader.LoadAssembly(settings.TargetAssemblyPath!);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load target assembly: {Path}", settings.TargetAssemblyPath);
+                AnsiConsole.MarkupLine($"[red]Error loading target assembly:[/] {ex.Message}");
+
+                return _exitCodeManager.GetExitCodeForException(ex);
+            }
+        }
+
+        // Extract API information
+        using (_logger.BeginScope("API extraction"))
+        {
+            _logger.LogInformation("Extracting API information from assemblies");
+            var apiExtractor = serviceProvider.GetRequiredService<IApiExtractor>();
+
+            // Pass the filter configuration to the API extractor
+            var sourceApi = apiExtractor.ExtractApiMembers(sourceAssembly, config.Filters);
+            var targetApi = apiExtractor.ExtractApiMembers(targetAssembly, config.Filters);
+
+            // Log the number of API members extracted
+            _logger.LogInformation(
+                "Extracted {SourceCount} API members from source and {TargetCount} API members from target",
+                sourceApi.Count(),
+                targetApi.Count());
+        }
+
+        // Compare APIs
+        Models.ComparisonResult comparisonResult;
+        using (_logger.BeginScope("API comparison"))
+        {
+            _logger.LogInformation("Comparing APIs");
+            var apiComparer = serviceProvider.GetRequiredService<IApiComparer>();
+
+            try
+            {
+                // Use the single CompareAssemblies method - configuration is now injected into dependencies
+                comparisonResult = apiComparer.CompareAssemblies(sourceAssembly, targetAssembly);
+
+                // Update configuration with actual command-line values used for this comparison
+                if (Enum.TryParse<ReportFormat>(settings.OutputFormat, true, out var outputFormat))
+                {
+                    comparisonResult.Configuration.OutputFormat = outputFormat;
+                }
+
+                if (!string.IsNullOrEmpty(settings.OutputFile))
+                {
+                    comparisonResult.Configuration.OutputPath = settings.OutputFile;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error comparing assemblies");
+                AnsiConsole.MarkupLine($"[red]Error comparing assemblies:[/] {ex.Message}");
+
+                return _exitCodeManager.GetExitCodeForException(ex);
+            }
+        }
+
+        // Create ApiComparison from ComparisonResult
+        var comparison = CreateApiComparisonFromResult(comparisonResult);
+
+        // Generate report
+        using (_logger.BeginScope("Report generation"))
+        {
+            _logger.LogInformation("Generating {Format} report", settings.OutputFormat);
+            var reportGenerator = serviceProvider.GetRequiredService<IReportGenerator>();
+
+            // Convert string format to ReportFormat enum
+            ReportFormat format = settings.OutputFormat.ToLowerInvariant() switch
+            {
+                "json" => ReportFormat.Json,
+                "xml" => ReportFormat.Xml,
+                "html" => ReportFormat.Html,
+                "markdown" => ReportFormat.Markdown,
+                _ => ReportFormat.Console
+            };
+
+            string report;
+            try
+            {
+                if (string.IsNullOrEmpty(settings.OutputFile))
+                {
+                    // No output file specified - output to console regardless of format
+                    report = reportGenerator.GenerateReport(comparisonResult, format);
+
+                    // Output the formatted report to the console
+                    // Use Console.Write to avoid format string interpretation issues
+                    Console.Write(report);
+                }
+                else
+                {
+                    // Output file specified - save to the specified file
+                    reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile).GetAwaiter().GetResult();
+                    _logger.LogInformation("Report saved to {OutputFile}", settings.OutputFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating {Format} report", format);
+                AnsiConsole.MarkupLine($"[red]Error generating report:[/] {ex.Message}");
+
+                return _exitCodeManager.GetExitCodeForException(ex);
+            }
+        }
+
+        // Use the ExitCodeManager to determine the appropriate exit code
+        int exitCode = _exitCodeManager.GetExitCode(comparison);
+
+        if (comparison.HasBreakingChanges)
+        {
+            _logger.LogWarning("{Count} breaking changes detected", comparison.BreakingChangesCount);
+        }
+        else
+        {
+            _logger.LogInformation("Comparison completed successfully with no breaking changes");
+        }
+
+        _logger.LogInformation(
+            "Exiting with code {ExitCode}: {Description}",
+            exitCode,
+            _exitCodeManager.GetExitCodeDescription(exitCode));
+
+        return exitCode;
     }
 
     /// <summary>
