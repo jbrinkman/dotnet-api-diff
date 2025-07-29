@@ -1,5 +1,6 @@
 // Copyright DotNet API Diff Project Contributors - SPDX Identifier: MIT
 using DotNetApiDiff.Interfaces;
+using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -7,15 +8,16 @@ using Xunit;
 namespace DotNetApiDiff.Tests.Integration;
 
 /// <summary>
-/// Tests to validate that all services in the DI container can be properly instantiated
+/// Tests to validate that the root DI container can properly instantiate command services,
+/// and that command-specific containers work with business logic services
 /// </summary>
 public class DependencyInjectionTests
 {
     /// <summary>
-    /// Creates a service provider using the same configuration as the main application
+    /// Creates a service provider using the same configuration as the main application root container
     /// </summary>
     /// <returns>Configured service provider</returns>
-    private static ServiceProvider CreateServiceProvider()
+    private static ServiceProvider CreateRootServiceProvider()
     {
         var services = new ServiceCollection();
 
@@ -25,119 +27,54 @@ public class DependencyInjectionTests
         return services.BuildServiceProvider();
     }
 
-    [Fact]
-    public void ServiceProvider_CanResolve_IAssemblyLoader()
+    /// <summary>
+    /// Creates a command-specific service provider with business logic services and test configuration
+    /// </summary>
+    /// <returns>Configured command-specific service provider</returns>
+    private static ServiceProvider CreateCommandServiceProvider()
     {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        // Create command-specific container with its own logging
+        var commandServices = new ServiceCollection();
 
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IAssemblyLoader>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.AssemblyLoading.AssemblyLoader>(service);
+        // Add logging directly
+        commandServices.AddLogging();
+
+        // Add test configuration
+        var config = ComparisonConfiguration.CreateDefault();
+        commandServices.AddSingleton(config);
+
+        // Add all business logic services
+        commandServices.AddScoped<IAssemblyLoader, DotNetApiDiff.AssemblyLoading.AssemblyLoader>();
+        commandServices.AddScoped<IApiExtractor, DotNetApiDiff.ApiExtraction.ApiExtractor>();
+        commandServices.AddScoped<IMemberSignatureBuilder, DotNetApiDiff.ApiExtraction.MemberSignatureBuilder>();
+        commandServices.AddScoped<ITypeAnalyzer, DotNetApiDiff.ApiExtraction.TypeAnalyzer>();
+        commandServices.AddScoped<IDifferenceCalculator, DotNetApiDiff.ApiExtraction.DifferenceCalculator>();
+        commandServices.AddScoped<IReportGenerator, DotNetApiDiff.Reporting.ReportGenerator>();
+
+        // Add configuration-specific services
+        commandServices.AddScoped<INameMapper>(provider =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            return new DotNetApiDiff.ApiExtraction.NameMapper(config.Mappings, loggerFactory.CreateLogger<DotNetApiDiff.ApiExtraction.NameMapper>());
+        });
+
+        commandServices.AddScoped<IChangeClassifier>(provider =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            return new DotNetApiDiff.ApiExtraction.ChangeClassifier(config.BreakingChangeRules, config.Exclusions,
+                loggerFactory.CreateLogger<DotNetApiDiff.ApiExtraction.ChangeClassifier>());
+        });
+
+        commandServices.AddScoped<IApiComparer, DotNetApiDiff.ApiExtraction.ApiComparer>();
+
+        return commandServices.BuildServiceProvider();
     }
 
     [Fact]
-    public void ServiceProvider_CanResolve_IApiExtractor()
+    public void RootServiceProvider_CanResolve_IExitCodeManager()
     {
         // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IApiExtractor>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.ApiExtractor>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IMemberSignatureBuilder()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IMemberSignatureBuilder>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.MemberSignatureBuilder>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_ITypeAnalyzer()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<ITypeAnalyzer>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.TypeAnalyzer>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IDifferenceCalculator()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IDifferenceCalculator>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.DifferenceCalculator>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_INameMapper()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<INameMapper>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.NameMapper>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IChangeClassifier()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IChangeClassifier>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.ChangeClassifier>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IApiComparer()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IApiComparer>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.ApiExtraction.ApiComparer>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IReportGenerator()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
-
-        // Act & Assert
-        var service = serviceProvider.GetRequiredService<IReportGenerator>();
-        Assert.NotNull(service);
-        Assert.IsType<DotNetApiDiff.Reporting.ReportGenerator>(service);
-    }
-
-    [Fact]
-    public void ServiceProvider_CanResolve_IExitCodeManager()
-    {
-        // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        using var serviceProvider = CreateRootServiceProvider();
 
         // Act & Assert
         var service = serviceProvider.GetRequiredService<IExitCodeManager>();
@@ -146,10 +83,10 @@ public class DependencyInjectionTests
     }
 
     [Fact]
-    public void ServiceProvider_CanResolve_IGlobalExceptionHandler()
+    public void RootServiceProvider_CanResolve_IGlobalExceptionHandler()
     {
         // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        using var serviceProvider = CreateRootServiceProvider();
 
         // Act & Assert
         var service = serviceProvider.GetRequiredService<IGlobalExceptionHandler>();
@@ -158,12 +95,131 @@ public class DependencyInjectionTests
     }
 
     [Fact]
-    public void ServiceProvider_CanResolve_AllServices_InSingleScope()
+    public void RootServiceProvider_CanResolve_ILoggerFactory()
     {
         // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        using var serviceProvider = CreateRootServiceProvider();
 
-        // Act & Assert - Try to resolve all services in a single scope to ensure no circular dependencies
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<ILoggerFactory>();
+        Assert.NotNull(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IAssemblyLoader()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IAssemblyLoader>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.AssemblyLoading.AssemblyLoader>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IApiExtractor()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IApiExtractor>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.ApiExtractor>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IMemberSignatureBuilder()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IMemberSignatureBuilder>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.MemberSignatureBuilder>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_ITypeAnalyzer()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<ITypeAnalyzer>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.TypeAnalyzer>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IDifferenceCalculator()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IDifferenceCalculator>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.DifferenceCalculator>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_INameMapper()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<INameMapper>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.NameMapper>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IChangeClassifier()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IChangeClassifier>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.ChangeClassifier>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IApiComparer()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IApiComparer>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.ApiExtraction.ApiComparer>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_IReportGenerator()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert
+        var service = serviceProvider.GetRequiredService<IReportGenerator>();
+        Assert.NotNull(service);
+        Assert.IsType<DotNetApiDiff.Reporting.ReportGenerator>(service);
+    }
+
+    [Fact]
+    public void CommandServiceProvider_CanResolve_AllBusinessLogicServices_InSingleScope()
+    {
+        // Arrange
+        using var serviceProvider = CreateCommandServiceProvider();
+
+        // Act & Assert - Try to resolve all business logic services in a single scope to ensure no circular dependencies
         using var scope = serviceProvider.CreateScope();
         var scopedProvider = scope.ServiceProvider;
 
@@ -176,10 +232,8 @@ public class DependencyInjectionTests
         var changeClassifier = scopedProvider.GetRequiredService<IChangeClassifier>();
         var apiComparer = scopedProvider.GetRequiredService<IApiComparer>();
         var reportGenerator = scopedProvider.GetRequiredService<IReportGenerator>();
-        var exitCodeManager = scopedProvider.GetRequiredService<IExitCodeManager>();
-        var globalExceptionHandler = scopedProvider.GetRequiredService<IGlobalExceptionHandler>();
 
-        // Verify all services were created
+        // Verify all business logic services were created
         Assert.NotNull(assemblyLoader);
         Assert.NotNull(apiExtractor);
         Assert.NotNull(memberSignatureBuilder);
@@ -189,15 +243,31 @@ public class DependencyInjectionTests
         Assert.NotNull(changeClassifier);
         Assert.NotNull(apiComparer);
         Assert.NotNull(reportGenerator);
+    }
+
+    [Fact]
+    public void RootServiceProvider_CanResolve_AllInfrastructureServices_InSingleScope()
+    {
+        // Arrange
+        using var serviceProvider = CreateRootServiceProvider();
+
+        // Act & Assert - Try to resolve all infrastructure services in a single scope
+        using var scope = serviceProvider.CreateScope();
+        var scopedProvider = scope.ServiceProvider;
+
+        var exitCodeManager = scopedProvider.GetRequiredService<IExitCodeManager>();
+        var globalExceptionHandler = scopedProvider.GetRequiredService<IGlobalExceptionHandler>();
+
+        // Verify all infrastructure services were created
         Assert.NotNull(exitCodeManager);
         Assert.NotNull(globalExceptionHandler);
     }
 
     [Fact]
-    public void ServiceProvider_ValidatesDependencyChain_ForApiComparer()
+    public void CommandServiceProvider_ValidatesDependencyChain_ForApiComparer()
     {
         // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        using var serviceProvider = CreateCommandServiceProvider();
 
         // Act - Get ApiComparer which depends on many other services
         var apiComparer = serviceProvider.GetRequiredService<IApiComparer>();

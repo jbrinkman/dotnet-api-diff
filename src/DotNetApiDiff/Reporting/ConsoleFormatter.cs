@@ -323,7 +323,9 @@ public class ConsoleFormatter : IReportFormatter
             table.AddColumn("Breaking");
         }
 
-        table.Title = new TableTitle($"[bold {color}]{title}[/] ({changes.Count})");
+        // Ensure color is not empty or null to avoid Spectre Console parsing errors
+        var safeColor = string.IsNullOrWhiteSpace(color) ? "default" : color;
+        table.Title = new TableTitle($"[bold {safeColor}]{title}[/] ({changes.Count})");
         table.Border = TableBorder.Rounded;
 
         // Group changes by element type for better organization
@@ -336,7 +338,7 @@ public class ConsoleFormatter : IReportFormatter
                 var row = new List<string>
                 {
                     change.ElementType.ToString(),
-                    change.ElementName,
+                    string.IsNullOrWhiteSpace(change.ElementName) ? "[dim]<unnamed>[/]" : change.ElementName,
                     FormatChangeDetails(change)
                 };
 
@@ -368,25 +370,39 @@ public class ConsoleFormatter : IReportFormatter
 
     private string FormatChangeDetails(ApiDifference change)
     {
-        var details = new StringBuilder(change.Description);
+        // Escape any markup in the description to prevent parsing errors
+        var safeDescription = string.IsNullOrWhiteSpace(change.Description)
+            ? "No description available"
+            : EscapeMarkup(change.Description);
 
-        if (!string.IsNullOrEmpty(change.OldSignature) && !string.IsNullOrEmpty(change.NewSignature))
+        var details = new StringBuilder(safeDescription);
+
+        if (!string.IsNullOrWhiteSpace(change.OldSignature))
         {
             details.AppendLine();
-            details.AppendLine($"[red]- {change.OldSignature}[/]");
-            details.AppendLine($"[green]+ {change.NewSignature}[/]");
+            details.AppendLine($"[red]- {EscapeMarkup(change.OldSignature)}[/]");
         }
-        else if (!string.IsNullOrEmpty(change.OldSignature))
+
+        if (!string.IsNullOrWhiteSpace(change.NewSignature))
         {
             details.AppendLine();
-            details.AppendLine($"[red]- {change.OldSignature}[/]");
-        }
-        else if (!string.IsNullOrEmpty(change.NewSignature))
-        {
-            details.AppendLine();
-            details.AppendLine($"[green]+ {change.NewSignature}[/]");
+            details.AppendLine($"[green]+ {EscapeMarkup(change.NewSignature)}[/]");
         }
 
         return details.ToString();
+    }
+
+    /// <summary>
+    /// Escapes markup characters to prevent Spectre Console parsing errors
+    /// </summary>
+    /// <param name="text">The text to escape</param>
+    /// <returns>Escaped text safe for Spectre Console</returns>
+    private string EscapeMarkup(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        // Escape square brackets which are used for markup
+        return text.Replace("[", "[[").Replace("]", "]]");
     }
 }

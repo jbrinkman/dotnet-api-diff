@@ -114,7 +114,8 @@ public class Program
     }
 
     /// <summary>
-    /// Configures dependency injection services
+    /// Configures dependency injection services for the root container
+    /// Only includes services needed for command instantiation
     /// </summary>
     /// <param name="services">Service collection to configure</param>
     public static void ConfigureServices(IServiceCollection services)
@@ -150,45 +151,11 @@ public class Program
             builder.SetMinimumLevel(logLevel);
         });
 
-        // Register core services
-        services.AddScoped<IAssemblyLoader, AssemblyLoading.AssemblyLoader>();
-        services.AddScoped<IApiExtractor, ApiExtraction.ApiExtractor>();
-        services.AddScoped<IMemberSignatureBuilder, ApiExtraction.MemberSignatureBuilder>();
-        services.AddScoped<ITypeAnalyzer, ApiExtraction.TypeAnalyzer>();
-        services.AddScoped<IDifferenceCalculator, ApiExtraction.DifferenceCalculator>();
-
-        // Register the NameMapper
-        services.AddScoped<INameMapper>(provider =>
-        {
-            var logger = provider.GetRequiredService<ILogger<ApiExtraction.NameMapper>>();
-
-            // Create a default mapping configuration - in real usage this would be loaded from config
-            var mappingConfig = Models.Configuration.MappingConfiguration.CreateDefault();
-            return new ApiExtraction.NameMapper(mappingConfig, logger);
-        });
-
-        // Register the ChangeClassifier
-        services.AddScoped<IChangeClassifier>(provider =>
-        {
-            var logger = provider.GetRequiredService<ILogger<ApiExtraction.ChangeClassifier>>();
-
-            // Create default configurations - in real usage these would be loaded from config
-            var breakingChangeRules = Models.Configuration.BreakingChangeRules.CreateDefault();
-            var exclusionConfig = Models.Configuration.ExclusionConfiguration.CreateDefault();
-
-            return new ApiExtraction.ChangeClassifier(breakingChangeRules, exclusionConfig, logger);
-        });
-
-        // Register the ApiComparer with NameMapper
-        services.AddScoped<IApiComparer, ApiExtraction.ApiComparer>();
-
-        // Register the ReportGenerator
-        services.AddScoped<IReportGenerator, Reporting.ReportGenerator>();
-
-        // Register the ExitCodeManager
+        // Register only services needed for command instantiation
         services.AddSingleton<IExitCodeManager, ExitCodeManager>();
-
-        // Register the GlobalExceptionHandler
         services.AddSingleton<IGlobalExceptionHandler, GlobalExceptionHandler>();
+
+        // Note: Business logic services (AssemblyLoader, ApiExtractor, etc.) will be registered
+        // in the command-specific container to avoid configuration timing issues
     }
 }
