@@ -38,6 +38,14 @@
         {{ include "config-string-list" config.exclusions.excluded_members "Excluded Members" }}
         {{ include "config-string-list" config.exclusions.excluded_type_patterns "Excluded Type Patterns" }}
         {{ include "config-string-list" config.exclusions.excluded_member_patterns "Excluded Member Patterns" }}
+        <div class="config-item">
+            <span class="config-label">Exclude Compiler Generated:</span>
+            <span class="config-value">{{ config.exclusions.exclude_compiler_generated | format_boolean }}</span>
+        </div>
+        <div class="config-item">
+            <span class="config-label">Exclude Obsolete:</span>
+            <span class="config-value">{{ config.exclusions.exclude_obsolete | format_boolean }}</span>
+        </div>
     </div>
 
     <!-- Breaking Change Rules Section -->
@@ -45,6 +53,7 @@
         <h3>⚠️ Breaking Change Rules</h3>
         <div class="config-grid-inner">
             <div>
+                <h4>Removal Rules</h4>
                 <div class="config-item">
                     <span class="config-label">Treat Type Removal as Breaking:</span>
                     <span class="config-value">{{ config.breaking_change_rules.treat_type_removal_as_breaking | format_boolean }}</span>
@@ -53,8 +62,19 @@
                     <span class="config-label">Treat Member Removal as Breaking:</span>
                     <span class="config-value">{{ config.breaking_change_rules.treat_member_removal_as_breaking | format_boolean }}</span>
                 </div>
+
+                <h4>Addition Rules</h4>
+                <div class="config-item">
+                    <span class="config-label">Treat Added Type as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_added_type_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Added Member as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_added_member_as_breaking | format_boolean }}</span>
+                </div>
             </div>
             <div>
+                <h4>Modification Rules</h4>
                 <div class="config-item">
                     <span class="config-label">Treat Signature Change as Breaking:</span>
                     <span class="config-value">{{ config.breaking_change_rules.treat_signature_change_as_breaking | format_boolean }}</span>
@@ -62,6 +82,24 @@
                 <div class="config-item">
                     <span class="config-label">Treat Reduced Accessibility as Breaking:</span>
                     <span class="config-value">{{ config.breaking_change_rules.treat_reduced_accessibility_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Parameter Name Change as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_parameter_name_change_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Added Optional Parameter as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_added_optional_parameter_as_breaking | format_boolean }}</span>
+                </div>
+
+                <h4>Interface Rules</h4>
+                <div class="config-item">
+                    <span class="config-label">Treat Added Interface as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_added_interface_as_breaking | format_boolean }}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Treat Removed Interface as Breaking:</span>
+                    <span class="config-value">{{ config.breaking_change_rules.treat_removed_interface_as_breaking | format_boolean }}</span>
                 </div>
             </div>
         </div>
