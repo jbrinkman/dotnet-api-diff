@@ -77,7 +77,7 @@ public class TypeRegistrarTests
         var registrar = new TypeRegistrar(services);
 
         // Act
-        registrar.RegisterLazy(typeof(ILogger<TypeRegistrar>), () => 
+        registrar.RegisterLazy(typeof(ILogger<TypeRegistrar>), () =>
         {
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             return loggerFactory.CreateLogger<TypeRegistrar>();
