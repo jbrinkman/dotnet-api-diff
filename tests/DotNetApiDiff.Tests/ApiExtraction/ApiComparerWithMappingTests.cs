@@ -157,6 +157,7 @@ namespace DotNetApiDiff.Tests.ApiExtraction
                 _differenceCalculatorMock.Object,
                 nameMapper,
                 _changeClassifierMock.Object,
+                ComparisonConfiguration.CreateDefault(),
                 _loggerMock.Object);
 
             var addedDifference = new ApiDifference { ChangeType = ChangeType.Added };

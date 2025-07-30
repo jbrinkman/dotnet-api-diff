@@ -275,7 +275,14 @@ public class CompareCommand : Command<CompareCommandSettings>
                         loggerFactory.CreateLogger<ApiExtraction.ChangeClassifier>()));
 
                 // Add the main comparison service that depends on configured services
-                commandServices.AddScoped<IApiComparer, ApiExtraction.ApiComparer>();
+                commandServices.AddScoped<IApiComparer>(provider =>
+                    new ApiExtraction.ApiComparer(
+                        provider.GetRequiredService<IApiExtractor>(),
+                        provider.GetRequiredService<IDifferenceCalculator>(),
+                        provider.GetRequiredService<INameMapper>(),
+                        provider.GetRequiredService<IChangeClassifier>(),
+                        config,
+                        provider.GetRequiredService<ILogger<ApiExtraction.ApiComparer>>()));
 
                 // Execute the command with the configured services
                 using (var commandProvider = commandServices.BuildServiceProvider())

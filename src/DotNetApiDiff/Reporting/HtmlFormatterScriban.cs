@@ -4,6 +4,7 @@ using DotNetApiDiff.Models;
 using DotNetApiDiff.Models.Configuration;
 using Scriban;
 using Scriban.Runtime;
+using System.Linq;
 
 namespace DotNetApiDiff.Reporting;
 
@@ -65,49 +66,57 @@ public class HtmlFormatterScriban : IReportFormatter
 
     private object PrepareConfigData(ComparisonConfiguration config)
     {
+        var namespaceMappings = config?.Mappings?.NamespaceMappings ?? new Dictionary<string, List<string>>();
+
+        // Convert Dictionary to array of objects with key/value properties for Scriban
+        var namespaceMappingsArray = namespaceMappings.Select(kvp => new { key = kvp.Key, value = kvp.Value }).ToList();
+        var typeMappingsArray = (config?.Mappings?.TypeMappings ?? new Dictionary<string, string>()).Select(kvp => new { key = kvp.Key, value = kvp.Value }).ToList();
+
+        var mappingsResult = new
+        {
+            namespace_mappings = namespaceMappingsArray,
+            type_mappings = typeMappingsArray,
+            auto_map_same_name_types = config?.Mappings?.AutoMapSameNameTypes ?? false,
+            ignore_case = config?.Mappings?.IgnoreCase ?? false
+        };
+
         return new
         {
             filters = new
             {
-                include_internals = config.Filters.IncludeInternals,
-                include_compiler_generated = config.Filters.IncludeCompilerGenerated,
-                include_namespaces = config.Filters.IncludeNamespaces?.ToList() ?? new List<string>(),
-                exclude_namespaces = config.Filters.ExcludeNamespaces?.ToList() ?? new List<string>(),
-                include_types = config.Filters.IncludeTypes?.ToList() ?? new List<string>(),
-                exclude_types = config.Filters.ExcludeTypes?.ToList() ?? new List<string>()
+                include_internals = config?.Filters?.IncludeInternals ?? false,
+                include_compiler_generated = config?.Filters?.IncludeCompilerGenerated ?? false,
+                include_namespaces = config?.Filters?.IncludeNamespaces?.ToList() ?? new List<string>(),
+                exclude_namespaces = config?.Filters?.ExcludeNamespaces?.ToList() ?? new List<string>(),
+                include_types = config?.Filters?.IncludeTypes?.ToList() ?? new List<string>(),
+                exclude_types = config?.Filters?.ExcludeTypes?.ToList() ?? new List<string>()
             },
-            mappings = new
-            {
-                namespace_mappings = config.Mappings.NamespaceMappings ?? new Dictionary<string, List<string>>(),
-                type_mappings = config.Mappings.TypeMappings ?? new Dictionary<string, string>(),
-                auto_map_same_name_types = config.Mappings.AutoMapSameNameTypes,
-                ignore_case = config.Mappings.IgnoreCase
-            },
+            mappings = mappingsResult,
             exclusions = new
             {
-                excluded_types = config.Exclusions.ExcludedTypes?.ToList() ?? new List<string>(),
-                excluded_members = config.Exclusions.ExcludedMembers?.ToList() ?? new List<string>(),
-                excluded_type_patterns = config.Exclusions.ExcludedTypePatterns?.ToList() ?? new List<string>(),
-                excluded_member_patterns = config.Exclusions.ExcludedMemberPatterns?.ToList() ?? new List<string>(),
-                exclude_compiler_generated = config.Exclusions.ExcludeCompilerGenerated,
-                exclude_obsolete = config.Exclusions.ExcludeObsolete
+                excluded_types = config?.Exclusions?.ExcludedTypes?.ToList() ?? new List<string>(),
+                excluded_members = config?.Exclusions?.ExcludedMembers?.ToList() ?? new List<string>(),
+                excluded_type_patterns = config?.Exclusions?.ExcludedTypePatterns?.ToList() ?? new List<string>(),
+                excluded_member_patterns = config?.Exclusions?.ExcludedMemberPatterns?.ToList() ?? new List<string>(),
+                exclude_compiler_generated = config?.Exclusions?.ExcludeCompilerGenerated ?? false,
+                exclude_obsolete = config?.Exclusions?.ExcludeObsolete ?? false
             },
             breaking_change_rules = new
             {
-                treat_type_removal_as_breaking = config.BreakingChangeRules.TreatTypeRemovalAsBreaking,
-                treat_member_removal_as_breaking = config.BreakingChangeRules.TreatMemberRemovalAsBreaking,
-                treat_signature_change_as_breaking = config.BreakingChangeRules.TreatSignatureChangeAsBreaking,
-                treat_reduced_accessibility_as_breaking = config.BreakingChangeRules.TreatReducedAccessibilityAsBreaking,
-                treat_added_type_as_breaking = config.BreakingChangeRules.TreatAddedTypeAsBreaking,
-                treat_added_member_as_breaking = config.BreakingChangeRules.TreatAddedMemberAsBreaking,
-                treat_added_interface_as_breaking = config.BreakingChangeRules.TreatAddedInterfaceAsBreaking,
-                treat_removed_interface_as_breaking = config.BreakingChangeRules.TreatRemovedInterfaceAsBreaking,
-                treat_parameter_name_change_as_breaking = config.BreakingChangeRules.TreatParameterNameChangeAsBreaking,
-                treat_added_optional_parameter_as_breaking = config.BreakingChangeRules.TreatAddedOptionalParameterAsBreaking
+                treat_type_removal_as_breaking = config?.BreakingChangeRules?.TreatTypeRemovalAsBreaking ?? true,
+                treat_member_removal_as_breaking = config?.BreakingChangeRules?.TreatMemberRemovalAsBreaking ?? true,
+                treat_signature_change_as_breaking = config?.BreakingChangeRules?.TreatSignatureChangeAsBreaking ?? true,
+                treat_reduced_accessibility_as_breaking = config?.BreakingChangeRules?.TreatReducedAccessibilityAsBreaking ?? true,
+                treat_added_type_as_breaking = config?.BreakingChangeRules?.TreatAddedTypeAsBreaking ?? false,
+                treat_added_member_as_breaking = config?.BreakingChangeRules?.TreatAddedMemberAsBreaking ?? false,
+                treat_added_interface_as_breaking = config?.BreakingChangeRules?.TreatAddedInterfaceAsBreaking ?? true,
+                treat_removed_interface_as_breaking = config?.BreakingChangeRules?.TreatRemovedInterfaceAsBreaking ?? true,
+                treat_parameter_name_change_as_breaking = config?.BreakingChangeRules?.TreatParameterNameChangeAsBreaking ?? false,
+                treat_added_optional_parameter_as_breaking = config?.BreakingChangeRules?.TreatAddedOptionalParameterAsBreaking ?? false
             },
-            output_format = config.OutputFormat.ToString(),
-            output_path = config.OutputPath ?? string.Empty,
-            fail_on_breaking_changes = config.FailOnBreakingChanges
+            output_format = config?.OutputFormat.ToString() ?? "Console",
+            output_path = config?.OutputPath ?? string.Empty,
+            fail_on_breaking_changes = config?.FailOnBreakingChanges ?? false
         };
     }
 
