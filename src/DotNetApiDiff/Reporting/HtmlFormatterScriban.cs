@@ -64,6 +64,21 @@ public class HtmlFormatterScriban : IReportFormatter
         return _mainTemplate.Render(context);
     }
 
+    private static string HtmlEscape(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return input ?? string.Empty;
+        }
+
+        return input
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;")
+            .Replace("\"", "&quot;")
+            .Replace("'", "&#39;");
+    }
+
     private object PrepareConfigData(ComparisonConfiguration config)
     {
         var namespaceMappings = config?.Mappings?.NamespaceMappings ?? new Dictionary<string, List<string>>();
@@ -236,19 +251,6 @@ public class HtmlFormatterScriban : IReportFormatter
                     details_id = $"details-{Guid.NewGuid():N}"
                 }).ToArray()
             }).ToArray();
-    }
-
-    private static string HtmlEscape(string? input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return input ?? string.Empty;
-
-        return input
-            .Replace("&", "&amp;")
-            .Replace("<", "&lt;")
-            .Replace(">", "&gt;")
-            .Replace("\"", "&quot;")
-            .Replace("'", "&#39;");
     }
 
     private object[] PrepareBreakingChangesData(IEnumerable<ApiDifference> breakingChanges)
