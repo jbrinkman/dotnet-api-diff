@@ -55,7 +55,7 @@ namespace DotNetApiDiff.Tests.ApiExtraction
 
             // Setup default behavior for all tests
             _apiExtractorMock.Setup(x => x.ExtractTypeMembers(It.IsAny<Type>())).Returns(new List<ApiMember>());
-            _differenceCalculatorMock.Setup(x => x.CalculateTypeChanges(It.IsAny<Type>(), It.IsAny<Type>())).Returns((ApiDifference?)null);
+            _differenceCalculatorMock.Setup(x => x.CalculateTypeChanges(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<bool>())).Returns((ApiDifference?)null);
 
             // Setup the change classifier to return the same difference that is passed to it
             _changeClassifierMock.Setup(x => x.ClassifyChange(It.IsAny<ApiDifference>()))

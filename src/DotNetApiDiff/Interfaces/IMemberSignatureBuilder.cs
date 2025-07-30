@@ -37,6 +37,7 @@ public interface IMemberSignatureBuilder
     string BuildEventSignature(EventInfo eventInfo);
 
     /// <summary>
+    /// <summary>
     /// Builds a normalized signature for a constructor
     /// </summary>
     /// <param name="constructor">Constructor to build signature for</param>

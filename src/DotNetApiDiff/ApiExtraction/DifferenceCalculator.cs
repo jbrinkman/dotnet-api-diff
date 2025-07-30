@@ -97,8 +97,9 @@ public class DifferenceCalculator : IDifferenceCalculator
     /// </summary>
     /// <param name="oldType">The original type</param>
     /// <param name="newType">The new type</param>
+    /// <param name="signaturesEquivalent">Whether the signatures are equivalent after applying type mappings</param>
     /// <returns>ApiDifference representing the changes, or null if no changes</returns>
-    public ApiDifference? CalculateTypeChanges(Type oldType, Type newType)
+    public ApiDifference? CalculateTypeChanges(Type oldType, Type newType, bool signaturesEquivalent = false)
     {
         if (oldType == null)
         {
@@ -132,6 +133,12 @@ public class DifferenceCalculator : IDifferenceCalculator
                     OldSignature = oldTypeMember.Signature,
                     NewSignature = newTypeMember.Signature
                 };
+            }
+
+            // If signatures are different but equivalent after type mappings, no change
+            if (signaturesEquivalent)
+            {
+                return null;
             }
 
             // If signatures are different, we have changes

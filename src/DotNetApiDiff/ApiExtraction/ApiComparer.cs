@@ -187,16 +187,26 @@ public class ApiComparer : IApiComparer
             }
             else
             {
-                // Check if this type matches any mapped old types
-                var mappedOldNames = _nameMapper.MapFullTypeName(newTypeName).ToList();
-
-                foreach (var mappedName in mappedOldNames)
+                // Check if any old type maps to this new type
+                foreach (var oldType in oldTypesList)
                 {
-                    if (oldTypesByFullName.ContainsKey(mappedName))
+                    var oldTypeName = oldType.FullName ?? oldType.Name;
+                    var mappedNames = _nameMapper.MapFullTypeName(oldTypeName).ToList();
+
+                    foreach (var mappedName in mappedNames)
                     {
-                        foundMatch = true;
-                        break;
+                        if (string.Equals(mappedName, newTypeName, StringComparison.Ordinal))
+                        {
+                            foundMatch = true;
+                            _logger.LogDebug(
+                                "Found mapped type: {OldTypeName} -> {NewTypeName}",
+                                oldTypeName,
+                                newTypeName);
+                            break;
+                        }
                     }
+
+                    if (foundMatch) break;
                 }
 
                 // Check for auto-mapping if enabled
@@ -298,8 +308,12 @@ public class ApiComparer : IApiComparer
                         var memberDifferences = CompareMembers(oldType, mappedNewType).ToList();
                         differences.AddRange(memberDifferences);
 
-                        // Check for type-level changes
-                        var typeDifference = _differenceCalculator.CalculateTypeChanges(oldType, mappedNewType);
+                        // Check for type-level changes with signature equivalence
+                        // For mapped types, check if the old type name maps to the new type name
+                        var mappedOldTypeName = _nameMapper.MapTypeName(oldType.Name);
+                        var areTypeNamesEquivalent = string.Equals(mappedOldTypeName, mappedNewType.Name, StringComparison.Ordinal);
+
+                        var typeDifference = _differenceCalculator.CalculateTypeChanges(oldType, mappedNewType, areTypeNamesEquivalent);
                         if (typeDifference != null)
                         {
                             differences.Add(typeDifference);
@@ -387,16 +401,11 @@ public class ApiComparer : IApiComparer
             _logger.LogDebug(
                 "Found {OldMemberCount} members in old type and {NewMemberCount} members in new type",
                 oldMembers.Count,
-                newMembers.Count);
-
-            // Create dictionaries for faster lookup
-            var oldMembersBySignature = oldMembers.ToDictionary(m => m.Signature);
-            var newMembersBySignature = newMembers.ToDictionary(m => m.Signature);
-
-            // Find added members
+                newMembers.Count);            // Find added members (exist in new but not in old)
             foreach (var newMember in newMembers)
             {
-                if (!oldMembersBySignature.ContainsKey(newMember.Signature))
+                var equivalentOldMember = FindEquivalentMember(newMember, oldMembers);
+                if (equivalentOldMember == null)
                 {
                     _logger.LogDebug("Found added member: {MemberName}", newMember.FullName);
                     var addedDifference = _differenceCalculator.CalculateAddedMember(newMember);
@@ -404,10 +413,11 @@ public class ApiComparer : IApiComparer
                 }
             }
 
-            // Find removed members
+            // Find removed members (exist in old but not in new)
             foreach (var oldMember in oldMembers)
             {
-                if (!newMembersBySignature.ContainsKey(oldMember.Signature))
+                var equivalentNewMember = FindEquivalentMember(oldMember, newMembers);
+                if (equivalentNewMember == null)
                 {
                     _logger.LogDebug("Found removed member: {MemberName}", oldMember.FullName);
                     var removedDifference = _differenceCalculator.CalculateRemovedMember(oldMember);
@@ -415,12 +425,23 @@ public class ApiComparer : IApiComparer
                 }
             }
 
-            // Find modified members
+            // Find modified members (exist in both but with differences)
             foreach (var oldMember in oldMembers)
             {
-                if (newMembersBySignature.TryGetValue(oldMember.Signature, out var newMember))
+                var equivalentNewMember = FindEquivalentMember(oldMember, newMembers);
+                if (equivalentNewMember != null)
                 {
-                    var memberDifference = _differenceCalculator.CalculateMemberChanges(oldMember, newMember);
+                    // Check if the members are truly different or just equivalent via type mappings
+                    if (AreSignaturesEquivalent(oldMember.Signature, equivalentNewMember.Signature))
+                    {
+                        // Members are equivalent via type mappings - no difference to report
+                        _logger.LogDebug("Members are equivalent via type mappings: {OldSignature} <-> {NewSignature}",
+                            oldMember.Signature, equivalentNewMember.Signature);
+                        continue;
+                    }
+
+                    // Members match but have other differences beyond type mappings
+                    var memberDifference = _differenceCalculator.CalculateMemberChanges(oldMember, equivalentNewMember);
                     if (memberDifference != null)
                     {
                         _logger.LogDebug("Found modified member: {MemberName}", oldMember.FullName);
@@ -440,5 +461,130 @@ public class ApiComparer : IApiComparer
                 newType.FullName);
             return Enumerable.Empty<ApiDifference>();
         }
+    }
+
+    /// <summary>
+    /// Applies type mappings to a signature to enable equivalence checking
+    /// </summary>
+    /// <param name="signature">The original signature</param>
+    /// <returns>The signature with type mappings applied</returns>
+    private string ApplyTypeMappingsToSignature(string signature)
+    {
+        if (string.IsNullOrEmpty(signature))
+        {
+            return signature;
+        }
+
+        var mappedSignature = signature;
+
+        // Check if we have type mappings configured
+        if (_nameMapper.Configuration?.TypeMappings == null)
+        {
+            return mappedSignature;
+        }
+
+        // Apply all type mappings to the signature
+        foreach (var mapping in _nameMapper.Configuration.TypeMappings)
+        {
+            // Replace the type name in the signature
+            // We need to be careful to only replace whole type names, not partial matches
+            mappedSignature = ReplaceTypeNameInSignature(mappedSignature, mapping.Key, mapping.Value);
+
+            // Also try with just the type name (without namespace) since signatures might not include full namespaces
+            var oldTypeNameOnly = mapping.Key.Split('.').Last();
+            var newTypeNameOnly = mapping.Value.Split('.').Last();
+
+            if (oldTypeNameOnly != mapping.Key) // Only if we had a namespace
+            {
+                mappedSignature = ReplaceTypeNameInSignature(mappedSignature, oldTypeNameOnly, newTypeNameOnly);
+            }
+        }
+
+        return mappedSignature;
+    }
+
+    /// <summary>
+    /// Replaces a type name in a signature, ensuring we only replace complete type names
+    /// </summary>
+    /// <param name="signature">The signature to modify</param>
+    /// <param name="oldTypeName">The type name to replace</param>
+    /// <param name="newTypeName">The replacement type name</param>
+    /// <returns>The modified signature</returns>
+    private string ReplaceTypeNameInSignature(string signature, string oldTypeName, string newTypeName)
+    {
+        // We need to replace type names carefully to avoid partial matches
+        // For example, when replacing "RedisValue" with "ValkeyValue", we don't want to
+        // replace "RedisValueWithExpiry" incorrectly
+
+        var result = signature;
+
+        // Pattern 1: Type name followed by non-word character (space, <, >, ,, etc.)
+        // This handles most cases including generic parameters and return types
+        result = System.Text.RegularExpressions.Regex.Replace(
+            result,
+            $@"\b{System.Text.RegularExpressions.Regex.Escape(oldTypeName)}\b",
+            newTypeName);
+
+        // Pattern 2: Special handling for constructor names
+        // Constructor signatures typically look like: "public RedisValue(parameters)"
+        // We need to replace the constructor name (which matches the type name) as well
+        // This pattern matches: word boundary + type name + opening parenthesis
+        result = System.Text.RegularExpressions.Regex.Replace(
+            result,
+            $@"\b{System.Text.RegularExpressions.Regex.Escape(oldTypeName)}(?=\s*\()",
+            newTypeName);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Checks if two signatures are equivalent considering type mappings
+    /// </summary>
+    /// <param name="sourceSignature">Signature from the source assembly</param>
+    /// <param name="targetSignature">Signature from the target assembly</param>
+    /// <returns>True if the signatures are equivalent after applying type mappings</returns>
+    private bool AreSignaturesEquivalent(string sourceSignature, string targetSignature)
+    {
+        // Apply type mappings to the source signature to see if it matches the target
+        var mappedSourceSignature = ApplyTypeMappingsToSignature(sourceSignature);
+
+        return string.Equals(mappedSourceSignature, targetSignature, StringComparison.Ordinal);
+    }    /// <summary>
+         /// Finds an equivalent member in the target collection based on signature equivalence with type mappings
+         /// </summary>
+         /// <param name="sourceMember">The member from the source assembly (could be old or new)</param>
+         /// <param name="targetMembers">The collection of members from the target assembly (could be new or old)</param>
+         /// <returns>The equivalent member if found, null otherwise</returns>
+    private ApiMember? FindEquivalentMember(ApiMember sourceMember, IEnumerable<ApiMember> targetMembers)
+    {
+        // First, try to find a member with the same name - this handles "modified" members
+        // where the signature might have changed but it's still the same conceptual member
+        var sameNameMember = targetMembers.FirstOrDefault(m =>
+            m.Name == sourceMember.Name &&
+            m.FullName == sourceMember.FullName);
+
+        if (sameNameMember != null)
+        {
+            return sameNameMember;
+        }
+
+        // If no exact name match, check for signature equivalence due to type mappings
+        // This handles cases where type mappings make signatures equivalent even with different names
+        foreach (var targetMember in targetMembers)
+        {
+            // Check if source maps to target (source signature with mappings applied == target signature)
+            if (AreSignaturesEquivalent(sourceMember.Signature, targetMember.Signature))
+            {
+                return targetMember;
+            }
+
+            // Also check the reverse: if target maps to source (target signature with mappings applied == source signature)
+            if (AreSignaturesEquivalent(targetMember.Signature, sourceMember.Signature))
+            {
+                return targetMember;
+            }
+        }
+
+        return null;
     }
 }

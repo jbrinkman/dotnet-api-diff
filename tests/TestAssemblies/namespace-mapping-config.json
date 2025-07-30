@@ -1,0 +1,9 @@
+{
+  "typeMappings": {},
+  "namespaceMappings": {
+    "TestAssembly.NamespaceMapping.Old": "TestAssembly.NamespaceMapping.New"
+  },
+  "autoMappingConfig": {
+    "enableAutoMapping": false
+  }
+}
