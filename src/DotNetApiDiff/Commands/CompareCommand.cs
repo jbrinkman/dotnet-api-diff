@@ -260,9 +260,6 @@ public class CompareCommand : Command<CompareCommandSettings>
                 // Add configuration-specific services
                 commandServices.AddScoped<INameMapper>(provider =>
                 {
-                    _logger.LogInformation(
-                        "Creating NameMapper with {MappingCount} namespace mappings",
-                        config.Mappings.NamespaceMappings.Count);
                     return new ApiExtraction.NameMapper(
                         config.Mappings,
                         loggerFactory.CreateLogger<ApiExtraction.NameMapper>());

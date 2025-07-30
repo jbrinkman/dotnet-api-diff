@@ -27,8 +27,9 @@ public interface IDifferenceCalculator
     /// </summary>
     /// <param name="oldType">The original type</param>
     /// <param name="newType">The new type</param>
+    /// <param name="signaturesEquivalent">Whether the signatures are equivalent after applying type mappings</param>
     /// <returns>ApiDifference representing the changes, or null if no changes</returns>
-    ApiDifference? CalculateTypeChanges(Type oldType, Type newType);
+    ApiDifference? CalculateTypeChanges(Type oldType, Type newType, bool signaturesEquivalent = false);
 
     /// <summary>
     /// Calculates an ApiDifference for an added member

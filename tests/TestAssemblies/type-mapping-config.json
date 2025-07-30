@@ -1,0 +1,10 @@
+{
+  "mappings": {
+    "typeMappings": {
+      "TestAssembly.TypeMapping.OldValue": "TestAssembly.TypeMapping.NewValue"
+    },
+    "namespaceMappings": {},
+    "autoMapSameNameTypes": false,
+    "ignoreCase": false
+  }
+}

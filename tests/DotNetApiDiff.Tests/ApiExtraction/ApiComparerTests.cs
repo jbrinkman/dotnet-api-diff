@@ -27,6 +27,10 @@ public class ApiComparerTests
         _mockChangeClassifier = new Mock<IChangeClassifier>();
         _mockLogger = new Mock<ILogger<ApiComparer>>();
 
+        // Setup the name mapper to return an empty configuration
+        _mockNameMapper.Setup(x => x.Configuration)
+            .Returns(new MappingConfiguration { TypeMappings = new Dictionary<string, string>() });
+
         // Setup the change classifier to return the same difference that is passed to it
         _mockChangeClassifier.Setup(x => x.ClassifyChange(It.IsAny<ApiDifference>()))
             .Returns<ApiDifference>(diff => diff);
@@ -204,7 +208,7 @@ public class ApiComparerTests
             IsBreakingChange = true
         };
 
-        _mockDifferenceCalculator.Setup(x => x.CalculateTypeChanges(typeof(string), typeof(string)))
+        _mockDifferenceCalculator.Setup(x => x.CalculateTypeChanges(typeof(string), typeof(string), false))
             .Returns(modifiedTypeDifference);
 
         // Setup empty member differences
@@ -331,7 +335,7 @@ public class ApiComparerTests
     {
         // Arrange
         var oldType = typeof(string);
-        var newType = typeof(string);
+        var newType = typeof(int); // Use a different type to avoid mock collision
 
         var oldMember = new ApiMember
         {
@@ -345,7 +349,7 @@ public class ApiComparerTests
         {
             Name = "Method",
             FullName = "System.String.Method",
-            Signature = "public void Method()",
+            Signature = "public string Method()",
             Type = MemberType.Method
         };
 
@@ -364,8 +368,7 @@ public class ApiComparerTests
             IsBreakingChange = true
         };
 
-        _mockDifferenceCalculator.Setup(x => x.CalculateMemberChanges(It.Is<ApiMember>(m => m.Signature == oldMember.Signature),
-                                                                     It.Is<ApiMember>(m => m.Signature == newMember.Signature)))
+        _mockDifferenceCalculator.Setup(x => x.CalculateMemberChanges(It.IsAny<ApiMember>(), It.IsAny<ApiMember>()))
             .Returns(modifiedMemberDifference);
 
         // Act

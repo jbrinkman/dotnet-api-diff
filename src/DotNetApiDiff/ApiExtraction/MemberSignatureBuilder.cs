@@ -676,7 +676,7 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
         }
 
         // Handle primitive types with C# keywords using a direct switch on type
-        return type switch
+        var primitiveTypeName = type switch
         {
             Type t when t == typeof(bool) => "bool",
             Type t when t == typeof(byte) => "byte",
@@ -693,8 +693,16 @@ public class MemberSignatureBuilder : IMemberSignatureBuilder
             Type t when t == typeof(ushort) => "ushort",
             Type t when t == typeof(string) => "string",
             Type t when t == typeof(object) => "object",
-            _ => type.Name // For regular types, just return the name
+            _ => null // Not a primitive type
         };
+
+        if (primitiveTypeName != null)
+        {
+            return primitiveTypeName;
+        }
+
+        // For regular types, return the type name directly
+        return type.Name;
     }
 
     /// <summary>
