@@ -2,6 +2,7 @@
 using System.Reflection;
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models;
+using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetApiDiff.ApiExtraction;
@@ -15,6 +16,7 @@ public class ApiComparer : IApiComparer
     private readonly IDifferenceCalculator _differenceCalculator;
     private readonly INameMapper _nameMapper;
     private readonly IChangeClassifier _changeClassifier;
+    private readonly ComparisonConfiguration _configuration;
     private readonly ILogger<ApiComparer> _logger;
 
     /// <summary>
@@ -24,18 +26,21 @@ public class ApiComparer : IApiComparer
     /// <param name="differenceCalculator">Calculator for detailed change analysis</param>
     /// <param name="nameMapper">Mapper for namespace and type name transformations</param>
     /// <param name="changeClassifier">Classifier for breaking changes and exclusions</param>
+    /// <param name="configuration">Configuration used for the comparison</param>
     /// <param name="logger">Logger for diagnostic information</param>
     public ApiComparer(
         IApiExtractor apiExtractor,
         IDifferenceCalculator differenceCalculator,
         INameMapper nameMapper,
         IChangeClassifier changeClassifier,
+        ComparisonConfiguration configuration,
         ILogger<ApiComparer> logger)
     {
         _apiExtractor = apiExtractor ?? throw new ArgumentNullException(nameof(apiExtractor));
         _differenceCalculator = differenceCalculator ?? throw new ArgumentNullException(nameof(differenceCalculator));
         _nameMapper = nameMapper ?? throw new ArgumentNullException(nameof(nameMapper));
         _changeClassifier = changeClassifier ?? throw new ArgumentNullException(nameof(changeClassifier));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -66,7 +71,8 @@ public class ApiComparer : IApiComparer
         {
             OldAssemblyPath = oldAssembly.Location,
             NewAssemblyPath = newAssembly.Location,
-            ComparisonTimestamp = DateTime.UtcNow
+            ComparisonTimestamp = DateTime.UtcNow,
+            Configuration = _configuration
         };
 
         try

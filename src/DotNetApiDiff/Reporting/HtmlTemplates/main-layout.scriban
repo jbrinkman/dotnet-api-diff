@@ -85,7 +85,7 @@
                 </button>
             </div>
             <div id="config-details" class="config-details" style="display: none;">
-                {{ include "configuration" result.configuration }}
+                {{ include "configuration" }}
             </div>
         </section>
 

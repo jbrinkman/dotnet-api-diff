@@ -1,8 +1,8 @@
 <div class="config-item">
-    <span class="config-label">{{ label }}:</span>
-    {{if items && items.size > 0}}
+    <span class="config-label">{{ $2 }}:</span>
+    {{if $1 && $1.size > 0}}
     <div class="config-list">
-        {{for item in items}}
+        {{for item in $1}}
         <span class="config-list-item">{{ item }}</span>
         {{end}}
     </div>

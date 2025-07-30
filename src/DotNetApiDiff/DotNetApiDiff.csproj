@@ -21,7 +21,7 @@
         <PackageReference Include="Spectre.Console" Version="0.48.0" />
         <PackageReference Include="Spectre.Console.Cli" Version="0.48.0" />
         <PackageReference Include="System.Reflection.Metadata" Version="8.0.1" />
-        <PackageReference Include="Scriban" Version="5.9.0" />
+        <PackageReference Include="Scriban" Version="6.2.1" />
     </ItemGroup>
 
     <ItemGroup>

@@ -3,6 +3,7 @@ using System.Reflection;
 using DotNetApiDiff.ApiExtraction;
 using DotNetApiDiff.Interfaces;
 using DotNetApiDiff.Models;
+using DotNetApiDiff.Models.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -35,6 +36,7 @@ public class ApiComparerTests
             _mockDifferenceCalculator.Object,
             _mockNameMapper.Object,
             _mockChangeClassifier.Object,
+            ComparisonConfiguration.CreateDefault(),
             _mockLogger.Object);
     }
 
