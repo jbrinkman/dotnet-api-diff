@@ -231,11 +231,24 @@ public class HtmlFormatterScriban : IReportFormatter
                     description = c.Description,
                     is_breaking_change = c.IsBreakingChange,
                     has_signatures = !string.IsNullOrEmpty(c.OldSignature) || !string.IsNullOrEmpty(c.NewSignature),
-                    old_signature = c.OldSignature,
-                    new_signature = c.NewSignature,
+                    old_signature = HtmlEscape(c.OldSignature),
+                    new_signature = HtmlEscape(c.NewSignature),
                     details_id = $"details-{Guid.NewGuid():N}"
                 }).ToArray()
             }).ToArray();
+    }
+
+    private static string HtmlEscape(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input ?? string.Empty;
+
+        return input
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;")
+            .Replace("\"", "&quot;")
+            .Replace("'", "&#39;");
     }
 
     private object[] PrepareBreakingChangesData(IEnumerable<ApiDifference> breakingChanges)

@@ -181,6 +181,43 @@ public class HtmlFormatterScribanTests
         Assert.Contains("public void ChangedMethod(string param)", report);
     }
 
+    [Fact]
+    public void Format_WithGenericTypeSignatures_ProperlyEscapesHtml()
+    {
+        // Arrange
+        var result = new ComparisonResult
+        {
+            OldAssemblyPath = "source.dll",
+            NewAssemblyPath = "target.dll",
+            ComparisonTimestamp = new DateTime(2023, 1, 1, 12, 0, 0, DateTimeKind.Utc),
+            Configuration = CreateDefaultConfiguration(),
+            Differences = new List<ApiDifference>
+            {
+                new ApiDifference
+                {
+                    ChangeType = ChangeType.Added,
+                    ElementType = ApiElementType.Method,
+                    ElementName = "Execute",
+                    Description = "Added method with generic parameters",
+                    NewSignature = "public ValkeyResult Execute(string command, ICollection<object> args)",
+                    Severity = SeverityLevel.Info
+                }
+            }
+        };
+
+        // Act
+        var report = _formatter.Format(result);
+
+        // Assert
+        Assert.NotNull(report);
+        Assert.Contains("Added Items", report);
+        Assert.Contains("Execute", report);
+        // Verify that generic type parameters are properly HTML-escaped
+        Assert.Contains("ICollection&lt;object&gt;", report);
+        // Verify that unescaped angle brackets are not present
+        Assert.DoesNotContain("ICollection<object>", report);
+    }
+
     private static ComparisonConfiguration CreateDefaultConfiguration()
     {
         return new ComparisonConfiguration
