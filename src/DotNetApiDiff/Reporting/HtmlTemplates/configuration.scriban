@@ -2,14 +2,8 @@
     <!-- Filters Section -->
     <div class="config-section">
         <h3>🔍 Filters</h3>
-        <div class="config-item">
-            <span class="config-label">Include Internals:</span>
-            <span class="config-value">{{ config.filters.include_internals | format_boolean }}</span>
-        </div>
-        <div class="config-item">
-            <span class="config-label">Include Compiler Generated:</span>
-            <span class="config-value">{{ config.filters.include_compiler_generated | format_boolean }}</span>
-        </div>
+        {{ include "config-boolean-item" "Include Internals" config.filters.include_internals }}
+        {{ include "config-boolean-item" "Include Compiler Generated" config.filters.include_compiler_generated }}
         {{ include "config-string-list" config.filters.include_namespaces "Include Namespaces" }}
         {{ include "config-string-list" config.filters.exclude_namespaces "Exclude Namespaces" }}
         {{ include "config-string-list" config.filters.include_types "Include Types" }}
@@ -19,14 +13,8 @@
     <!-- Mappings Section -->
     <div class="config-section">
         <h3>🔗 Mappings</h3>
-        <div class="config-item">
-            <span class="config-label">Auto Map Same Name Types:</span>
-            <span class="config-value">{{ config.mappings.auto_map_same_name_types | format_boolean }}</span>
-        </div>
-        <div class="config-item">
-            <span class="config-label">Ignore Case:</span>
-            <span class="config-value">{{ config.mappings.ignore_case | format_boolean }}</span>
-        </div>
+        {{ include "config-boolean-item" "Auto Map Same Name Types" config.mappings.auto_map_same_name_types }}
+        {{ include "config-boolean-item" "Ignore Case" config.mappings.ignore_case }}
         {{ include "config-mappings" config.mappings.type_mappings "Type Mappings" }}
         {{ include "config-namespace-mappings" config.mappings.namespace_mappings "Namespace Mappings" }}
     </div>
@@ -38,14 +26,8 @@
         {{ include "config-string-list" config.exclusions.excluded_members "Excluded Members" }}
         {{ include "config-string-list" config.exclusions.excluded_type_patterns "Excluded Type Patterns" }}
         {{ include "config-string-list" config.exclusions.excluded_member_patterns "Excluded Member Patterns" }}
-        <div class="config-item">
-            <span class="config-label">Exclude Compiler Generated:</span>
-            <span class="config-value">{{ config.exclusions.exclude_compiler_generated | format_boolean }}</span>
-        </div>
-        <div class="config-item">
-            <span class="config-label">Exclude Obsolete:</span>
-            <span class="config-value">{{ config.exclusions.exclude_obsolete | format_boolean }}</span>
-        </div>
+        {{ include "config-boolean-item" "Exclude Compiler Generated" config.exclusions.exclude_compiler_generated }}
+        {{ include "config-boolean-item" "Exclude Obsolete" config.exclusions.exclude_obsolete }}
     </div>
 
     <!-- Breaking Change Rules Section -->
@@ -54,53 +36,23 @@
         <div class="config-grid-inner">
             <div>
                 <h4>Removal Rules</h4>
-                <div class="config-item">
-                    <span class="config-label">Treat Type Removal as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_type_removal_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Member Removal as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_member_removal_as_breaking | format_boolean }}</span>
-                </div>
+                {{ include "config-boolean-item" "Treat Type Removal as Breaking" config.breaking_change_rules.treat_type_removal_as_breaking }}
+                {{ include "config-boolean-item" "Treat Member Removal as Breaking" config.breaking_change_rules.treat_member_removal_as_breaking }}
 
                 <h4>Addition Rules</h4>
-                <div class="config-item">
-                    <span class="config-label">Treat Added Type as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_added_type_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Added Member as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_added_member_as_breaking | format_boolean }}</span>
-                </div>
+                {{ include "config-boolean-item" "Treat Added Type as Breaking" config.breaking_change_rules.treat_added_type_as_breaking }}
+                {{ include "config-boolean-item" "Treat Added Member as Breaking" config.breaking_change_rules.treat_added_member_as_breaking }}
             </div>
             <div>
                 <h4>Modification Rules</h4>
-                <div class="config-item">
-                    <span class="config-label">Treat Signature Change as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_signature_change_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Reduced Accessibility as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_reduced_accessibility_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Parameter Name Change as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_parameter_name_change_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Added Optional Parameter as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_added_optional_parameter_as_breaking | format_boolean }}</span>
-                </div>
+                {{ include "config-boolean-item" "Treat Signature Change as Breaking" config.breaking_change_rules.treat_signature_change_as_breaking }}
+                {{ include "config-boolean-item" "Treat Reduced Accessibility as Breaking" config.breaking_change_rules.treat_reduced_accessibility_as_breaking }}
+                {{ include "config-boolean-item" "Treat Parameter Name Change as Breaking" config.breaking_change_rules.treat_parameter_name_change_as_breaking }}
+                {{ include "config-boolean-item" "Treat Added Optional Parameter as Breaking" config.breaking_change_rules.treat_added_optional_parameter_as_breaking }}
 
                 <h4>Interface Rules</h4>
-                <div class="config-item">
-                    <span class="config-label">Treat Added Interface as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_added_interface_as_breaking | format_boolean }}</span>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Treat Removed Interface as Breaking:</span>
-                    <span class="config-value">{{ config.breaking_change_rules.treat_removed_interface_as_breaking | format_boolean }}</span>
-                </div>
+                {{ include "config-boolean-item" "Treat Added Interface as Breaking" config.breaking_change_rules.treat_added_interface_as_breaking }}
+                {{ include "config-boolean-item" "Treat Removed Interface as Breaking" config.breaking_change_rules.treat_removed_interface_as_breaking }}
             </div>
         </div>
     </div>
@@ -112,10 +64,7 @@
             <span class="config-label">Output Format:</span>
             <span class="config-value">{{ config.output_format }}</span>
         </div>
-        <div class="config-item">
-            <span class="config-label">Fail On Breaking Changes:</span>
-            <span class="config-value">{{ config.fail_on_breaking_changes | format_boolean }}</span>
-        </div>
+        {{ include "config-boolean-item" "Fail On Breaking Changes" config.fail_on_breaking_changes }}
         {{if config.output_path}}
         <div class="config-item">
             <span class="config-label">Output Path:</span>
