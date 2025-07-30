@@ -97,10 +97,17 @@ public class HtmlFormatterScriban : IReportFormatter
                 treat_type_removal_as_breaking = config.BreakingChangeRules.TreatTypeRemovalAsBreaking,
                 treat_member_removal_as_breaking = config.BreakingChangeRules.TreatMemberRemovalAsBreaking,
                 treat_signature_change_as_breaking = config.BreakingChangeRules.TreatSignatureChangeAsBreaking,
-                treat_reduced_accessibility_as_breaking = config.BreakingChangeRules.TreatReducedAccessibilityAsBreaking
+                treat_reduced_accessibility_as_breaking = config.BreakingChangeRules.TreatReducedAccessibilityAsBreaking,
+                treat_added_type_as_breaking = config.BreakingChangeRules.TreatAddedTypeAsBreaking,
+                treat_added_member_as_breaking = config.BreakingChangeRules.TreatAddedMemberAsBreaking,
+                treat_added_interface_as_breaking = config.BreakingChangeRules.TreatAddedInterfaceAsBreaking,
+                treat_removed_interface_as_breaking = config.BreakingChangeRules.TreatRemovedInterfaceAsBreaking,
+                treat_parameter_name_change_as_breaking = config.BreakingChangeRules.TreatParameterNameChangeAsBreaking,
+                treat_added_optional_parameter_as_breaking = config.BreakingChangeRules.TreatAddedOptionalParameterAsBreaking
             },
             output_format = config.OutputFormat.ToString(),
-            output_path = config.OutputPath ?? string.Empty
+            output_path = config.OutputPath ?? string.Empty,
+            fail_on_breaking_changes = config.FailOnBreakingChanges
         };
     }
 

@@ -1,0 +1,43 @@
+{
+  "filters": {
+    "includeInternals": true,
+    "includeCompilerGenerated": false,
+    "includeNamespaces": ["System.Collections", "System.IO"],
+    "excludeNamespaces": ["System.Diagnostics"],
+    "includeTypes": ["System.Collections.Generic.*"],
+    "excludeTypes": ["System.ObsoleteAttribute"]
+  },
+  "mappings": {
+    "namespaceMappings": {
+      "System.Collections.Generic": ["System.Collections.Concurrent"]
+    },
+    "typeMappings": {
+      "System.Collections.ArrayList": "System.Collections.Generic.List`1"
+    },
+    "autoMapSameNameTypes": true,
+    "ignoreCase": false
+  },
+  "exclusions": {
+    "excludedTypes": ["System.Diagnostics.Debug", "System.Diagnostics.Trace"],
+    "excludedMembers": ["System.Console.WriteLine", "System.Console.ReadLine"],
+    "excludedTypePatterns": ["System.Diagnostics.*", "Microsoft.*.Internal"],
+    "excludedMemberPatterns": ["*.ToString", "*.Equals"],
+    "excludeCompilerGenerated": true,
+    "excludeObsolete": true
+  },
+  "breakingChangeRules": {
+    "treatTypeRemovalAsBreaking": true,
+    "treatMemberRemovalAsBreaking": true,
+    "treatSignatureChangeAsBreaking": false,
+    "treatReducedAccessibilityAsBreaking": true,
+    "treatAddedInterfaceAsBreaking": true,
+    "treatRemovedInterfaceAsBreaking": true,
+    "treatParameterNameChangeAsBreaking": false,
+    "treatAddedOptionalParameterAsBreaking": false,
+    "treatAddedMemberAsBreaking": true,
+    "treatAddedTypeAsBreaking": false
+  },
+  "outputFormat": "html",
+  "outputPath": "comparison-report.html",
+  "failOnBreakingChanges": false
+}
