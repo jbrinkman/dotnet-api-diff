@@ -430,7 +430,9 @@ public class CompareCommand : Command<CompareCommandSettings>
 
                 return _exitCodeManager.GetExitCodeForException(ex);
             }
-        }        // Use the ExitCodeManager to determine the appropriate exit code
+        }
+
+        // Use the ExitCodeManager to determine the appropriate exit code
         int exitCode = _exitCodeManager.GetExitCode(comparison);
 
         if (comparison.HasBreakingChanges)
