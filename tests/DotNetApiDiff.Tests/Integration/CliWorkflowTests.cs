@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -165,6 +166,82 @@ public class CliWorkflowTests : IDisposable
         // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
         Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with config. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce JSON output");
+    }
+
+    [Fact]
+    public void CliWorkflow_WithConfigFileOutputSettings_ShouldUseConfigurationValues()
+    {
+        // Arrange
+        var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
+        var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
+        var configFile = Path.Combine(_testDataPath, "config-output-format-and-path.json");
+        var expectedOutputFile = Path.Combine(_tempOutputPath, "comparison-report.html");
+
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+        Assert.True(File.Exists(configFile), $"Config file not found: {configFile}");
+
+        // Update the config file to use our temp output path
+        var configContent = File.ReadAllText(configFile);
+        var configWithTempPath = configContent.Replace("comparison-report.html", expectedOutputFile);
+        var tempConfigFile = Path.Combine(_tempOutputPath, "temp-config.json");
+        File.WriteAllText(tempConfigFile, configWithTempPath);
+
+        // Execute with config file but NO command line output options
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{tempConfigFile}\"";
+
+        // Act
+        var result = RunCliCommand(arguments);
+
+        // Assert
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with config output settings. Exit code: {result.ExitCode}");
+
+        // The output file should have been created (this tests that OutputPath from config was used)
+        Assert.True(File.Exists(expectedOutputFile), $"Output file should have been created at: {expectedOutputFile}");
+
+        // The output file should contain HTML content (this tests that OutputFormat from config was used)
+        var outputContent = File.ReadAllText(expectedOutputFile);
+        Assert.Contains("<html", outputContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("</html>", outputContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("API Comparison Report", outputContent);
+    }
+
+    [Fact]
+    public void CliWorkflow_CommandLineOverridesConfigOutputSettings_ShouldUseCommandLineValues()
+    {
+        // Arrange
+        var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
+        var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
+        var configFile = Path.Combine(_testDataPath, "config-output-format-and-path.json");
+        var commandLineOutputFile = Path.Combine(_tempOutputPath, "command-line-output.json");
+
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+        Assert.True(File.Exists(configFile), $"Config file not found: {configFile}");
+
+        // Execute with config file AND command line output options (command line should override config)
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{configFile}\" --output json --output-file \"{commandLineOutputFile}\"";
+
+        // Act
+        var result = RunCliCommand(arguments);
+
+        // Assert
+        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with command line override. Exit code: {result.ExitCode}");
+
+        // The command line output file should have been created (not the config one)
+        Assert.True(File.Exists(commandLineOutputFile), $"Command line output file should have been created at: {commandLineOutputFile}");
+
+        // The output file should contain JSON content (command line format should override config HTML format)
+        var outputContent = File.ReadAllText(commandLineOutputFile);
+        Assert.Contains("{", outputContent);
+        Assert.Contains("}", outputContent);
+        Assert.DoesNotContain("<html", outputContent, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -392,6 +469,171 @@ public class CliWorkflowTests : IDisposable
         // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
         Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with no-color option. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce output without colors");
+    }
+
+    [Fact]
+    public void CliWorkflow_ConfigurationJsonEnumParsing_ShouldParseOutputFormatCorrectly()
+    {
+        // Arrange
+        var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
+        var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
+        var outputFile = Path.Combine(_tempOutputPath, "enum-test-output.html");
+
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+
+        // Create a test config with various format cases to verify JSON enum parsing
+        var testConfigJson = $$"""
+        {
+          "filters": {
+            "includeNamespaces": [],
+            "excludeNamespaces": [],
+            "includeTypes": [],
+            "excludeTypes": [],
+            "includeInternals": false,
+            "includeCompilerGenerated": false
+          },
+          "mappings": {
+            "namespaceMappings": {},
+            "typeMappings": {},
+            "autoMapSameNameTypes": true,
+            "ignoreCase": false
+          },
+          "exclusions": {
+            "excludedTypes": [],
+            "excludedMembers": [],
+            "excludedTypePatterns": [],
+            "excludedMemberPatterns": []
+          },
+          "breakingChangeRules": {
+            "treatTypeRemovalAsBreaking": true,
+            "treatMemberRemovalAsBreaking": true,
+            "treatAddedTypeAsBreaking": false,
+            "treatAddedMemberAsBreaking": false,
+            "treatSignatureChangeAsBreaking": true
+          },
+          "outputFormat": "Html",
+          "outputPath": "{{outputFile}}",
+          "failOnBreakingChanges": false
+        }
+        """;
+
+        var testConfigFile = Path.Combine(_tempOutputPath, "enum-test-config.json");
+        File.WriteAllText(testConfigFile, testConfigJson);
+
+        // Debug: Output the actual JSON content to verify it's correct
+        _output.WriteLine($"Created config file: {testConfigFile}");
+        _output.WriteLine($"Config content: {testConfigJson}");
+
+        // Execute with config file that has "Html" (proper case) enum value
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{testConfigFile}\"";
+
+        // Act
+        var result = RunCliCommand(arguments);
+
+        // Assert
+        // Exit code 2 is expected when there are breaking changes
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+
+        // Verify the output file was created (tests OutputPath config usage)
+        Assert.True(File.Exists(outputFile), $"Output file should have been created at: {outputFile}");
+
+        // Verify HTML content was generated (tests OutputFormat config usage)
+        var outputContent = File.ReadAllText(outputFile);
+        Assert.Contains("<html", outputContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("</html>", outputContent, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("API Comparison Report", outputContent);
+
+        // Verify the logs show the correct format was read from config and used
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.Contains("Configuration loaded successfully", combinedOutput);
+        Assert.Contains("Generating Html report", combinedOutput);
+        Assert.Contains("Report saved successfully", combinedOutput);
+    }
+
+    [Fact]
+    public void CliWorkflow_CommandLineOverridesConfig_ShouldUseExplicitCommandLineFormat()
+    {
+        // Arrange
+        var sourceAssembly = Path.Combine(_testDataPath, "TestAssemblyV1.dll");
+        var targetAssembly = Path.Combine(_testDataPath, "TestAssemblyV2.dll");
+        var outputFile = Path.Combine(_tempOutputPath, "override-test-output.json");
+
+        // Fail test if prerequisites are not met
+        Assert.NotNull(_executablePath);
+        Assert.True(File.Exists(sourceAssembly), $"Source test assembly not found: {sourceAssembly}");
+        Assert.True(File.Exists(targetAssembly), $"Target test assembly not found: {targetAssembly}");
+
+        // Create config with Html format
+        var testConfigJson = $$"""
+        {
+          "filters": {
+            "includeNamespaces": [],
+            "excludeNamespaces": [],
+            "includeTypes": [],
+            "excludeTypes": [],
+            "includeInternals": false,
+            "includeCompilerGenerated": false
+          },
+          "mappings": {
+            "namespaceMappings": {},
+            "typeMappings": {},
+            "autoMapSameNameTypes": true,
+            "ignoreCase": false
+          },
+          "exclusions": {
+            "excludedTypes": [],
+            "excludedMembers": [],
+            "excludedTypePatterns": [],
+            "excludedMemberPatterns": []
+          },
+          "breakingChangeRules": {
+            "treatTypeRemovalAsBreaking": true,
+            "treatMemberRemovalAsBreaking": true,
+            "treatAddedTypeAsBreaking": false,
+            "treatAddedMemberAsBreaking": false,
+            "treatSignatureChangeAsBreaking": true
+          },
+          "outputFormat": "Html",
+          "outputPath": "{{outputFile}}",
+          "failOnBreakingChanges": false
+        }
+        """;
+
+        var testConfigFile = Path.Combine(_tempOutputPath, "override-test-config.json");
+        File.WriteAllText(testConfigFile, testConfigJson);
+
+        // Execute with config file that has Html format, but override with Json format on command line
+        var arguments = $"compare \"{sourceAssembly}\" \"{targetAssembly}\" --config \"{testConfigFile}\" --output json";
+
+        // Act
+        var result = RunCliCommand(arguments);
+
+        // Assert
+        // Exit code 2 is expected when there are breaking changes
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+
+        // Verify the output file was created
+        Assert.True(File.Exists(outputFile), $"Output file should have been created at: {outputFile}");
+
+        // Verify JSON content was generated (command line Json overrode config Html)
+        var outputContent = File.ReadAllText(outputFile);
+        try
+        {
+            JsonDocument.Parse(outputContent); // Should not throw if valid JSON
+        }
+        catch (JsonException)
+        {
+            Assert.Fail("Output should be valid JSON when Json format is specified");
+        }
+
+        // Verify the logs show Json format was used (command line override)
+        var combinedOutput = result.StandardOutput + result.StandardError;
+        Assert.Contains("Configuration loaded successfully", combinedOutput);
+        Assert.Contains("Generating Json report", combinedOutput);
+        Assert.Contains("Report saved successfully", combinedOutput);
     }
 
     public void Dispose()

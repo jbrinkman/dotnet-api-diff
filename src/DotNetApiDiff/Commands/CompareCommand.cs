@@ -32,8 +32,7 @@ public class CompareCommandSettings : CommandSettings
 
     [CommandOption("-o|--output <format>")]
     [Description("Output format (console, json, html, markdown)")]
-    [DefaultValue("console")]
-    public string OutputFormat { get; set; } = "console";
+    public string? OutputFormat { get; set; }
 
     [CommandOption("-p|--output-file <path>")]
     [Description("Output file path (required for json, html, markdown formats)")]
@@ -137,27 +136,30 @@ public class CompareCommand : Command<CompareCommandSettings>
             return ValidationResult.Error($"Configuration file not found: {settings.ConfigFile}");
         }
 
-        // Validate output format
-        string format = settings.OutputFormat.ToLowerInvariant();
-        if (format != "console" && format != "json" && format != "html" && format != "markdown")
+        // Validate output format if provided
+        if (!string.IsNullOrEmpty(settings.OutputFormat))
         {
-            return ValidationResult.Error($"Invalid output format: {settings.OutputFormat}. Valid formats are: console, json, html, markdown");
-        }
-
-        // Validate output file requirements
-        if (format == "html")
-        {
-            // HTML format requires an output file
-            if (string.IsNullOrEmpty(settings.OutputFile))
+            string format = settings.OutputFormat.ToLowerInvariant();
+            if (format != "console" && format != "json" && format != "html" && format != "markdown")
             {
-                return ValidationResult.Error($"Output file is required for {settings.OutputFormat} format. Use --output-file to specify the output file path.");
+                return ValidationResult.Error($"Invalid output format: {settings.OutputFormat}. Valid formats are: console, json, html, markdown");
             }
 
-            // Validate output directory exists
-            var outputDir = Path.GetDirectoryName(settings.OutputFile);
-            if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+            // Validate output file requirements
+            if (format == "html")
             {
-                return ValidationResult.Error($"Output directory does not exist: {outputDir}");
+                // HTML format requires an output file
+                if (string.IsNullOrEmpty(settings.OutputFile))
+                {
+                    return ValidationResult.Error($"Output file is required for {settings.OutputFormat} format. Use --output-file to specify the output file path.");
+                }
+
+                // Validate output directory exists
+                var outputDir = Path.GetDirectoryName(settings.OutputFile);
+                if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+                {
+                    return ValidationResult.Error($"Output directory does not exist: {outputDir}");
+                }
             }
         }
         else if (!string.IsNullOrEmpty(settings.OutputFile))
@@ -369,8 +371,8 @@ public class CompareCommand : Command<CompareCommandSettings>
                 // Use the single CompareAssemblies method - configuration is now injected into dependencies
                 comparisonResult = apiComparer.CompareAssemblies(sourceAssembly, targetAssembly);
 
-                // Update configuration with actual command-line values used for this comparison
-                if (Enum.TryParse<ReportFormat>(settings.OutputFormat, true, out var outputFormat))
+                // Update configuration with actual command-line values ONLY if explicitly provided by user
+                if (!string.IsNullOrEmpty(settings.OutputFormat) && Enum.TryParse<ReportFormat>(settings.OutputFormat, true, out var outputFormat))
                 {
                     comparisonResult.Configuration.OutputFormat = outputFormat;
                 }
@@ -395,26 +397,20 @@ public class CompareCommand : Command<CompareCommandSettings>
         // Generate report
         using (_logger.BeginScope("Report generation"))
         {
-            _logger.LogInformation("Generating {Format} report", settings.OutputFormat);
-            var reportGenerator = serviceProvider.GetRequiredService<IReportGenerator>();
+            // Use the configuration from the comparison result, which now has the correct precedence applied
+            var effectiveFormat = comparisonResult.Configuration.OutputFormat;
+            var effectiveOutputFile = comparisonResult.Configuration.OutputPath;
 
-            // Convert string format to ReportFormat enum
-            ReportFormat format = settings.OutputFormat.ToLowerInvariant() switch
-            {
-                "json" => ReportFormat.Json,
-                "xml" => ReportFormat.Xml,
-                "html" => ReportFormat.Html,
-                "markdown" => ReportFormat.Markdown,
-                _ => ReportFormat.Console
-            };
+            _logger.LogInformation("Generating {Format} report", effectiveFormat);
+            var reportGenerator = serviceProvider.GetRequiredService<IReportGenerator>();
 
             string report;
             try
             {
-                if (string.IsNullOrEmpty(settings.OutputFile))
+                if (string.IsNullOrEmpty(effectiveOutputFile))
                 {
                     // No output file specified - output to console regardless of format
-                    report = reportGenerator.GenerateReport(comparisonResult, format);
+                    report = reportGenerator.GenerateReport(comparisonResult, effectiveFormat);
 
                     // Output the formatted report to the console
                     // Use Console.Write to avoid format string interpretation issues
@@ -423,20 +419,18 @@ public class CompareCommand : Command<CompareCommandSettings>
                 else
                 {
                     // Output file specified - save to the specified file
-                    reportGenerator.SaveReportAsync(comparisonResult, format, settings.OutputFile).GetAwaiter().GetResult();
-                    _logger.LogInformation("Report saved to {OutputFile}", settings.OutputFile);
+                    reportGenerator.SaveReportAsync(comparisonResult, effectiveFormat, effectiveOutputFile).GetAwaiter().GetResult();
+                    _logger.LogInformation("Report saved to {OutputFile}", effectiveOutputFile);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating {Format} report", format);
+                _logger.LogError(ex, "Error generating {Format} report", effectiveFormat);
                 AnsiConsole.MarkupLine($"[red]Error generating report:[/] {ex.Message}");
 
                 return _exitCodeManager.GetExitCodeForException(ex);
             }
-        }
-
-        // Use the ExitCodeManager to determine the appropriate exit code
+        }        // Use the ExitCodeManager to determine the appropriate exit code
         int exitCode = _exitCodeManager.GetExitCode(comparison);
 
         if (comparison.HasBreakingChanges)
