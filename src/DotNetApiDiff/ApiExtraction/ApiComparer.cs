@@ -206,7 +206,10 @@ public class ApiComparer : IApiComparer
                         }
                     }
 
-                    if (foundMatch) { break; }
+                    if (foundMatch)
+                    {
+                        break;
+                    }
                 }
 
                 // Check for auto-mapping if enabled
@@ -437,7 +440,8 @@ public class ApiComparer : IApiComparer
                         // Members are equivalent via type mappings - no difference to report
                         _logger.LogDebug(
                             "Members are equivalent via type mappings: {OldSignature} <-> {NewSignature}",
-                            oldMember.Signature, equivalentNewMember.Signature);
+                            oldMember.Signature,
+                            equivalentNewMember.Signature);
                         continue;
                     }
 
