@@ -110,7 +110,7 @@ namespace TestAssembly.TypeMapping
     /// </summary>
     public class GenericOldValueContainer<T>
     {
-        public T Value { get; set; }
+        public T? Value { get; set; }
 
         /// <summary>
         /// Method that works with OldValue when T is OldValue
@@ -140,10 +140,12 @@ namespace TestAssembly.NamespaceMapping.Old
         {
         }
 
+
         /// <summary>
         /// Property in the old namespace
         /// </summary>
-        public string OldNamespaceProperty { get; set; }
+        public string? OldNamespaceProperty { get; set; }
+
     }
 
     /// <summary>
