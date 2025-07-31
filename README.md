@@ -87,6 +87,31 @@ task ci
 
 ### Installation
 
+#### Quick Install (Linux/macOS)
+
+```bash
+# Install latest version to user directory
+curl -fsSL https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/install.sh | bash
+
+# Install specific version
+curl -fsSL https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/install.sh | bash -s -- v1.2.3
+
+# Install system-wide (requires sudo)
+curl -fsSL https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/install.sh | sudo bash -s -- --system
+```
+
+#### Manual Install
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/jbrinkman/dotnet-api-diff/releases):
+
+- **Linux**: `dotnet-api-diff-linux-x64.tar.gz` or `dotnet-api-diff-linux-arm64.tar.gz`
+- **macOS**: `dotnet-api-diff-osx-x64.tar.gz` or `dotnet-api-diff-osx-arm64.tar.gz` 
+- **Windows**: `dotnet-api-diff-win-x64.zip` or `dotnet-api-diff-win-arm64.zip`
+
+Extract the archive and add the binary to your PATH.
+
+#### Build from Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/jbrinkman/dotnet-api-diff.git
