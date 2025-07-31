@@ -90,7 +90,7 @@ public class ComparisonConfiguration
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
-            Converters = { new JsonStringEnumConverter() }
+            Converters = { new JsonStringEnumConverter(null, false) }
         };
 
         var config = JsonSerializer.Deserialize<ComparisonConfiguration>(json, options);
@@ -129,7 +129,8 @@ public class ComparisonConfiguration
         var options = new JsonSerializerOptions
         {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter(null, false) }
         };
 
         var json = JsonSerializer.Serialize(this, options);
