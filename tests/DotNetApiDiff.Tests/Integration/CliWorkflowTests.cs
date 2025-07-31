@@ -185,7 +185,9 @@ public class CliWorkflowTests : IDisposable
 
         // Update the config file to use our temp output path
         var configContent = File.ReadAllText(configFile);
-        var configWithTempPath = configContent.Replace("comparison-report.html", expectedOutputFile);
+        // Escape backslashes for JSON format on Windows
+        var escapedOutputPath = expectedOutputFile.Replace("\\", "\\\\");
+        var configWithTempPath = configContent.Replace("comparison-report.html", escapedOutputPath);
         var tempConfigFile = Path.Combine(_tempOutputPath, "temp-config.json");
         File.WriteAllText(tempConfigFile, configWithTempPath);
 
