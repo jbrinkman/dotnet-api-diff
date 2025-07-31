@@ -515,7 +515,7 @@ public class CliWorkflowTests : IDisposable
             "treatSignatureChangeAsBreaking": true
           },
           "outputFormat": "Html",
-          "outputPath": "{{outputFile}}",
+          "outputPath": "{{outputFile.Replace("\\", "\\\\")}}",
           "failOnBreakingChanges": false
         }
         """;
@@ -597,7 +597,7 @@ public class CliWorkflowTests : IDisposable
             "treatSignatureChangeAsBreaking": true
           },
           "outputFormat": "Html",
-          "outputPath": "{{outputFile}}",
+          "outputPath": "{{outputFile.Replace("\\", "\\\\")}}",
           "failOnBreakingChanges": false
         }
         """;
