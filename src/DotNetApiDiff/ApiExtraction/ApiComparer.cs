@@ -206,7 +206,7 @@ public class ApiComparer : IApiComparer
                         }
                     }
 
-                    if (foundMatch) break;
+                    if (foundMatch) { break; }
                 }
 
                 // Check for auto-mapping if enabled
@@ -435,7 +435,8 @@ public class ApiComparer : IApiComparer
                     if (AreSignaturesEquivalent(oldMember.Signature, equivalentNewMember.Signature))
                     {
                         // Members are equivalent via type mappings - no difference to report
-                        _logger.LogDebug("Members are equivalent via type mappings: {OldSignature} <-> {NewSignature}",
+                        _logger.LogDebug(
+                            "Members are equivalent via type mappings: {OldSignature} <-> {NewSignature}",
                             oldMember.Signature, equivalentNewMember.Signature);
                         continue;
                     }
@@ -494,7 +495,8 @@ public class ApiComparer : IApiComparer
             var oldTypeNameOnly = mapping.Key.Split('.').Last();
             var newTypeNameOnly = mapping.Value.Split('.').Last();
 
-            if (oldTypeNameOnly != mapping.Key) // Only if we had a namespace
+            // Only if we had a namespace
+            if (oldTypeNameOnly != mapping.Key)
             {
                 mappedSignature = ReplaceTypeNameInSignature(mappedSignature, oldTypeNameOnly, newTypeNameOnly);
             }
@@ -515,7 +517,6 @@ public class ApiComparer : IApiComparer
         // We need to replace type names carefully to avoid partial matches
         // For example, when replacing "RedisValue" with "ValkeyValue", we don't want to
         // replace "RedisValueWithExpiry" incorrectly
-
         var result = signature;
 
         // Pattern 1: Type name followed by non-word character (space, <, >, ,, etc.)
@@ -549,12 +550,14 @@ public class ApiComparer : IApiComparer
         var mappedSourceSignature = ApplyTypeMappingsToSignature(sourceSignature);
 
         return string.Equals(mappedSourceSignature, targetSignature, StringComparison.Ordinal);
-    }    /// <summary>
-         /// Finds an equivalent member in the target collection based on signature equivalence with type mappings
-         /// </summary>
-         /// <param name="sourceMember">The member from the source assembly (could be old or new)</param>
-         /// <param name="targetMembers">The collection of members from the target assembly (could be new or old)</param>
-         /// <returns>The equivalent member if found, null otherwise</returns>
+    }
+
+    /// <summary>
+    /// Finds an equivalent member in the target collection based on signature equivalence with type mappings
+    /// </summary>
+    /// <param name="sourceMember">The member from the source assembly (could be old or new)</param>
+    /// <param name="targetMembers">The collection of members from the target assembly (could be new or old)</param>
+    /// <returns>The equivalent member if found, null otherwise</returns>
     private ApiMember? FindEquivalentMember(ApiMember sourceMember, IEnumerable<ApiMember> targetMembers)
     {
         // First, try to find a member with the same name - this handles "modified" members
