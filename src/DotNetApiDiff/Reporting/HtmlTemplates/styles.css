@@ -54,6 +54,84 @@ section h2 {
     font-size: 1.5rem;
 }
 
+/* Collapsible Section Styles */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.section-header h2 {
+    background: none;
+    padding: 0;
+    margin: 0;
+    border: none;
+    font-size: 1.5rem;
+}
+
+.section-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.section-toggle:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.section-toggle:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.toggle-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.section-toggle.collapsed .toggle-icon {
+    transform: rotate(0deg); /* No rotation - ▶ points right when collapsed */
+}
+
+.section-toggle:not(.collapsed) .toggle-icon {
+    transform: rotate(90deg); /* Rotate ▶ to point down when expanded */
+}
+
+.section-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.section-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.section-content:not(.collapsed) {
+    max-height: none;
+    opacity: 1;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .metadata-content {
     padding: 20px;
 }
@@ -156,6 +234,21 @@ section h2 {
     padding: 20px;
     border-radius: 8px;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card.clickable {
+    cursor: pointer;
+}
+
+.summary-card.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card.clickable:active {
+    transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 

@@ -30,3 +30,104 @@ function toggleConfig() {
         text.textContent = 'Show Configuration Details';
     }
 }
+
+// Session storage helpers
+function setSectionState(sectionId, state) {
+    try {
+        sessionStorage.setItem('section-' + sectionId, state);
+    } catch (e) {
+        // Ignore storage errors
+    }
+}
+
+function getSectionState(sectionId) {
+    try {
+        return sessionStorage.getItem('section-' + sectionId);
+    } catch (e) {
+        return null;
+    }
+}
+
+// New collapsible section functionality
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const content = document.getElementById(sectionId + '-content');
+    const button = section.querySelector('.section-toggle');
+    const icon = button.querySelector('.toggle-icon');
+
+    if (content.classList.contains('collapsed')) {
+        // Expand section
+        content.classList.remove('collapsed');
+        button.classList.remove('collapsed');
+        icon.textContent = '▶'; // Keep using ▶ and let CSS handle rotation
+        setSectionState(sectionId, 'expanded');
+    } else {
+        // Collapse section
+        content.classList.add('collapsed');
+        button.classList.add('collapsed');
+        icon.textContent = '▶'; // Keep using ▶ and let CSS handle rotation
+        setSectionState(sectionId, 'collapsed');
+    }
+}
+
+// Navigate to section with smooth scrolling and auto-expand
+function navigateToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const content = document.getElementById(sectionId + '-content');
+
+    if (!section) return;
+
+    // Auto-expand if collapsed
+    if (content && content.classList.contains('collapsed')) {
+        toggleSection(sectionId);
+    }
+
+    // Smooth scroll to section
+    section.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+
+    // Brief highlight effect
+    section.style.transition = 'box-shadow 0.3s ease';
+    section.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.3)';
+    setTimeout(() => {
+        section.style.boxShadow = '';
+    }, 1500);
+}
+
+// Initialize sections to collapsed state by default
+function initializeSections() {
+    const sections = ['breaking-changes', 'added-items', 'removed-items', 'modified-items'];
+
+    sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        const content = document.getElementById(sectionId + '-content');
+        const button = section?.querySelector('.section-toggle');
+        const icon = button?.querySelector('.toggle-icon');
+
+        if (!section || !content || !button || !icon) return;
+
+        // Check session storage first
+        const savedState = getSectionState(sectionId);
+
+        if (savedState === 'expanded') {
+            // Expand based on saved state
+            content.classList.remove('collapsed');
+            button.classList.remove('collapsed');
+            icon.textContent = '▶';
+        } else {
+            // Default to collapsed (including null/new sessions)
+            content.classList.add('collapsed');
+            button.classList.add('collapsed');
+            icon.textContent = '▶';
+            // Save the default state if not already set
+            if (savedState === null) {
+                setSectionState(sectionId, 'collapsed');
+            }
+        }
+    });
+}
+
+// Initialize sections when the page loads
+document.addEventListener('DOMContentLoaded', initializeSections);
