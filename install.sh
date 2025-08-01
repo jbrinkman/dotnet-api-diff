@@ -286,9 +286,9 @@ get_asset_info() {
     local version="$1"
     local os="$2"
     local arch="$3"
-    
+
     print_info "Getting download information for $os-$arch..." >&2
-    
+
     # Determine file extension based on OS
     local file_ext
     case $os in
@@ -302,13 +302,13 @@ get_asset_info() {
             die "Unsupported OS: $os"
             ;;
     esac
-    
+
     local asset_name="dotnet-api-diff-$os-$arch.$file_ext"
     local release_info
     release_info=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/tags/$version" 2>/dev/null) || {
         die "Failed to fetch release information for version $version."
     }
-    
+
     # Extract download URL and checksum
     local download_url
     download_url=$(echo "$release_info" | grep -A 30 "\"name\": \"$asset_name\"" | grep '"browser_download_url"' | sed -E 's/.*"browser_download_url": "([^"]+)".*/\1/')
@@ -456,21 +456,21 @@ check_install_permissions() {
 install_binary() {
     local extract_dir="$1"
     local install_dir="$2"
-    
+
     print_info "Installing to $install_dir..."
-    
+
     # Find the binary in the extracted files
     local binary_path
     binary_path=$(find "$extract_dir" -name "$BINARY_NAME" -type f | head -1)
-    
+
     if [[ -z "$binary_path" ]]; then
         die "Binary '$BINARY_NAME' not found in extracted files."
     fi
-    
+
     # Install with user-friendly name
     local target_name="dotnetapidiff"
     local target_path="$install_dir/$target_name"
-    
+
     # Check if binary already exists
     if [[ -f "$target_path" ]] && [[ "$FORCE_INSTALL" != "true" ]]; then
         print_warning "Binary already exists at $target_path. Use --force to overwrite."
@@ -479,11 +479,11 @@ install_binary() {
         print_info "Existing version: $existing_version"
         return 1
     fi
-    
+
     # Copy binary and set permissions
     cp "$binary_path" "$target_path" || die "Failed to copy binary to $target_path"
     chmod +x "$target_path" || die "Failed to set executable permissions on $target_path"
-    
+
     print_success "Binary installed to $target_path"
 }
 
@@ -554,19 +554,19 @@ update_path() {
 verify_installation() {
     local install_dir="$1"
     local version="$2"
-    
+
     print_info "Verifying installation..."
-    
+
     local binary_path="$install_dir/dotnetapidiff"
-    
+
     if [[ ! -f "$binary_path" ]]; then
         die "Installation verification failed: binary not found at $binary_path"
     fi
-    
+
     if [[ ! -x "$binary_path" ]]; then
         die "Installation verification failed: binary is not executable"
     fi
-    
+
     # Test that the binary can run
     local installed_version
     if installed_version=$("$binary_path" --version 2>/dev/null | head -1); then

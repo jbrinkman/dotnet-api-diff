@@ -105,7 +105,7 @@ curl -fsSL https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/inst
 Download the latest release for your platform from [GitHub Releases](https://github.com/jbrinkman/dotnet-api-diff/releases):
 
 - **Linux**: `dotnet-api-diff-linux-x64.tar.gz` or `dotnet-api-diff-linux-arm64.tar.gz`
-- **macOS**: `dotnet-api-diff-osx-x64.tar.gz` or `dotnet-api-diff-osx-arm64.tar.gz` 
+- **macOS**: `dotnet-api-diff-osx-x64.tar.gz` or `dotnet-api-diff-osx-arm64.tar.gz`
 - **Windows**: `dotnet-api-diff-win-x64.zip` or `dotnet-api-diff-win-arm64.zip`
 
 Extract the archive and add the binary to your PATH.
