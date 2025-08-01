@@ -249,7 +249,7 @@ check_dependencies() {
 
 # Get latest release version from GitHub API
 get_latest_version() {
-    print_info "Fetching latest release information..."
+    print_info "Fetching latest release information..." >&2
 
     local latest_info
     latest_info=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" 2>/dev/null) || {
@@ -269,7 +269,7 @@ get_latest_version() {
 # Validate that a specific version exists
 validate_version() {
     local version="$1"
-    print_info "Validating version $version..."
+    print_info "Validating version $version..." >&2
 
     local release_info
     release_info=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/tags/$version" 2>/dev/null) || {
