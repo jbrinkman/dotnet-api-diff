@@ -28,9 +28,10 @@ namespace DotNetApiDiff.Tests.Integration
             _output = output;
 
             // Get the test assembly paths
-            var testAssemblyDir = Path.Combine(
-                Path.GetDirectoryName(typeof(TypeMappingIntegrationTests).Assembly.Location)!,
-                "..", "..", "..", "..", "TestAssemblies", "bin", "Debug", "net8.0");
+            // var testAssemblyDir = Path.Combine(
+            //     Path.GetDirectoryName(typeof(TypeMappingIntegrationTests).Assembly.Location)!,
+            //     "..", "..", "..", "..", "TestAssemblies", "bin", "Debug", "net8.0");
+            var testAssemblyDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData");
 
             _testAssemblyV1Path = Path.Combine(testAssemblyDir, "TestAssemblyV1.dll");
             _testAssemblyV2Path = Path.Combine(testAssemblyDir, "TestAssemblyV2.dll");
