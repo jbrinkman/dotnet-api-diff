@@ -92,5 +92,8 @@ node_modules/
 
 # Local History for Visual Studio
 .localhistory/test-report/
-
 glide-testing/
+
+# Package build directories
+build/
+artifacts/

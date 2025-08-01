@@ -87,7 +87,19 @@ task ci
 
 ### Installation
 
-#### Quick Install (Linux/macOS)
+#### Package Managers (Recommended)
+
+**Windows (Chocolatey):**
+```powershell
+choco install dotnetapidiff
+```
+
+**macOS/Linux (Homebrew):**
+```bash
+brew install dotnetapidiff
+```
+
+#### Quick Install Script (Linux/macOS)
 
 ```bash
 # Install latest version to user directory

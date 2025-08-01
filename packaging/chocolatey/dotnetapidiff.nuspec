@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>dotnetapidiff</id>
+    <version>$version$</version>
+    <packageSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</packageSourceUrl>
+    <owners>jbrinkman</owners>
+    <title>DotNet API Diff</title>
+    <authors>Josh Brinkman</authors>
+    <projectUrl>https://github.com/jbrinkman/dotnet-api-diff</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/icon.png</iconUrl>
+    <copyright>2025 Josh Brinkman</copyright>
+    <licenseUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</projectSourceUrl>
+    <docsUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/jbrinkman/dotnet-api-diff/issues</bugTrackerUrl>
+    <tags>dotnet api diff compare assembly compatibility breaking-changes cli tool</tags>
+    <summary>A command-line tool for comparing .NET assemblies and detecting API differences and breaking changes.</summary>
+    <description><![CDATA[
+DotNet API Diff is a powerful command-line tool designed to compare .NET assemblies and identify API differences, including breaking changes. It's particularly useful for library maintainers, API designers, and development teams who need to ensure backward compatibility when releasing new versions of their .NET libraries.
+
+## Features
+
+- **Comprehensive API Analysis**: Detects additions, removals, and modifications in types, methods, properties, and other API members
+- **Breaking Change Detection**: Identifies changes that could break existing client code
+- **Flexible Configuration**: Supports custom mappings, exclusions, and comparison rules via JSON configuration files
+- **Multiple Output Formats**: Console, JSON, and other formats for integration with CI/CD pipelines
+- **Cross-Platform**: Runs on Windows, macOS, and Linux
+- **Fast and Reliable**: Built with .NET 8 for optimal performance
+
+## Use Cases
+
+- **Library Versioning**: Validate that new library versions maintain backward compatibility
+- **API Migration**: Compare APIs when migrating between different libraries or versions
+- **CI/CD Integration**: Automate API compatibility checks in your build pipeline
+- **Documentation**: Generate change logs and migration guides based on API differences
+
+## Installation
+
+Once installed via Chocolatey, you can use the tool from any command prompt or PowerShell window:
+
+```
+dotnetapidiff --help
+```
+
+## Basic Usage
+
+```
+# Compare two assembly files
+dotnetapidiff compare old-assembly.dll new-assembly.dll
+
+# Use a configuration file for advanced scenarios
+dotnetapidiff compare old-assembly.dll new-assembly.dll --config myconfig.json
+
+# Output results in JSON format
+dotnetapidiff compare old-assembly.dll new-assembly.dll --output json
+```
+
+For more information, visit the project repository at https://github.com/jbrinkman/dotnet-api-diff
+]]></description>
+    <releaseNotes>See release notes at https://github.com/jbrinkman/dotnet-api-diff/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
