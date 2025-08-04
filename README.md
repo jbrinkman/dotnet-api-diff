@@ -142,13 +142,13 @@ task build
 
 ```bash
 # Compare two assembly versions
-dotnet run --project src/DotNetApiDiff -- compare MyLibrary.v1.dll MyLibrary.v2.dll
+dotnetapidiff compare MyLibrary.v1.dll MyLibrary.v2.dll
 
 # Generate a JSON report
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output json
+dotnetapidiff compare source.dll target.dll --output json
 
 # Save report to file
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output markdown > api-changes.md
+dotnetapidiff compare source.dll target.dll --output markdown > api-changes.md
 ```
 
 ## 🔧 Usage Examples
@@ -157,58 +157,58 @@ dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output
 
 ```bash
 # Simple comparison with console output
-dotnet run --project src/DotNetApiDiff -- compare MyLibrary.v1.dll MyLibrary.v2.dll
+dotnetapidiff compare MyLibrary.v1.dll MyLibrary.v2.dll
 ```
 
 ### Filtering Options
 
 ```bash
 # Filter to specific namespaces
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll \
+dotnetapidiff compare source.dll target.dll \
   --filter "MyLibrary.Core" --filter "MyLibrary.Extensions"
 
 # Filter to specific type patterns
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll \
+dotnetapidiff compare source.dll target.dll \
   --type "MyLibrary.Core.*" --type "MyLibrary.Models.*"
 
 # Exclude internal or test types
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll \
+dotnetapidiff compare source.dll target.dll \
   --exclude "*.Internal*" --exclude "*.Tests*"
 
 # Include internal types (normally excluded)
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --include-internals
+dotnetapidiff compare source.dll target.dll --include-internals
 
 # Include compiler-generated types
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --include-compiler-generated
+dotnetapidiff compare source.dll target.dll --include-compiler-generated
 ```
 
 ### Output Formats
 
 ```bash
 # Generate JSON report
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output json
+dotnetapidiff compare source.dll target.dll --output json
 
 # Generate Markdown report
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output markdown
+dotnetapidiff compare source.dll target.dll --output markdown
 
 # Generate XML report
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output xml
+dotnetapidiff compare source.dll target.dll --output xml
 
 # Generate HTML report
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --output html
+dotnetapidiff compare source.dll target.dll --output html
 ```
 
 ### Configuration File Usage
 
 ```bash
 # Use a configuration file for complex scenarios
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --config my-config.json
+dotnetapidiff compare source.dll target.dll --config my-config.json
 
 # Enable verbose logging
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --verbose
+dotnetapidiff compare source.dll target.dll --verbose
 
 # Disable colored output (useful for CI/CD)
-dotnet run --project src/DotNetApiDiff -- compare source.dll target.dll --no-color
+dotnetapidiff compare source.dll target.dll --no-color
 ```
 
 ## ⚙️ Configuration
@@ -382,7 +382,7 @@ jobs:
     
     - name: Run API Diff
       run: |
-        dotnet run --project path/to/dotnet-api-diff -- compare \
+        dotnetapidiff compare \
           ./baseline/MyLibrary.dll \
           ./current/MyLibrary.dll \
           --config .github/api-diff-config.json \
@@ -435,8 +435,8 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Run API Diff'
   inputs:
-    command: 'run'
-    projects: 'tools/dotnet-api-diff/DotNetApiDiff.csproj'
+    command: 'custom'
+    custom: 'dotnetapidiff'
     arguments: >
       compare
       $(Build.ArtifactStagingDirectory)/baseline/MyLibrary.dll
@@ -470,7 +470,7 @@ The tool uses semantic exit codes to integrate with CI/CD systems:
 #!/bin/bash
 
 # Run API diff and capture exit code
-dotnet run --project dotnet-api-diff -- compare old.dll new.dll --config config.json
+dotnetapidiff compare old.dll new.dll --config config.json
 EXIT_CODE=$?
 
 case $EXIT_CODE in
@@ -508,7 +508,7 @@ esac
 nuget install MyLibrary -Version 1.0.0 -OutputDirectory packages
 
 # Compare with current build
-dotnet run --project dotnet-api-diff -- compare \
+dotnetapidiff compare \
   packages/MyLibrary.1.0.0/lib/net8.0/MyLibrary.dll \
   src/MyLibrary/bin/Release/net8.0/MyLibrary.dll \
   --output json > api-changes.json
@@ -527,7 +527,7 @@ fi
 
 ```bash
 # Compare .NET Framework vs .NET Core implementations
-dotnet run --project dotnet-api-diff -- compare \
+dotnetapidiff compare \
   MyLibrary.net48.dll \
   MyLibrary.net8.0.dll \
   --config framework-migration-config.json \
@@ -538,7 +538,7 @@ dotnet run --project dotnet-api-diff -- compare \
 
 ```bash
 # Lenient checking for pre-release versions
-dotnet run --project dotnet-api-diff -- compare \
+dotnetapidiff compare \
   MyLibrary.1.0.0-stable.dll \
   MyLibrary.1.1.0-beta.dll \
   --config samples/lenient-changes.json \
@@ -583,7 +583,7 @@ tests/
 
 ```bash
 # Ensure assemblies are built for compatible target frameworks
-dotnet run --project dotnet-api-diff -- compare source.dll target.dll --verbose
+dotnetapidiff compare source.dll target.dll --verbose
 ```
 
 **Missing Dependencies**
@@ -597,7 +597,7 @@ dotnet run --project dotnet-api-diff -- compare source.dll target.dll --verbose
 
 ```bash
 # For very large assemblies, consider filtering to specific namespaces
-dotnet run --project dotnet-api-diff -- compare source.dll target.dll \
+dotnetapidiff compare source.dll target.dll \
   --filter "MyLibrary.Core" --exclude "*.Internal*"
 ```
 
@@ -605,7 +605,7 @@ dotnet run --project dotnet-api-diff -- compare source.dll target.dll \
 
 ```bash
 # Use configuration files to exclude unnecessary types
-dotnet run --project dotnet-api-diff -- compare source.dll target.dll \
+dotnetapidiff compare source.dll target.dll \
   --config samples/enterprise-config.json
 ```
 
@@ -618,7 +618,7 @@ Enable detailed logging for troubleshooting:
 export DOTNET_API_DIFF_LOG_LEVEL=Debug
 
 # Run with verbose output
-dotnet run --project dotnet-api-diff -- compare source.dll target.dll --verbose
+dotnetapidiff compare source.dll target.dll --verbose
 ```
 
 ## 🚀 Advanced Usage
@@ -662,7 +662,7 @@ if (result.HasBreakingChanges)
 
 ```xml
 <Target Name="CheckApiCompatibility" BeforeTargets="Pack">
-  <Exec Command="dotnet run --project $(MSBuildThisFileDirectory)tools/dotnet-api-diff -- compare $(PreviousVersionDll) $(OutputPath)$(AssemblyName).dll --config api-config.json" 
+  <Exec Command="dotnetapidiff compare $(PreviousVersionDll) $(OutputPath)$(AssemblyName).dll --config api-config.json" 
         ContinueOnError="false" />
 </Target>
 ```
@@ -673,9 +673,9 @@ if (result.HasBreakingChanges)
 Task("CheckApiCompatibility")
     .Does(() =>
 {
-    var exitCode = StartProcess("dotnet", new ProcessSettings
+    var exitCode = StartProcess("dotnetapidiff", new ProcessSettings
     {
-        Arguments = "run --project tools/dotnet-api-diff -- compare baseline.dll current.dll --config config.json"
+        Arguments = "compare baseline.dll current.dll --config config.json"
     });
     
     if (exitCode == 2)
