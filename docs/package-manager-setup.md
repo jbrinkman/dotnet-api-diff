@@ -5,6 +5,7 @@ This document explains how to set up automated publishing to Chocolatey and Home
 ## Overview
 
 The release workflow automatically builds and publishes packages to:
+
 - **Chocolatey** (Windows package manager)
 - **Homebrew** (macOS/Linux package manager)
 
@@ -31,6 +32,7 @@ The following secrets must be configured in the GitHub repository settings:
    - Package ID: `dotnetapidiff`
 
 3. **Configure GitHub Secret**:
+
    ```bash
    # In GitHub repository settings > Secrets and variables > Actions
    # Add new repository secret:
@@ -41,10 +43,12 @@ The following secrets must be configured in the GitHub repository settings:
 #### Homebrew Setup
 
 Homebrew publishing is currently handled by generating an updated formula that can be:
+
 1. **Submitted to homebrew-core** (requires community approval)
 2. **Published to a custom tap** (immediate publishing)
 
 For custom tap approach:
+
 1. Create a repository named `homebrew-dotnetapidiff`
 2. The workflow generates the updated formula as an artifact
 3. Manually or automatically commit the formula to the tap repository
@@ -54,13 +58,15 @@ For custom tap approach:
 ### Chocolatey Publishing
 
 The workflow automatically:
+
 1. Builds Windows x64 and ARM64 binaries
 2. Calculates SHA256 checksums
 3. Creates a Chocolatey package (.nupkg)
 4. Publishes to Chocolatey Community using the API key
 
 **Package Structure:**
-```
+
+```text
 dotnetapidiff/
 ├── tools/
 │   ├── chocolateyinstall.ps1    # Installation script
@@ -72,12 +78,14 @@ dotnetapidiff/
 ### Homebrew Formula
 
 The workflow automatically:
+
 1. Downloads all platform binaries (macOS/Linux, x64/ARM64)
 2. Calculates SHA256 checksums for each platform
 3. Generates an updated Homebrew formula with correct URLs and checksums
 4. Uploads the formula as a build artifact
 
 **Formula Features:**
+
 - Platform detection (macOS/Linux, Intel/ARM)
 - Automatic binary selection based on platform
 - SHA256 verification
