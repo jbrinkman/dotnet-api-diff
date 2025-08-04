@@ -8,6 +8,7 @@
         <title>DotNet API Diff</title>
         <authors>Josh Brinkman</authors>
         <projectUrl>https://github.com/jbrinkman/dotnet-api-diff</projectUrl>
+        <iconUrl>https://cdn.statically.io/gh/jbrinkman/dotnet-api-diff/main/icons/icon128.png</iconUrl>
         <copyright>2025 Josh Brinkman</copyright>
         <licenseUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/LICENSE</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
