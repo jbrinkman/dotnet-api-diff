@@ -62,12 +62,14 @@ jobs:
       - name: Calculate checksums
         id: checksums
         run: |
-          echo "win_x64_sha256=$(sha256sum dotnet-api-diff-win-x64.zip | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "win_arm64_sha256=$(sha256sum dotnet-api-diff-win-arm64.zip | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "linux_x64_sha256=$(sha256sum dotnet-api-diff-linux-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "linux_arm64_sha256=$(sha256sum dotnet-api-diff-linux-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "osx_x64_sha256=$(sha256sum dotnet-api-diff-osx-x64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "osx_arm64_sha256=$(sha256sum dotnet-api-diff-osx-arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          {
+            echo "win_x64_sha256=$(sha256sum "dotnet-api-diff-win-x64.zip" | cut -d' ' -f1)"
+            echo "win_arm64_sha256=$(sha256sum "dotnet-api-diff-win-arm64.zip" | cut -d' ' -f1)"
+            echo "linux_x64_sha256=$(sha256sum "dotnet-api-diff-linux-x64.tar.gz" | cut -d' ' -f1)"
+            echo "linux_arm64_sha256=$(sha256sum "dotnet-api-diff-linux-arm64.tar.gz" | cut -d' ' -f1)"
+            echo "osx_x64_sha256=$(sha256sum "dotnet-api-diff-osx-x64.tar.gz" | cut -d' ' -f1)"
+            echo "osx_arm64_sha256=$(sha256sum "dotnet-api-diff-osx-arm64.tar.gz" | cut -d' ' -f1)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
