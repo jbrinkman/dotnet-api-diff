@@ -45,8 +45,9 @@ $nuspecContent | Set-Content (Join-Path $buildDir "dotnetapidiff.nuspec")
 
 # Update checksums in install script
 $installScriptContent = Get-Content $installScriptPath -Raw
-$installScriptContent = $installScriptContent.Replace('$checksum64$', $ChecksumX64)
-$installScriptContent = $installScriptContent.Replace('$checksumArm64$', $ChecksumArm64)
+$installScriptContent = $installScriptContent -replace '\$checksum64\$', $ChecksumX64
+$installScriptContent = $installScriptContent -replace '\$checksumArm64\$', $ChecksumArm64
+
 $installScriptContent | Set-Content (Join-Path $buildDir "tools/chocolateyinstall.ps1")
 
 # Build package
