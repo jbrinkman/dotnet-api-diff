@@ -5,6 +5,7 @@ param(
     [string]$Version,
 
     [Parameter(Mandatory = $true)]
+    [ValidatePattern('^[a-fA-F0-9]{64}$')]
     [string]$ChecksumX64,
 
     [Parameter(Mandatory = $true)]
