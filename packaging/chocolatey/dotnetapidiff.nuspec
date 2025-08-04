@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
-  <metadata>
-    <id>dotnetapidiff</id>
-    <version>$version$</version>
-    <packageSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</packageSourceUrl>
-    <owners>jbrinkman</owners>
-    <title>DotNet API Diff</title>
-    <authors>Josh Brinkman</authors>
-    <projectUrl>https://github.com/jbrinkman/dotnet-api-diff</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/icon.png</iconUrl>
-    <copyright>2025 Josh Brinkman</copyright>
-    <licenseUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/LICENSE</licenseUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</projectSourceUrl>
-    <docsUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/README.md</docsUrl>
-    <bugTrackerUrl>https://github.com/jbrinkman/dotnet-api-diff/issues</bugTrackerUrl>
-    <tags>dotnet api diff compare assembly compatibility breaking-changes cli tool</tags>
-    <summary>A command-line tool for comparing .NET assemblies and detecting API differences and breaking changes.</summary>
-    <description><![CDATA[
+    <metadata>
+        <id>dotnetapidiff</id>
+        <version>$version$</version>
+        <packageSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</packageSourceUrl>
+        <owners>jbrinkman</owners>
+        <title>DotNet API Diff</title>
+        <authors>Josh Brinkman</authors>
+        <projectUrl>https://github.com/jbrinkman/dotnet-api-diff</projectUrl>
+        <iconUrl>https://raw.githubusercontent.com/jbrinkman/dotnet-api-diff/main/icon.png</iconUrl>
+        <copyright>2025 Josh Brinkman</copyright>
+        <licenseUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/LICENSE</licenseUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <projectSourceUrl>https://github.com/jbrinkman/dotnet-api-diff</projectSourceUrl>
+        <docsUrl>https://github.com/jbrinkman/dotnet-api-diff/blob/main/README.md</docsUrl>
+        <bugTrackerUrl>https://github.com/jbrinkman/dotnet-api-diff/issues</bugTrackerUrl>
+        <tags>dotnet api diff compare assembly compatibility breaking-changes cli tool</tags>
+        <summary>A command-line tool for comparing .NET assemblies and detecting API differences and breaking changes.</summary>
+        <description><![CDATA[
 DotNet API Diff is a powerful command-line tool designed to compare .NET assemblies and identify API differences, including breaking changes. It's particularly useful for library maintainers, API designers, and development teams who need to ensure backward compatibility when releasing new versions of their .NET libraries.
 
 ## Features
@@ -58,10 +58,10 @@ dotnetapidiff compare old-assembly.dll new-assembly.dll --output json
 ```
 
 For more information, visit the project repository at https://github.com/jbrinkman/dotnet-api-diff
-]]></description>
-    <releaseNotes>See release notes at https://github.com/jbrinkman/dotnet-api-diff/releases</releaseNotes>
-  </metadata>
-  <files>
-    <file src="tools\**" target="tools" />
-  </files>
+]]>        </description>
+        <releaseNotes>See release notes at https://github.com/jbrinkman/dotnet-api-diff/releases</releaseNotes>
+    </metadata>
+    <files>
+        <file src="tools\**" target="tools" />
+    </files>
 </package>

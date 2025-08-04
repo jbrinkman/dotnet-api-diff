@@ -78,7 +78,7 @@ jobs:
     needs: build
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -98,18 +98,18 @@ jobs:
         run: |
           $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
           $release = Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$version"
-          
+
           # Get checksums from release assets or calculate them
           $winX64Asset = $release.assets | Where-Object { $_.name -eq "dotnet-api-diff-win-x64.zip" }
           $winArm64Asset = $release.assets | Where-Object { $_.name -eq "dotnet-api-diff-win-arm64.zip" }
-          
+
           # Download assets and calculate checksums
           Invoke-WebRequest -Uri $winX64Asset.browser_download_url -OutFile "win-x64.zip"
           Invoke-WebRequest -Uri $winArm64Asset.browser_download_url -OutFile "win-arm64.zip"
-          
+
           $checksumX64 = (Get-FileHash "win-x64.zip" -Algorithm SHA256).Hash.ToLower()
           $checksumArm64 = (Get-FileHash "win-arm64.zip" -Algorithm SHA256).Hash.ToLower()
-          
+
           echo "version=$version" >> $env:GITHUB_OUTPUT
           echo "checksum_x64=$checksumX64" >> $env:GITHUB_OUTPUT
           echo "checksum_arm64=$checksumArm64" >> $env:GITHUB_OUTPUT
@@ -125,7 +125,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -133,21 +133,21 @@ jobs:
         id: release_info
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          
+
           # Get release information
           RELEASE_JSON=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$VERSION")
-          
+
           # Download assets and calculate checksums
           wget -q $(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="dotnet-api-diff-osx-arm64.tar.gz") | .browser_download_url') -O osx-arm64.tar.gz
           wget -q $(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="dotnet-api-diff-osx-x64.tar.gz") | .browser_download_url') -O osx-x64.tar.gz
           wget -q $(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="dotnet-api-diff-linux-arm64.tar.gz") | .browser_download_url') -O linux-arm64.tar.gz
           wget -q $(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="dotnet-api-diff-linux-x64.tar.gz") | .browser_download_url') -O linux-x64.tar.gz
-          
+
           OSX_ARM64_SHA256=$(sha256sum osx-arm64.tar.gz | cut -d' ' -f1)
           OSX_X64_SHA256=$(sha256sum osx-x64.tar.gz | cut -d' ' -f1)
           LINUX_ARM64_SHA256=$(sha256sum linux-arm64.tar.gz | cut -d' ' -f1)
           LINUX_X64_SHA256=$(sha256sum linux-x64.tar.gz | cut -d' ' -f1)
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "osx_arm64_sha256=$OSX_ARM64_SHA256" >> $GITHUB_OUTPUT
           echo "osx_x64_sha256=$OSX_X64_SHA256" >> $GITHUB_OUTPUT
