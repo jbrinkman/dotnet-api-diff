@@ -15,6 +15,19 @@ if [[ -z "$VERSION" || -z "$SHA256_OSX_ARM64" || -z "$SHA256_OSX_X64" || -z "$SH
     echo "Example: $0 1.0.0 abc123... def456... ghi789... jkl012..."
     exit 1
 fi
+if [[ -z "$VERSION" || -z "$SHA256_OSX_ARM64" || -z "$SHA256_OSX_X64" || -z "$SHA256_LINUX_ARM64" || -z "$SHA256_LINUX_X64" ]]; then
+    echo "Usage: $0 <version> <sha256_osx_arm64> <sha256_osx_x64> <sha256_linux_arm64> <sha256_linux_x64>"
+    echo "Example: $0 1.0.0 abc123... def456... ghi789... jkl012..."
+    exit 1
+fi
+
+# Validate SHA256 format
+for sha in "$SHA256_OSX_ARM64" "$SHA256_OSX_X64" "$SHA256_LINUX_ARM64" "$SHA256_LINUX_X64"; do
+   if [[ ! "$sha" =~ ^[a-fA-F0-9]{64}$ ]]; then
+       echo "Error: Invalid SHA256 format: $sha"
+       exit 1
+   fi
+done
 
 echo "Updating Homebrew formula for version $VERSION"
 
