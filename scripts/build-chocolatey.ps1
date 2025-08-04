@@ -3,16 +3,16 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
-    
+
     [Parameter(Mandatory = $true)]
     [string]$ChecksumX64,
-    
+
     [Parameter(Mandatory = $true)]
     [string]$ChecksumArm64,
-    
+
     [Parameter(Mandatory = $false)]
     [string]$ApiKey,
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$Publish
 )
@@ -52,28 +52,29 @@ $installScriptContent | Set-Content (Join-Path $buildDir "tools/chocolateyinstal
 Push-Location $buildDir
 try {
     $nupkgFile = "dotnetapidiff.$Version.nupkg"
-    
+
     Write-Host "Creating Chocolatey package..."
     choco pack dotnetapidiff.nuspec
-    
+
     if (-not (Test-Path $nupkgFile)) {
         throw "Package creation failed - $nupkgFile not found"
     }
-    
+
     Write-Host "Package created successfully: $nupkgFile"
-    
+
     if ($Publish) {
         if (-not $ApiKey) {
             throw "API key is required for publishing"
         }
-        
+
         Write-Host "Publishing package to Chocolatey..."
         choco push $nupkgFile --api-key $ApiKey
         Write-Host "Package published successfully!"
-    } else {
+    }
+    else {
         Write-Host "Package built but not published (use -Publish flag to publish)"
     }
-    
+
     # Copy package to artifacts directory
     $artifactsDir = Join-Path $rootDir "artifacts"
     if (-not (Test-Path $artifactsDir)) {
@@ -81,8 +82,9 @@ try {
     }
     Copy-Item $nupkgFile $artifactsDir -Force
     Write-Host "Package copied to artifacts directory"
-    
-} finally {
+
+}
+finally {
     Pop-Location
 }
 
