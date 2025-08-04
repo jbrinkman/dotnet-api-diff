@@ -24,7 +24,7 @@ $packageArgs = @{
 # Check if we're on ARM64 and the ARM64 version is available
 $isArm64 = $env:PROCESSOR_ARCHITECTURE -eq 'ARM64' -or $env:PROCESSOR_ARCHITEW6432 -eq 'ARM64'
 
-if ($isArm64 -and $urlArm64 -and $checksumArm64 -ne '$checksumArm64$') {
+if ($isArm64 -and $urlArm64 -and $checksumArm64 -match '^[a-fA-F0-9]{64}$') {
     Write-Host "Detected ARM64 architecture, using ARM64 build"
     $packageArgs.url64bit = $urlArm64
     $packageArgs.checksum64 = $checksumArm64

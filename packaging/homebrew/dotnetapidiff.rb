@@ -10,7 +10,7 @@ class Dotnetapidiff < Formula
   elsif OS.mac? && Hardware::CPU.intel?
     url "https://github.com/jbrinkman/dotnet-api-diff/releases/download/v$version$/dotnet-api-diff-osx-x64.tar.gz"
     sha256 "$sha256_osx_x64$"
-  elsif OS.linux? && Hardware::CPU.arm?
+  elsif OS.linux? && Hardware::CPU.arm64?
     url "https://github.com/jbrinkman/dotnet-api-diff/releases/download/v$version$/dotnet-api-diff-linux-arm64.tar.gz"
     sha256 "$sha256_linux_arm64$"
   elsif OS.linux? && Hardware::CPU.intel?
