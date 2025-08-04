@@ -90,11 +90,13 @@ task ci
 #### Package Managers (Recommended)
 
 **Windows (Chocolatey):**
+
 ```powershell
 choco install dotnetapidiff
 ```
 
 **macOS/Linux (Homebrew):**
+
 ```bash
 brew install dotnetapidiff
 ```
