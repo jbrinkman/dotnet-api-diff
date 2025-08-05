@@ -71,7 +71,7 @@ public class HtmlFormatterScribanTests
         Assert.Contains("Added Items", report);
         Assert.Contains("NewClass", report);
         Assert.Contains("Added new class", report);
-        Assert.Contains("Type (1)", report); // Group header should show count
+        Assert.Contains("📁 NewClass", report); // Type group header should show type name
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class HtmlFormatterScribanTests
                 {
                     ChangeType = ChangeType.Removed,
                     ElementType = ApiElementType.Method,
-                    ElementName = "OldMethod",
+                    ElementName = "OldClass.OldMethod",
                     Description = "Removed method",
                     Severity = SeverityLevel.Info
                 }
@@ -105,7 +105,7 @@ public class HtmlFormatterScribanTests
         Assert.Contains("Removed Items", report);
         Assert.Contains("OldMethod", report);
         Assert.Contains("Removed method", report);
-        Assert.Contains("Method (1)", report); // Group header should show count
+        Assert.Contains("📁 OldClass", report); // Type group header should show type name
     }
 
     [Fact]

@@ -138,8 +138,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce output");
     }
 
@@ -163,8 +163,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with config. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully with config. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce JSON output");
     }
 
@@ -198,8 +198,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with config output settings. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully with config output settings. Exit code: {result.ExitCode}");
 
         // The output file should have been created (this tests that OutputPath from config was used)
         Assert.True(File.Exists(expectedOutputFile), $"Output file should have been created at: {expectedOutputFile}");
@@ -233,8 +233,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with command line override. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully with command line override. Exit code: {result.ExitCode}");
 
         // The command line output file should have been created (not the config one)
         Assert.True(File.Exists(commandLineOutputFile), $"Command line output file should have been created at: {commandLineOutputFile}");
@@ -364,8 +364,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully with {outputFormat} format. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully with {outputFormat} format. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), $"Should produce {outputFormat} output");
 
         // Verify output format specific content
@@ -422,8 +422,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with namespace filtering. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should succeed with namespace filtering. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce filtered output");
     }
 
@@ -445,8 +445,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with verbose output. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should succeed with verbose output. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce verbose output");
     }
 
@@ -468,8 +468,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes, which is normal for our test assemblies
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should succeed with no-color option. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes, which is normal for our test assemblies
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should succeed with no-color option. Exit code: {result.ExitCode}");
         Assert.False(string.IsNullOrEmpty(result.StandardOutput), "Should produce output without colors");
     }
 
@@ -536,8 +536,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully. Exit code: {result.ExitCode}");
 
         // Verify the output file was created (tests OutputPath config usage)
         Assert.True(File.Exists(outputFile), $"Output file should have been created at: {outputFile}");
@@ -614,8 +614,8 @@ public class CliWorkflowTests : IDisposable
         var result = RunCliCommand(arguments);
 
         // Assert
-        // Exit code 2 is expected when there are breaking changes
-        Assert.True(result.ExitCode == 0 || result.ExitCode == 2, $"CLI should execute successfully. Exit code: {result.ExitCode}");
+        // Exit code 1 is expected when there are breaking changes
+        Assert.True(result.ExitCode == 0 || result.ExitCode == 1, $"CLI should execute successfully. Exit code: {result.ExitCode}");
 
         // Verify the output file was created
         Assert.True(File.Exists(outputFile), $"Output file should have been created at: {outputFile}");

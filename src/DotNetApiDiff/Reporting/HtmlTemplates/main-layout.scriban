@@ -56,39 +56,18 @@
         <section class="summary">
             <h2>📈 Summary</h2>
             <div class="summary-cards">
-                {{if result.summary.added_count > 0}}
                 <div class="summary-card added clickable" onclick="navigateToSection('added-items')">
                     <div class="card-number">{{ result.summary.added_count }}</div>
                     <div class="card-label">Added</div>
                 </div>
-                {{else}}
-                <div class="summary-card added">
-                    <div class="card-number">{{ result.summary.added_count }}</div>
-                    <div class="card-label">Added</div>
-                </div>
-                {{end}}
-                {{if result.summary.removed_count > 0}}
                 <div class="summary-card removed clickable" onclick="navigateToSection('removed-items')">
                     <div class="card-number">{{ result.summary.removed_count }}</div>
                     <div class="card-label">Removed</div>
                 </div>
-                {{else}}
-                <div class="summary-card removed">
-                    <div class="card-number">{{ result.summary.removed_count }}</div>
-                    <div class="card-label">Removed</div>
-                </div>
-                {{end}}
-                {{if result.summary.modified_count > 0}}
                 <div class="summary-card modified clickable" onclick="navigateToSection('modified-items')">
                     <div class="card-number">{{ result.summary.modified_count }}</div>
                     <div class="card-label">Modified</div>
                 </div>
-                {{else}}
-                <div class="summary-card modified">
-                    <div class="card-number">{{ result.summary.modified_count }}</div>
-                    <div class="card-label">Modified</div>
-                </div>
-                {{end}}
                 {{if result.summary.breaking_changes_count > 0}}
                 <div class="summary-card breaking clickable" onclick="navigateToSection('breaking-changes')">
                     <div class="card-number">{{ result.summary.breaking_changes_count }}</div>
@@ -120,9 +99,9 @@
         <!-- Breaking changes section -->
         {{if result.has_breaking_changes}}
         <section class="breaking-changes" id="breaking-changes">
-            <div class="section-header">
+            <div class="section-header" onclick="toggleSection('breaking-changes')">
                 <h2>⚠️ Breaking Changes</h2>
-                <button class="section-toggle collapsed" onclick="toggleSection('breaking-changes')">
+                <button class="section-toggle collapsed">
                     <span class="toggle-icon">▶</span>
                 </button>
             </div>
@@ -160,9 +139,9 @@
         <!-- Change sections -->
         {{for section in change_sections}}
         <section class="changes-section" id="{{ section.change_type }}-items">
-            <div class="section-header">
+            <div class="section-header" onclick="toggleSection('{{ section.change_type }}-items')">
                 <h2>{{ section.icon }} {{ section.title }} ({{ section.count }})</h2>
-                <button class="section-toggle collapsed" onclick="toggleSection('{{ section.change_type }}-items')">
+                <button class="section-toggle collapsed">
                     <span class="toggle-icon">▶</span>
                 </button>
             </div>
@@ -170,7 +149,67 @@
                 {{if section.description}}
                 <p class="section-description">{{ section.description }}</p>
                 {{end}}
-                {{ render_change_group section }}
+                <!-- Type groups within this change category -->
+                {{for group in section.grouped_changes}}
+                <div class="type-group">
+                    <div class="type-header" onclick="toggleTypeGroup('{{ section.change_type }}-{{ group.key | string.replace " " "-" | string.replace "." "-" | string.replace "`" "-" }}')">
+                        <h3 class="type-name">
+                            📁 {{ group.key }}
+                            <span class="type-summary">
+                                ({{ group.count }} change{{ if group.count != 1 }}s{{ end }}{{ if group.has_breaking_changes }}, {{ group.breaking_changes_count }} breaking{{ end }})
+                            </span>
+                        </h3>
+                        <div class="type-header-controls">
+                            {{if group.has_breaking_changes}}
+                            <span class="breaking-type-badge">⚠️ Breaking Changes</span>
+                            {{end}}
+                            <button class="type-toggle collapsed">
+                                <span class="toggle-icon">▶</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="type-changes collapsed" id="{{ section.change_type }}-{{ group.key | string.replace " " "-" | string.replace "." "-" | string.replace "`" "-" }}-content">
+                        <div class="category-changes">
+                            {{for change in group.changes}}
+                            <div class="change-item {{ section.change_type }}">
+                                <div class="change-header">
+                                    <div class="change-name">
+                                        <span class="element-type">{{ change.element_type }}</span>
+                                        <code>{{ change.element_name }}</code>
+                                        {{if change.is_breaking_change}}
+                                        <span class="breaking-badge">BREAKING</span>
+                                        {{end}}
+                                    </div>
+                                    <div class="change-description">{{ change.description }}</div>
+                                </div>
+                                {{if change.has_signatures}}
+                                <div class="signature-toggle">
+                                    <button class="toggle-btn" onclick="toggleSignature('{{ change.details_id }}')">
+                                        <span class="toggle-icon">▼</span> View Signature Details
+                                    </button>
+                                </div>
+                                <div id="{{ change.details_id }}" class="signature-details" style="display: none;">
+                                    {{if change.old_signature}}
+                                    <div class="signature-section">
+                                        <h5>Old Signature:</h5>
+                                        <pre><code class="csharp">{{ change.old_signature }}</code></pre>
+                                    </div>
+                                    {{end}}
+                                    {{if change.new_signature}}
+                                    <div class="signature-section">
+                                        <h5>New Signature:</h5>
+                                        <pre><code class="csharp">{{ change.new_signature }}</code></pre>
+                                    </div>
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                {{end}}
             </div>
         </section>
         {{end}}
