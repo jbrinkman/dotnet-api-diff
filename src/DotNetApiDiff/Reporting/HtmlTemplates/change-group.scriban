@@ -1,41 +1,55 @@
 {{for group in grouped_changes}}
-<div class="change-group">
-    <h3>{{ group.key }} ({{ group.count }})</h3>
-    <div class="change-items">
-        {{for change in group.changes}}
-        <div class="change-item {{ change_type }}">
-            <div class="change-header">
-                <div class="change-name">
-                    <code>{{ change.element_name }}</code>
-                    {{if change.is_breaking_change}}
-                    <span class="breaking-badge">BREAKING</span>
+<div class="type-group">
+    <div class="type-header">
+        <h3 class="type-name">
+            📁 {{ group.key }}
+            <span class="type-summary">
+                ({{ group.count }} change{{ if group.count != 1 }}s{{ end }}{{ if group.has_breaking_changes }}, {{ group.breaking_changes_count }} breaking{{ end }})
+            </span>
+        </h3>
+        {{if group.has_breaking_changes}}
+        <span class="breaking-type-badge">⚠️ Breaking Changes</span>
+        {{end}}
+    </div>
+
+    <div class="type-changes">
+        <div class="category-changes">
+            {{for change in group.changes}}
+            <div class="change-item {{ change_type }}">
+                <div class="change-header">
+                    <div class="change-name">
+                        <span class="element-type">{{ change.element_type }}</span>
+                        <code>{{ change.element_name }}</code>
+                        {{if change.is_breaking_change}}
+                        <span class="breaking-badge">BREAKING</span>
+                        {{end}}
+                    </div>
+                    <div class="change-description">{{ change.description }}</div>
+                </div>
+                {{if change.has_signatures}}
+                <div class="signature-toggle">
+                    <button class="toggle-btn" onclick="toggleSignature('{{ change.details_id }}')">
+                        <span class="toggle-icon">▼</span> View Signature Details
+                    </button>
+                </div>
+                <div id="{{ change.details_id }}" class="signature-details" style="display: none;">
+                    {{if change.old_signature}}
+                    <div class="signature-section">
+                        <h4>Old Signature:</h4>
+                        <pre><code class="csharp">{{ change.old_signature }}</code></pre>
+                    </div>
                     {{end}}
-                </div>
-                <div class="change-description">{{ change.description }}</div>
-            </div>
-            {{if change.has_signatures}}
-            <div class="signature-toggle">
-                <button class="toggle-btn" onclick="toggleSignature('{{ change.details_id }}')">
-                    <span class="toggle-icon">▼</span> View Signature Details
-                </button>
-            </div>
-            <div id="{{ change.details_id }}" class="signature-details" style="display: none;">
-                {{if change.old_signature}}
-                <div class="signature-section">
-                    <h4>Old Signature:</h4>
-                    <pre><code class="csharp">{{ change.old_signature }}</code></pre>
-                </div>
-                {{end}}
-                {{if change.new_signature}}
-                <div class="signature-section">
-                    <h4>New Signature:</h4>
-                    <pre><code class="csharp">{{ change.new_signature }}</code></pre>
+                    {{if change.new_signature}}
+                    <div class="signature-section">
+                        <h4>New Signature:</h4>
+                        <pre><code class="csharp">{{ change.new_signature }}</code></pre>
+                    </div>
+                    {{end}}
                 </div>
                 {{end}}
             </div>
             {{end}}
         </div>
-        {{end}}
     </div>
 </div>
 {{end}}

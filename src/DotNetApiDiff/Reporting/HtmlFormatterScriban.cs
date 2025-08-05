@@ -172,7 +172,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 title = "Added Items",
                 count = addedItems.Count,
                 change_type = "added",
-                grouped_changes = GroupChanges(addedItems)
+                grouped_changes = GroupChangesByType(addedItems)
             });
         }
 
@@ -185,7 +185,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 title = "Removed Items",
                 count = removedItems.Count,
                 change_type = "removed",
-                grouped_changes = GroupChanges(removedItems)
+                grouped_changes = GroupChangesByType(removedItems)
             });
         }
 
@@ -198,7 +198,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 title = "Modified Items",
                 count = modifiedItems.Count,
                 change_type = "modified",
-                grouped_changes = GroupChanges(modifiedItems)
+                grouped_changes = GroupChangesByType(modifiedItems)
             });
         }
 
@@ -211,7 +211,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 title = "Moved Items",
                 count = movedItems.Count,
                 change_type = "moved",
-                grouped_changes = GroupChanges(movedItems)
+                grouped_changes = GroupChangesByType(movedItems)
             });
         }
 
@@ -225,7 +225,7 @@ public class HtmlFormatterScriban : IReportFormatter
                 count = excludedItems.Count,
                 change_type = "excluded",
                 description = "The following items were intentionally excluded from the comparison:",
-                grouped_changes = GroupChanges(excludedItems)
+                grouped_changes = GroupChangesByType(excludedItems)
             });
         }
 
@@ -251,6 +251,85 @@ public class HtmlFormatterScriban : IReportFormatter
                     details_id = $"details-{Guid.NewGuid():N}"
                 }).ToArray()
             }).ToArray();
+    }
+
+    private object[] GroupChangesByType(List<ApiDifference> changes)
+    {
+        // Group changes by the containing type first
+        return changes
+            .GroupBy(d => ExtractContainingType(d.ElementName, d.ElementType))
+            .OrderBy(g => g.Key)
+            .Select(typeGroup => new
+            {
+                key = GetTypeDisplayName(typeGroup.Key),
+                full_type_name = typeGroup.Key,
+                count = typeGroup.Count(),
+                breaking_changes_count = typeGroup.Count(c => c.IsBreakingChange),
+                has_breaking_changes = typeGroup.Any(c => c.IsBreakingChange),
+                changes = typeGroup.OrderBy(c => c.ElementName).Select(c => new
+                {
+                    element_name = GetMemberDisplayName(c.ElementName, c.ElementType),
+                    full_element_name = c.ElementName,
+                    element_type = c.ElementType.ToString(),
+                    description = c.Description,
+                    is_breaking_change = c.IsBreakingChange,
+                    has_signatures = !string.IsNullOrEmpty(c.OldSignature) || !string.IsNullOrEmpty(c.NewSignature),
+                    old_signature = HtmlEscape(c.OldSignature),
+                    new_signature = HtmlEscape(c.NewSignature),
+                    details_id = $"details-{Guid.NewGuid():N}",
+                    severity = c.Severity.ToString().ToLower()
+                }).ToArray()
+            }).ToArray();
+    }
+
+    private string ExtractContainingType(string elementName, ApiElementType elementType)
+    {
+        // For type-level changes, the element name is the type name
+        if (elementType == ApiElementType.Type)
+        {
+            return elementName;
+        }
+
+        // For member-level changes, extract the type from the full name
+        // Expected format: TypeName.MemberName or Namespace.TypeName.MemberName
+        var lastDotIndex = elementName.LastIndexOf('.');
+        if (lastDotIndex > 0)
+        {
+            var typePart = elementName.Substring(0, lastDotIndex);
+
+            // Handle nested types (Type+NestedType.Member)
+            var plusIndex = typePart.LastIndexOf('+');
+            if (plusIndex > 0)
+            {
+                return typePart; // Keep the full nested type name
+            }
+
+            return typePart;
+        }
+
+        // Fallback for malformed names
+        return elementName;
+    }
+
+    private string GetTypeDisplayName(string typeName)
+    {
+        // Extract just the type name without namespace for display
+        var lastDotIndex = typeName.LastIndexOf('.');
+        return lastDotIndex > 0 ? typeName.Substring(lastDotIndex + 1) : typeName;
+    }
+
+    private string GetMemberDisplayName(string elementName, ApiElementType elementType)
+    {
+        // For type-level changes, return the simple type name
+        if (elementType == ApiElementType.Type)
+        {
+            var lastDotIndex = elementName.LastIndexOf('.');
+            return lastDotIndex > 0 ? elementName.Substring(lastDotIndex + 1) : elementName;
+        }
+
+        // For member-level changes, return just the member name
+        var memberDotIndex = elementName.LastIndexOf('.');
+        return memberDotIndex > 0 ? elementName.Substring(memberDotIndex + 1) : elementName;
     }
 
     private object[] PrepareBreakingChangesData(IEnumerable<ApiDifference> breakingChanges)

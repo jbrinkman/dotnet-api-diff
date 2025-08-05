@@ -70,6 +70,46 @@ function toggleSection(sectionId) {
     }
 }
 
+// Toggle type group functionality
+function toggleTypeGroup(typeGroupId) {
+    const content = document.getElementById(typeGroupId + '-content');
+    const button = document.querySelector(`[onclick="toggleTypeGroup('${typeGroupId}')"] .type-toggle`);
+    const icon = button?.querySelector('.toggle-icon');
+
+    if (!content || !button || !icon) return;
+
+    if (content.classList.contains('collapsed')) {
+        // Expand type group
+        content.classList.remove('collapsed');
+        button.classList.remove('collapsed');
+        icon.textContent = '▶'; // Keep using ▶ and let CSS handle rotation
+        setTypeGroupState(typeGroupId, 'expanded');
+    } else {
+        // Collapse type group
+        content.classList.add('collapsed');
+        button.classList.add('collapsed');
+        icon.textContent = '▶'; // Keep using ▶ and let CSS handle rotation
+        setTypeGroupState(typeGroupId, 'collapsed');
+    }
+}
+
+// Type group session storage helpers
+function setTypeGroupState(typeGroupId, state) {
+    try {
+        sessionStorage.setItem('type-group-' + typeGroupId, state);
+    } catch (e) {
+        // Ignore storage errors
+    }
+}
+
+function getTypeGroupState(typeGroupId) {
+    try {
+        return sessionStorage.getItem('type-group-' + typeGroupId);
+    } catch (e) {
+        return null;
+    }
+}
+
 // Navigate to section with smooth scrolling and auto-expand
 function navigateToSection(sectionId) {
     const section = document.getElementById(sectionId);
@@ -124,6 +164,49 @@ function initializeSections() {
             // Save the default state if not already set
             if (savedState === null) {
                 setSectionState(sectionId, 'collapsed');
+            }
+        }
+    });
+
+    // Initialize type groups to collapsed state by default
+    initializeTypeGroups();
+}
+
+// Initialize type groups to collapsed state by default
+function initializeTypeGroups() {
+    const typeGroups = document.querySelectorAll('.type-group');
+
+    typeGroups.forEach(typeGroup => {
+        const typeHeader = typeGroup.querySelector('.type-header');
+        const typeContent = typeGroup.querySelector('.type-changes');
+        const button = typeGroup.querySelector('.type-toggle');
+        const icon = button?.querySelector('.toggle-icon');
+
+        if (!typeHeader || !typeContent || !button || !icon) return;
+
+        // Extract type group ID from onclick attribute
+        const onclickAttr = typeHeader.getAttribute('onclick');
+        const match = onclickAttr?.match(/toggleTypeGroup\('([^']+)'\)/);
+        const typeGroupId = match ? match[1] : null;
+
+        if (!typeGroupId) return;
+
+        // Check session storage first
+        const savedState = getTypeGroupState(typeGroupId);
+
+        if (savedState === 'expanded') {
+            // Expand based on saved state
+            typeContent.classList.remove('collapsed');
+            button.classList.remove('collapsed');
+            icon.textContent = '▶';
+        } else {
+            // Default to collapsed (including null/new sessions)
+            typeContent.classList.add('collapsed');
+            button.classList.add('collapsed');
+            icon.textContent = '▶';
+            // Save the default state if not already set
+            if (savedState === null) {
+                setTypeGroupState(typeGroupId, 'collapsed');
             }
         }
     });
