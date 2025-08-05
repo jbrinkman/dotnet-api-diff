@@ -540,7 +540,13 @@ public class CompareCommand : Command<CompareCommandSettings>
                 .Select(d => new Models.ApiChange
                 {
                     Type = Models.ChangeType.Added,
-                    TargetMember = new Models.ApiMember { Name = d.ElementName },
+                    Description = d.Description,
+                    TargetMember = new Models.ApiMember
+                    {
+                        Name = ExtractMemberName(d.ElementName),
+                        FullName = d.ElementName,
+                        Signature = d.NewSignature ?? "Unknown"
+                    },
                     IsBreakingChange = d.IsBreakingChange
                 }).ToList(),
             Removals = comparisonResult.Differences
@@ -548,7 +554,13 @@ public class CompareCommand : Command<CompareCommandSettings>
                 .Select(d => new Models.ApiChange
                 {
                     Type = Models.ChangeType.Removed,
-                    SourceMember = new Models.ApiMember { Name = d.ElementName },
+                    Description = d.Description,
+                    SourceMember = new Models.ApiMember
+                    {
+                        Name = ExtractMemberName(d.ElementName),
+                        FullName = d.ElementName,
+                        Signature = d.OldSignature ?? "Unknown"
+                    },
                     IsBreakingChange = d.IsBreakingChange
                 }).ToList(),
             Modifications = comparisonResult.Differences
@@ -556,8 +568,19 @@ public class CompareCommand : Command<CompareCommandSettings>
                 .Select(d => new Models.ApiChange
                 {
                     Type = Models.ChangeType.Modified,
-                    SourceMember = new Models.ApiMember { Name = d.ElementName },
-                    TargetMember = new Models.ApiMember { Name = d.ElementName },
+                    Description = d.Description,
+                    SourceMember = new Models.ApiMember
+                    {
+                        Name = ExtractMemberName(d.ElementName),
+                        FullName = d.ElementName,
+                        Signature = d.OldSignature ?? "Unknown"
+                    },
+                    TargetMember = new Models.ApiMember
+                    {
+                        Name = ExtractMemberName(d.ElementName),
+                        FullName = d.ElementName,
+                        Signature = d.NewSignature ?? "Unknown"
+                    },
                     IsBreakingChange = d.IsBreakingChange
                 }).ToList(),
             Excluded = comparisonResult.Differences
@@ -565,9 +588,30 @@ public class CompareCommand : Command<CompareCommandSettings>
                 .Select(d => new Models.ApiChange
                 {
                     Type = Models.ChangeType.Excluded,
-                    SourceMember = new Models.ApiMember { Name = d.ElementName },
+                    Description = d.Description,
+                    SourceMember = new Models.ApiMember
+                    {
+                        Name = ExtractMemberName(d.ElementName),
+                        FullName = d.ElementName,
+                        Signature = "Unknown"
+                    },
                     IsBreakingChange = false
                 }).ToList()
         };
+    }
+
+    /// <summary>
+    /// Extracts the member name from a full element name
+    /// </summary>
+    /// <param name="elementName">The full element name</param>
+    /// <returns>The member name</returns>
+    private static string ExtractMemberName(string elementName)
+    {
+        if (string.IsNullOrEmpty(elementName))
+            return "Unknown";
+
+        // For full names like "Namespace.Class.Method", extract just "Method"
+        var lastDotIndex = elementName.LastIndexOf('.');
+        return lastDotIndex >= 0 ? elementName.Substring(lastDotIndex + 1) : elementName;
     }
 }

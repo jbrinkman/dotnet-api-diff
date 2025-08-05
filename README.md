@@ -457,12 +457,14 @@ steps:
 
 The tool uses semantic exit codes to integrate with CI/CD systems:
 
-- **0**: Success - No breaking changes detected
-- **1**: Warning - Non-breaking changes detected (additions only)
-- **2**: Error - Breaking changes detected
-- **3**: Critical - Assembly loading or parsing errors
-- **4**: Configuration - Invalid configuration or command-line arguments
-- **99**: Unexpected - Unhandled exceptions or system errors
+- **0**: Success - Comparison completed successfully with no breaking changes detected
+- **1**: Breaking Changes - Comparison completed successfully but breaking changes were detected
+- **2**: Comparison Error - An error occurred during the comparison process
+- **3**: Assembly Load Error - Failed to load one or more assemblies for comparison
+- **4**: Configuration Error - Configuration error or invalid settings detected
+- **5**: Invalid Arguments - Invalid command line arguments provided
+- **6**: File Not Found - One or more required files could not be found
+- **99**: Unexpected Error - An unexpected error occurred during execution
 
 ### Using Exit Codes in Scripts
 
@@ -475,13 +477,14 @@ EXIT_CODE=$?
 
 case $EXIT_CODE in
   0)
-    echo "✅ No breaking changes detected"
+    echo "✅ Comparison completed successfully with no breaking changes"
     ;;
   1)
-    echo "⚠️  Non-breaking changes detected"
+    echo "⚠️  Breaking changes detected - review before release"
+    exit 1
     ;;
   2)
-    echo "❌ Breaking changes detected - blocking release"
+    echo "❌ Comparison error occurred"
     exit 1
     ;;
   3)
@@ -492,8 +495,20 @@ case $EXIT_CODE in
     echo "⚙️  Configuration error"
     exit 1
     ;;
+  5)
+    echo "📝 Invalid command line arguments"
+    exit 1
+    ;;
+  6)
+    echo "📁 Required files not found"
+    exit 1
+    ;;
+  99)
+    echo "🔥 Unexpected error occurred"
+    exit 1
+    ;;
   *)
-    echo "🔥 Unexpected error"
+    echo "❓ Unknown exit code: $EXIT_CODE"
     exit 1
     ;;
 esac
@@ -514,12 +529,13 @@ dotnetapidiff compare \
   --output json > api-changes.json
 
 # Parse results for automated decision making
-if [ $? -eq 2 ]; then
+if [ $? -eq 1 ]; then
   echo "Breaking changes detected - increment major version"
-elif [ $? -eq 1 ]; then
-  echo "Non-breaking changes detected - increment minor version"
+elif [ $? -eq 0 ]; then
+  echo "No breaking changes detected - increment minor or patch version"
 else
-  echo "No API changes - increment patch version"
+  echo "Error occurred during comparison - check logs"
+  exit 1
 fi
 ```
 
@@ -678,9 +694,13 @@ Task("CheckApiCompatibility")
         Arguments = "compare baseline.dll current.dll --config config.json"
     });
     
-    if (exitCode == 2)
+    if (exitCode == 1)
     {
         throw new Exception("Breaking changes detected!");
+    }
+    else if (exitCode != 0)
+    {
+        throw new Exception($"API comparison failed with exit code {exitCode}");
     }
 });
 ```
