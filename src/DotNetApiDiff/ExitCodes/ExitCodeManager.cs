@@ -134,7 +134,10 @@ namespace DotNetApiDiff.ExitCodes
             // Validate the comparison result
             if (!apiComparison.IsValid())
             {
-                _logger?.LogWarning("API comparison is invalid, returning ComparisonError exit code");
+                var errorMessage = string.IsNullOrEmpty(apiComparison.InvalidMessage) 
+                    ? "API comparison is invalid" 
+                    : $"API comparison is invalid: {apiComparison.InvalidMessage}";
+                _logger?.LogWarning("{ErrorMessage}, returning ComparisonError exit code", errorMessage);
                 return ComparisonError;
             }
 
