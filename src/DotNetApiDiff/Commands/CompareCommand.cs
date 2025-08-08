@@ -305,7 +305,9 @@ public class CompareCommand : Command<CompareCommandSettings>
     private static string ExtractMemberName(string elementName)
     {
         if (string.IsNullOrEmpty(elementName))
-            return "Unknown";
+        {
+            return "Unknown"; // Or throw an exception if this is not expected
+        }
 
         // For full names like "Namespace.Class.Method", extract just "Method"
         var lastDotIndex = elementName.LastIndexOf('.');
