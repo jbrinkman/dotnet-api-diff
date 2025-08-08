@@ -134,8 +134,8 @@ namespace DotNetApiDiff.ExitCodes
             // Validate the comparison result
             if (!apiComparison.IsValid())
             {
-                var errorMessage = string.IsNullOrEmpty(apiComparison.InvalidMessage) 
-                    ? "API comparison is invalid" 
+                var errorMessage = string.IsNullOrEmpty(apiComparison.InvalidMessage)
+                    ? "API comparison is invalid"
                     : $"API comparison is invalid: {apiComparison.InvalidMessage}";
                 _logger?.LogWarning("{ErrorMessage}, returning ComparisonError exit code", errorMessage);
                 return ComparisonError;
@@ -180,10 +180,7 @@ namespace DotNetApiDiff.ExitCodes
                 _ => UnexpectedError
             };
 
-            _logger?.LogWarning(
-                "Exception of type {ExceptionType} occurred, returning {ExitCode} exit code",
-                exception.GetType().Name,
-                GetExitCodeDescription(exitCode));
+            _logger?.LogWarning("Exception of type {ExceptionType} occurred, returning {ExitCode} exit code", exception.GetType().Name, GetExitCodeDescription(exitCode));
 
             return exitCode;
         }
