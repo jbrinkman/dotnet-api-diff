@@ -70,7 +70,7 @@ try {
         }
 
         Write-Host "Publishing package to Chocolatey..."
-        choco push $nupkgFile --api-key $ApiKey
+        choco push $nupkgFile --api-key $ApiKey --source https://push.chocolatey.org/
         Write-Host "Package published successfully!"
     }
     else {
