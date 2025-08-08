@@ -298,6 +298,21 @@ public class CompareCommand : Command<CompareCommandSettings>
     }
 
     /// <summary>
+    /// Extracts the member name from a full element name
+    /// </summary>
+    /// <param name="elementName">The full element name</param>
+    /// <returns>The member name</returns>
+    private static string ExtractMemberName(string elementName)
+    {
+        if (string.IsNullOrEmpty(elementName))
+            return "Unknown";
+
+        // For full names like "Namespace.Class.Method", extract just "Method"
+        var lastDotIndex = elementName.LastIndexOf('.');
+        return lastDotIndex >= 0 ? elementName.Substring(lastDotIndex + 1) : elementName;
+    }
+
+    /// <summary>
     /// Executes the comparison logic using the configured services
     /// </summary>
     /// <param name="settings">Command settings</param>
@@ -598,20 +613,5 @@ public class CompareCommand : Command<CompareCommandSettings>
                     IsBreakingChange = false
                 }).ToList()
         };
-    }
-
-    /// <summary>
-    /// Extracts the member name from a full element name
-    /// </summary>
-    /// <param name="elementName">The full element name</param>
-    /// <returns>The member name</returns>
-    private static string ExtractMemberName(string elementName)
-    {
-        if (string.IsNullOrEmpty(elementName))
-            return "Unknown";
-
-        // For full names like "Namespace.Class.Method", extract just "Method"
-        var lastDotIndex = elementName.LastIndexOf('.');
-        return lastDotIndex >= 0 ? elementName.Substring(lastDotIndex + 1) : elementName;
     }
 }
