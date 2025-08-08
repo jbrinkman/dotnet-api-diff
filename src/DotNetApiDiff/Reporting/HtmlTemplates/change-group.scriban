@@ -15,7 +15,7 @@
     <div class="type-changes">
         <div class="category-changes">
             {{for change in group.changes}}
-            <div class="change-item {{ change_type }}">
+            <div class="change-item {{ change.change_type }}">
                 <div class="change-header">
                     <div class="change-name">
                         <span class="element-type">{{ change.element_type }}</span>

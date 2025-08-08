@@ -151,8 +151,8 @@
                 {{end}}
                 <!-- Type groups within this change category -->
                 {{for group in section.grouped_changes}}
-                <div class="type-group">
-                    <div class="type-header" onclick="toggleTypeGroup('{{ section.change_type }}-{{ group.key | string.replace " " "-" | string.replace "." "-" | string.replace "`" "-" }}')">
+                <div class="type-group" data-type-group-id="{{ section.change_type }}-{{ group.key | string.replace " " "-" | string.replace "." "-" | string.replace "`" "-" }}">
+                    <div class="type-header">
                         <h3 class="type-name">
                             📁 {{ group.key }}
                             <span class="type-summary">
@@ -163,7 +163,7 @@
                             {{if group.has_breaking_changes}}
                             <span class="breaking-type-badge">⚠️ Breaking Changes</span>
                             {{end}}
-                            <button class="type-toggle collapsed">
+                            <button class="type-toggle collapsed" onclick="toggleTypeGroup(this.closest('.type-group').dataset.typeGroupId)">
                                 <span class="toggle-icon">▶</span>
                             </button>
                         </div>

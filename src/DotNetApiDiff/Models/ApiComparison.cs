@@ -71,44 +71,47 @@ public class ApiComparison
         // Clear any previous validation message
         InvalidMessage = string.Empty;
 
+        var errors = new List<string>();
+
         // Validate all changes
         var allChanges = AllChanges.ToList();
         var invalidChanges = allChanges.Where(c => !c.IsValid()).ToList();
         if (invalidChanges.Any())
         {
-            InvalidMessage = $"Found {invalidChanges.Count} invalid change(s): {string.Join(", ", invalidChanges.Select(c => $"'{c.Description}' ({c.Type})"))}";
-            return false;
+            errors.Add($"Found {invalidChanges.Count} invalid change(s): {string.Join(", ", invalidChanges.Select(c => $"'{c.Description}' ({c.Type})"))}");
         }
 
         // Validate that additions only contain Added changes
         var wrongAdditions = Additions.Where(c => c.Type != ChangeType.Added).ToList();
         if (wrongAdditions.Any())
         {
-            InvalidMessage = $"Additions collection contains {wrongAdditions.Count} change(s) with wrong type: {string.Join(", ", wrongAdditions.Select(c => $"'{c.Description}' ({c.Type})"))}";
-            return false;
+            errors.Add($"Additions collection contains {wrongAdditions.Count} change(s) with wrong type: {string.Join(", ", wrongAdditions.Select(c => $"'{c.Description}' ({c.Type})"))}");
         }
 
         // Validate that removals only contain Removed changes
         var wrongRemovals = Removals.Where(c => c.Type != ChangeType.Removed).ToList();
         if (wrongRemovals.Any())
         {
-            InvalidMessage = $"Removals collection contains {wrongRemovals.Count} change(s) with wrong type: {string.Join(", ", wrongRemovals.Select(c => $"'{c.Description}' ({c.Type})"))}";
-            return false;
+            errors.Add($"Removals collection contains {wrongRemovals.Count} change(s) with wrong type: {string.Join(", ", wrongRemovals.Select(c => $"'{c.Description}' ({c.Type})"))}");
         }
 
         // Validate that modifications only contain Modified changes
         var wrongModifications = Modifications.Where(c => c.Type != ChangeType.Modified).ToList();
         if (wrongModifications.Any())
         {
-            InvalidMessage = $"Modifications collection contains {wrongModifications.Count} change(s) with wrong type: {string.Join(", ", wrongModifications.Select(c => $"'{c.Description}' ({c.Type})"))}";
-            return false;
+            errors.Add($"Modifications collection contains {wrongModifications.Count} change(s) with wrong type: {string.Join(", ", wrongModifications.Select(c => $"'{c.Description}' ({c.Type})"))}");
         }
 
         // Validate that excluded only contain Excluded changes
         var wrongExcluded = Excluded.Where(c => c.Type != ChangeType.Excluded).ToList();
         if (wrongExcluded.Any())
         {
-            InvalidMessage = $"Excluded collection contains {wrongExcluded.Count} change(s) with wrong type: {string.Join(", ", wrongExcluded.Select(c => $"'{c.Description}' ({c.Type})"))}";
+            errors.Add($"Excluded collection contains {wrongExcluded.Count} change(s) with wrong type: {string.Join(", ", wrongExcluded.Select(c => $"'{c.Description}' ({c.Type})"))}");
+        }
+
+        if (errors.Count > 0)
+        {
+            InvalidMessage = string.Join("; ", errors);
             return false;
         }
 

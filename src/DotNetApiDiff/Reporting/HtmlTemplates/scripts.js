@@ -1,7 +1,9 @@
 function toggleSignature(detailsId) {
     const details = document.getElementById(detailsId);
-    const button = details.previousElementSibling.querySelector('.toggle-btn');
-    const icon = button.querySelector('.toggle-icon');
+    const button = details?.previousElementSibling?.querySelector('.toggle-btn');
+    const icon = button?.querySelector('.toggle-icon');
+
+    if (!details || !button || !icon) return;
 
     if (details.style.display === 'none') {
         details.style.display = 'block';
@@ -17,8 +19,10 @@ function toggleSignature(detailsId) {
 function toggleConfig() {
     const details = document.getElementById('config-details');
     const button = document.querySelector('.toggle-button');
-    const icon = button.querySelector('.toggle-icon');
-    const text = button.querySelector('.toggle-text');
+    const icon = button?.querySelector('.toggle-icon');
+    const text = button?.querySelector('.toggle-text');
+
+    if (!details || !button || !icon || !text) return;
 
     if (details.style.display === 'none') {
         details.style.display = 'block';
@@ -52,8 +56,10 @@ function getSectionState(sectionId) {
 function toggleSection(sectionId) {
     const section = document.getElementById(sectionId);
     const content = document.getElementById(sectionId + '-content');
-    const button = section.querySelector('.section-toggle');
-    const icon = button.querySelector('.toggle-icon');
+    const button = section?.querySelector('.section-toggle');
+    const icon = button?.querySelector('.toggle-icon');
+
+    if (!section || !content || !button || !icon) return;
 
     if (content.classList.contains('collapsed')) {
         // Expand section
@@ -73,10 +79,11 @@ function toggleSection(sectionId) {
 // Toggle type group functionality
 function toggleTypeGroup(typeGroupId) {
     const content = document.getElementById(typeGroupId + '-content');
-    const button = document.querySelector(`[onclick="toggleTypeGroup('${typeGroupId}')"] .type-toggle`);
+    const group = document.querySelector(`.type-group[data-type-group-id="${typeGroupId}"]`);
+    const button = group?.querySelector('.type-toggle');
     const icon = button?.querySelector('.toggle-icon');
 
-    if (!content || !button || !icon) return;
+    if (!content || !group || !button || !icon) return;
 
     if (content.classList.contains('collapsed')) {
         // Expand type group
@@ -177,19 +184,12 @@ function initializeTypeGroups() {
     const typeGroups = document.querySelectorAll('.type-group');
 
     typeGroups.forEach(typeGroup => {
-        const typeHeader = typeGroup.querySelector('.type-header');
         const typeContent = typeGroup.querySelector('.type-changes');
         const button = typeGroup.querySelector('.type-toggle');
         const icon = button?.querySelector('.toggle-icon');
+        const typeGroupId = typeGroup.getAttribute('data-type-group-id');
 
-        if (!typeHeader || !typeContent || !button || !icon) return;
-
-        // Extract type group ID from onclick attribute
-        const onclickAttr = typeHeader.getAttribute('onclick');
-        const match = onclickAttr?.match(/toggleTypeGroup\('([^']+)'\)/);
-        const typeGroupId = match ? match[1] : null;
-
-        if (!typeGroupId) return;
+        if (!typeContent || !button || !icon || !typeGroupId) return;
 
         // Check session storage first
         const savedState = getTypeGroupState(typeGroupId);
